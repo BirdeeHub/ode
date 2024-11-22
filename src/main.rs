@@ -39,11 +39,15 @@ impl<'a> Tokenizer<'a> {
                     self.advance();
                     Token::Semicolon
                 }
+                _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
+                    let op = self.consume_op();
+                    Token::Op(op)
+                }
                 '0'..='9' => {
                     let number = self.consume_numeric();
                     Token::Numeric(number)
                 }
-                'a'..='z' | 'A'..='Z' => {
+                'a'..='z' | 'A'..='Z' | '_' => {
                     let identifier = self.consume_identifier();
                     match identifier.as_str() {
                         _ if Keywords::is(&identifier) => Token::Keyword(identifier),
@@ -63,16 +67,28 @@ impl<'a> Tokenizer<'a> {
     }
 
     // TODO:
-    //fn consume_literal(&mut self) -> String {
-    //fn consume_template(&mut self) -> String {
-    //fn consume_encloser(&mut self) -> String {
-    //fn consume_ops(&mut self) -> String {
+    // fn consume_literal(&mut self) -> String {
+    // fn consume_template(&mut self) -> String {
+    // fn consume_encloser(&mut self) -> String {
+
+    fn consume_op(&mut self) -> String {
+        let start = self.position;
+        let mut buffer = String::new();
+        while let Some(c) = self.get_char() {
+            buffer.push(c);
+            if !(Ops::is(buffer.as_str()) || Ops::is_fragment(buffer.as_str())) {
+                break;
+            }
+            self.advance();
+        }
+        self.input[start..self.position].to_string()
+    }
 
     fn consume_numeric(&mut self) -> String {
         let start = self.position;
         let mut is_float = false;
         while let Some(c) = self.get_char() {
-            if !(c.is_ascii_digit() || c == '.' || c == '_') || (c == '.' && is_float) {
+            if !(c.is_ascii_digit() || c == '.') || (c == '.' && is_float) {
                 break;
             }
             is_float = c == '.' || is_float;
@@ -83,7 +99,7 @@ impl<'a> Tokenizer<'a> {
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
         while let Some(c) = self.get_char() {
-            if !c.is_alphanumeric() {
+            if !(c.is_alphanumeric() || c == '_') {
                 break;
             }
             self.advance();
