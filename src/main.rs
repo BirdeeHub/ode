@@ -21,17 +21,14 @@ fn main() {
     // Print all arguments
     println!("Arguments: {:?}", args);
 
-    let file_path = if args.len() > 1 {
-        Ok(&args[1])
+    let contents = if args.len() > 1 {
+        read_file(&args[1])
     } else {
-        Err("No file path provided")
+        Err(io::Error::new(io::ErrorKind::InvalidInput, "No file path provided"))
     };
 
-    match file_path {
-        Ok(path) => match read_file(path) {
-            Ok(contents) => println!("File contents:\n{}", contents),
-            Err(e) => eprintln!("Error reading file: {}", e),
-        },
-        Err(e) => eprintln!("Error: {}", e),
+    match contents {
+        Ok(contents) => println!("{}", contents),
+        Err(err) => println!("Error: {}", err),
     }
 }
