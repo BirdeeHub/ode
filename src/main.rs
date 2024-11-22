@@ -35,46 +35,18 @@ impl<'a> Tokenizer<'a> {
                     self.advance();
                     continue; // Skip whitespace
                 }
-                '+' => {
-                    self.advance();
-                    Token::Plus
-                }
-                '-' => {
-                    self.advance();
-                    Token::Minus
-                }
-                '=' => {
-                    self.advance();
-                    Token::Equals
-                }
-                '(' => {
-                    self.advance();
-                    Token::LParen
-                }
-                ')' => {
-                    self.advance();
-                    Token::RParen
-                }
-                '{' => {
-                    self.advance();
-                    Token::LSquirrel
-                }
-                '}' => {
-                    self.advance();
-                    Token::RSquirrel
-                }
                 ';' => {
                     self.advance();
                     Token::Semicolon
                 }
                 '0'..='9' => {
-                    let number = self.consume_number();
-                    Token::Number(number)
+                    let number = self.consume_numeric();
+                    Token::Numeric(number)
                 }
                 'a'..='z' | 'A'..='Z' => {
                     let identifier = self.consume_identifier();
                     match identifier.as_str() {
-                        "else" => Token::Keyword(identifier),
+                        _ if Keywords::is(&identifier) => Token::Keyword(identifier),
                         _ => Token::Identifier(identifier),
                     }
                 }
@@ -90,17 +62,24 @@ impl<'a> Tokenizer<'a> {
         tokens
     }
 
-    fn consume_number(&mut self) -> i32 {
+    // TODO:
+    //fn consume_literal(&mut self) -> String {
+    //fn consume_template(&mut self) -> String {
+    //fn consume_encloser(&mut self) -> String {
+    //fn consume_ops(&mut self) -> String {
+
+    fn consume_numeric(&mut self) -> String {
         let start = self.position;
+        let mut is_float = false;
         while let Some(c) = self.get_char() {
-            if !c.is_ascii_digit() {
+            if !(c.is_ascii_digit() || c == '.' || c == '_') || (c == '.' && is_float) {
                 break;
             }
+            is_float = c == '.' || is_float;
             self.advance();
         }
-        self.input[start..self.position].parse().unwrap_or(0)
+        self.input[start..self.position].to_string()
     }
-
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
         while let Some(c) = self.get_char() {

@@ -1,2 +1,3 @@
 5 + 3;
-if (x + 10) { y = 20 } else { z = 30 }
+if (x + 10.0) { y = 20 } else { z = 30 }
+fn (hello) { hello .. [=[world]=] }
