@@ -12,6 +12,9 @@ enum Token {
     Equals,
     LParen,
     RParen,
+    LSquirrel,
+    RSquirrel,
+    Semicolon,
     Eof, // End of file/input
     Unknown(char),
 }
@@ -65,6 +68,18 @@ impl<'a> Tokenizer<'a> {
                 ')' => {
                     self.advance();
                     Token::RParen
+                }
+                '{' => {
+                    self.advance();
+                    Token::LSquirrel
+                }
+                '}' => {
+                    self.advance();
+                    Token::RSquirrel
+                }
+                ';' => {
+                    self.advance();
+                    Token::Semicolon
                 }
                 '0'..='9' => {
                     let number = self.consume_number();
