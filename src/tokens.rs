@@ -43,16 +43,30 @@ pub enum Facing<T> {
 }
 
 fn is_literal_left(op: &str) -> bool {
-    op == "[[" ||
-    op.starts_with("[=")
-        && (op.ends_with("[") || op.ends_with("="))
-        && op[2..op.len() - 1].chars().all(|c| c == '=')
+    if op.len() < 2 {
+        false
+    } else if op == "[[" {
+        true
+    } else {
+        op.starts_with("[=")
+        && (
+            (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
+            || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '='))
+        )
+    }
 }
 fn is_literal_right(op: &str) -> bool {
-    op == "]]" ||
-    op.starts_with("]=")
-        && (op.ends_with("]") || op.ends_with("="))
-        && op[2..op.len() - 1].chars().all(|c| c == '=')
+    if op.len() < 2 {
+        false
+    } else if op == "]]" {
+        true
+    } else {
+        op.starts_with("]=")
+        && (
+            (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
+            || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '='))
+        )
+    }
 }
 
 impl Enclosers {
@@ -77,14 +91,14 @@ impl Enclosers {
     pub fn is_literal(op: &str) -> bool {
         is_literal_left(op) || is_literal_right(op)
     }
-    pub fn l_or_r(op: &str) -> Facing<&str> {
+    pub fn l_or_r(op: String) -> Facing<String> {
         match op {
-            _ if is_literal_left(op) => Facing::Left(op),
-            _ if is_literal_right(op) => Facing::Right(op),
+            _ if is_literal_left(op.as_str()) => Facing::Left(op),
+            _ if is_literal_right(op.as_str()) => Facing::Right(op),
             _ if op == "`" || op == "\"" => Facing::Either(op),
             _ if Self::OPS.iter().any(|(left, _right)| left == &op) => Facing::Left(op),
             _ if Self::OPS.iter().any(|(_left, right)| right == &op) => Facing::Right(op),
-            _ => Facing::Neither(op),
+            _ => Facing::Neither(op.to_string()),
         }
     }
     pub fn is_fragment(op: &str) -> bool {

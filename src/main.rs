@@ -39,6 +39,10 @@ impl<'a> Tokenizer<'a> {
                     self.advance();
                     Token::Semicolon
                 }
+                _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
+                    let encloser = Enclosers::l_or_r(self.consume_encloser());
+                    Token::Encloser(encloser)
+                }
                 _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
                     let op = self.consume_op();
                     Token::Op(op)
@@ -67,9 +71,22 @@ impl<'a> Tokenizer<'a> {
     }
 
     // TODO:
-    // fn consume_literal(&mut self) -> String {
-    // fn consume_template(&mut self) -> String {
-    // fn consume_encloser(&mut self) -> String {
+    fn consume_encloser(&mut self) -> String {
+        let start = self.position;
+        let mut buffer = String::new();
+        while let Some(c) = self.get_char() {
+            buffer.push(c);
+            if !Enclosers::is(buffer.as_str()) && !Enclosers::is_fragment(buffer.as_str()) {
+                break;
+            }
+            self.advance();
+        }
+        self.input[start..self.position].to_string()
+    }
+    //fn consume_literal(&mut self) -> String {
+    //}
+    //fn consume_template(&mut self) -> String {
+    //}
 
     fn consume_op(&mut self) -> String {
         let start = self.position;
