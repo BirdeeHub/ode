@@ -1,23 +1,9 @@
 use std::fs::File;
 use std::io::{self, Read};
 
-#[derive(Debug, PartialEq)]
-enum Token {
-    If,
-    Else,
-    Identifier(String),
-    Number(i32),
-    Plus,
-    Minus,
-    Equals,
-    LParen,
-    RParen,
-    LSquirrel,
-    RSquirrel,
-    Semicolon,
-    Eof, // End of file/input
-    Unknown(char),
-}
+mod tokens;
+
+use tokens::*;
 
 struct Tokenizer<'a> {
     input: &'a str,
@@ -88,8 +74,7 @@ impl<'a> Tokenizer<'a> {
                 'a'..='z' | 'A'..='Z' => {
                     let identifier = self.consume_identifier();
                     match identifier.as_str() {
-                        "if" => Token::If,
-                        "else" => Token::Else,
+                        "else" => Token::Keyword(identifier),
                         _ => Token::Identifier(identifier),
                     }
                 }
