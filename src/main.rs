@@ -28,35 +28,10 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
-        let mut in_template = false;
 
         while let Some(c) = self.get_char() {
-            let last_is_open_str: bool = match tokens.last() {
-                Some(Token::Encloser(item)) => match item {
-                    Side::Left(str) => {
-                        Enclosers::is_literal(str)
-                    },
-                    Side::Either(str) => {
-                        if str == "\"" {
-                            in_template = true;
-                            true
-                        } else {
-                            false
-                        }
-                    },
-                    _ => false
-                },
-                _ => false,
-            };
             let token = match c {
-                _ if last_is_open_str && ! in_template => {
-                    let literal = self.consume_literal();
-                    Token::Literal(literal)
-                },
-                _ if last_is_open_str && in_template => {
-                    let literal = self.consume_template();
-                    Token::Template(literal)
-                },
+                // TODO: parse out and ignore comments using // and /**/ for comments
                 ' ' | '\n' | '\t' => {
                     self.advance();
                     continue; // Skip whitespace
@@ -66,8 +41,28 @@ impl<'a> Tokenizer<'a> {
                     Token::Semicolon
                 },
                 _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
-                    let encloser = Enclosers::l_or_r(self.consume_encloser());
-                    Token::Encloser(encloser)
+                    let enclosestr = self.consume_encloser();
+                    let encloser = Enclosers::l_or_r(enclosestr.clone());
+                    let enclosetok = Token::Encloser(encloser);
+                    match Enclosers::l_or_r(enclosestr) {
+                        Side::Left(item) => {
+                            if Enclosers::is_literal(&item) {
+                                tokens.push(enclosetok);
+                                self.consume_literal(&mut tokens, item)
+                            } else {
+                                enclosetok
+                            }
+                        },
+                        Side::Either(item) => {
+                            if item == "\"" {
+                                tokens.push(enclosetok);
+                                self.consume_template(&mut tokens)
+                            } else {
+                                enclosetok
+                            }
+                        },
+                        _ => enclosetok,
+                    }
                 },
                 _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
                     let op = self.consume_op();
@@ -108,15 +103,21 @@ impl<'a> Tokenizer<'a> {
         }
         self.input[start..self.position].to_string()
     }
-    fn consume_literal(&mut self) -> String {
+    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start: String) -> Token {
         // TODO:
-        // read until closing literal encloser
+        // read until matching closing literal encloser is encountered
+        // push whole thing as a string in a Token::Literal
+        // into tokens argument
+        // return final literal Encloser
+        Token::Unknown(' ')
     }
-    fn consume_template(&mut self) -> Vec<Token> {
+    fn consume_template(&mut self, tokens: &mut Vec<Token>) -> Token {
         // TODO:
         // Read input until non-escaped closing "
         // make the string parts into literals and make the interpolated parts into tokens
-        // combine into vec of tokens in order
+        // push resulting vec of tokens into a Tokens::Template
+        // return closing " encloser
+        Token::Unknown(' ')
     }
 
     fn consume_op(&mut self) -> String {

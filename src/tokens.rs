@@ -4,8 +4,8 @@ pub enum Token {
     Op(String),
     Keyword(String),
     Encloser(Side<String>),
-    Numeric(String), // int or float in string form
-    Literal(String), // between literal enclosers
+    Numeric(String),  // int or float in string form
+    Literal(String),  // between literal enclosers
     Template(Format), // between " enclosers
     Semicolon,
     Eof, // End of file/input
@@ -49,10 +49,8 @@ fn is_literal_left(op: &str) -> bool {
         true
     } else {
         op.starts_with("[=")
-        && (
-            (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
-            || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '='))
-        )
+            && ((op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
+                || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '=')))
     }
 }
 fn is_literal_right(op: &str) -> bool {
@@ -62,10 +60,8 @@ fn is_literal_right(op: &str) -> bool {
         true
     } else {
         op.starts_with("]=")
-        && (
-            (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
-            || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '='))
-        )
+            && ((op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
+                || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '=')))
     }
 }
 
@@ -104,8 +100,7 @@ impl Enclosers {
     pub fn is_fragment(op: &str) -> bool {
         Self::OPS.iter().any(|(l_def, r_def)| {
             (l_def != &op && l_def.starts_with(op)) || (r_def != &op && r_def.starts_with(op))
-        }) ||
-        Self::is_literal(op) && op.ends_with("=")
+        }) || Self::is_literal(op) && op.ends_with("=")
     }
 }
 
@@ -114,7 +109,7 @@ pub struct Ops;
 impl Ops {
     const OPS: &'static [&'static str] = &[
         "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&", ".", "|", "&&", "||", "==",
-        "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++"
+        "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++", ":", "::",
     ];
 
     pub fn is(op: &str) -> bool {
