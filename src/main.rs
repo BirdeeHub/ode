@@ -28,40 +28,66 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
+        let mut in_template = false;
 
         while let Some(c) = self.get_char() {
+            let last_is_open_str: bool = match tokens.last() {
+                Some(Token::Encloser(item)) => match item {
+                    Side::Left(str) => {
+                        Enclosers::is_literal(str)
+                    },
+                    Side::Either(str) => {
+                        if str == "\"" {
+                            in_template = true;
+                            true
+                        } else {
+                            false
+                        }
+                    },
+                    _ => false
+                },
+                _ => false,
+            };
             let token = match c {
+                _ if last_is_open_str && ! in_template => {
+                    let literal = self.consume_literal();
+                    Token::Literal(literal)
+                },
+                _ if last_is_open_str && in_template => {
+                    let literal = self.consume_template();
+                    Token::Template(literal)
+                },
                 ' ' | '\n' | '\t' => {
                     self.advance();
                     continue; // Skip whitespace
-                }
+                },
                 ';' => {
                     self.advance();
                     Token::Semicolon
-                }
+                },
                 _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
                     let encloser = Enclosers::l_or_r(self.consume_encloser());
                     Token::Encloser(encloser)
-                }
+                },
                 _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
                     let op = self.consume_op();
                     Token::Op(op)
-                }
+                },
                 '0'..='9' => {
                     let number = self.consume_numeric();
                     Token::Numeric(number)
-                }
+                },
                 'a'..='z' | 'A'..='Z' | '_' => {
                     let identifier = self.consume_identifier();
                     match identifier.as_str() {
                         _ if Keywords::is(&identifier) => Token::Keyword(identifier),
                         _ => Token::Identifier(identifier),
                     }
-                }
+                },
                 _ => {
                     self.advance();
                     Token::Unknown(c)
-                }
+                },
             };
             tokens.push(token);
         }
@@ -70,7 +96,6 @@ impl<'a> Tokenizer<'a> {
         tokens
     }
 
-    // TODO:
     fn consume_encloser(&mut self) -> String {
         let start = self.position;
         let mut buffer = String::new();
@@ -83,10 +108,16 @@ impl<'a> Tokenizer<'a> {
         }
         self.input[start..self.position].to_string()
     }
-    //fn consume_literal(&mut self) -> String {
-    //}
-    //fn consume_template(&mut self) -> String {
-    //}
+    fn consume_literal(&mut self) -> String {
+        // TODO:
+        // read until closing literal encloser
+    }
+    fn consume_template(&mut self) -> Vec<Token> {
+        // TODO:
+        // Read input until non-escaped closing "
+        // make the string parts into literals and make the interpolated parts into tokens
+        // combine into vec of tokens in order
+    }
 
     fn consume_op(&mut self) -> String {
         let start = self.position;

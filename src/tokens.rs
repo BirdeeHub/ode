@@ -3,7 +3,7 @@ pub enum Token {
     Identifier(String),
     Op(String),
     Keyword(String),
-    Encloser(Facing<String>),
+    Encloser(Side<String>),
     Numeric(String), // int or float in string form
     Literal(String), // between literal enclosers
     Template(Format), // between " enclosers
@@ -35,7 +35,7 @@ impl Keywords {
 pub struct Enclosers;
 
 #[derive(Debug, PartialEq)]
-pub enum Facing<T> {
+pub enum Side<T> {
     Left(T),
     Right(T),
     Either(T),
@@ -91,14 +91,14 @@ impl Enclosers {
     pub fn is_literal(op: &str) -> bool {
         is_literal_left(op) || is_literal_right(op)
     }
-    pub fn l_or_r(op: String) -> Facing<String> {
+    pub fn l_or_r(op: String) -> Side<String> {
         match op {
-            _ if is_literal_left(op.as_str()) => Facing::Left(op),
-            _ if is_literal_right(op.as_str()) => Facing::Right(op),
-            _ if op == "`" || op == "\"" => Facing::Either(op),
-            _ if Self::OPS.iter().any(|(left, _right)| left == &op) => Facing::Left(op),
-            _ if Self::OPS.iter().any(|(_left, right)| right == &op) => Facing::Right(op),
-            _ => Facing::Neither(op.to_string()),
+            _ if is_literal_left(op.as_str()) => Side::Left(op),
+            _ if is_literal_right(op.as_str()) => Side::Right(op),
+            _ if op == "`" || op == "\"" => Side::Either(op),
+            _ if Self::OPS.iter().any(|(left, _right)| left == &op) => Side::Left(op),
+            _ if Self::OPS.iter().any(|(_left, right)| right == &op) => Side::Right(op),
+            _ => Side::Neither(op.to_string()),
         }
     }
     pub fn is_fragment(op: &str) -> bool {
