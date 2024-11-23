@@ -103,19 +103,32 @@ impl<'a> Tokenizer<'a> {
         }
         self.input[start..self.position].to_string()
     }
-    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start: String) -> Token {
-        // TODO:
-        // read until matching closing literal encloser is encountered
-        // push whole thing as a string in a Token::Literal
-        // into tokens argument
-        // return final literal Encloser
-        Token::Unknown(' ')
+    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: String) -> Token {
+        let end_encloser = start_encloser.replace("[","]");
+        let mut literal = String::new();
+        while let Some(c) = self.get_char() {
+            let remaining = &self.input[self.position..];
+            if remaining.starts_with(&end_encloser) {
+                let mut count = 0;
+                while count < end_encloser.len() {
+                    count += 1;
+                    self.advance();
+                }
+                break;
+            }
+            self.advance();
+            literal.push(c);
+        }
+        tokens.push(Token::Literal(literal));
+        Token::Encloser(Side::Right(end_encloser))
     }
     fn consume_template(&mut self, tokens: &mut Vec<Token>) -> Token {
         // TODO:
         // Read input until non-escaped closing "
-        // make the string parts into literals and make the interpolated parts into tokens
-        // push resulting vec of tokens into a Tokens::Template
+        // make the string parts into literals
+        // and read the $[interpolated parts] into a string.
+        // Call tokenizer on that string.
+        // push resulting vec of tokens into tokens as a Tokens::Template
         // return closing " encloser
         Token::Unknown(' ')
     }
