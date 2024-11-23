@@ -47,6 +47,7 @@ impl<'a> Tokenizer<'a> {
                 },
                 _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
                     let enclosestr = self.consume_encloser();
+                    if enclosestr.ends_with("=") { panic!("invalid literal string opener") }
                     let encloser = Enclosers::l_or_r(enclosestr.clone());
                     let enclosetok = Token::Encloser(encloser);
                     match Enclosers::l_or_r(enclosestr) {
