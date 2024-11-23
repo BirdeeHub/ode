@@ -260,9 +260,7 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
         }
-        let operator = self.input[start..self.position].to_string();
-        if ! Ops::is(&operator) { panic!("invalid operator {}", operator) };
-        operator
+        self.input[start..self.position].to_string()
     }
 
     fn consume_numeric(&mut self) -> String {
