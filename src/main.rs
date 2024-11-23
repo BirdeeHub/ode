@@ -26,6 +26,12 @@ impl<'a> Tokenizer<'a> {
         self.input[self.position..].chars().next()
     }
 
+    fn peek_next(&self) -> Option<char> {
+        let mut iterator = self.input[self.position..].chars();
+        iterator.next();
+        iterator.next()
+    }
+
     fn advance(&mut self) {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
@@ -36,7 +42,23 @@ impl<'a> Tokenizer<'a> {
 
         while let Some(c) = self.get_char() {
             let token = match c {
-                // TODO: parse out and ignore comments using // and /**/ for comments
+                '/' if matches!(self.peek_next(), Some('/') | Some('*')) => {
+                    match self.peek_next() {
+                        Some('/') => {
+                            self.advance();
+                            self.advance();
+                            self.consume_comment(false);
+                            continue;
+                        }
+                        Some('*') => {
+                            self.advance();
+                            self.advance();
+                            self.consume_comment(true);
+                            continue;
+                        },
+                        _ => panic!("expected slash or star"),
+                    }
+                },
                 ' ' | '\n' | '\t' => {
                     self.advance();
                     continue; // Skip whitespace
@@ -141,6 +163,17 @@ impl<'a> Tokenizer<'a> {
             self.advance();
         }
         self.input[start..self.position].to_string()
+    }
+    fn consume_comment(&mut self, block: bool) {
+        while let Some(_c) = self.get_char() {
+            let remaining = &self.input[self.position..];
+            if remaining.starts_with(if block {"*/"} else {"\n"}) {
+                self.advance();
+                self.advance();
+                break;
+            }
+            self.advance();
+        }
     }
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: String) -> Token {
         let end_encloser = start_encloser.replace("[","]");

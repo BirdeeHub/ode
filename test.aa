@@ -1,3 +1,4 @@
 5 + 3;
+// some comment here
 if (x + 10.0) f = "hel\"lo_$[sdasad + jhkljhkljh]sda'fgfgj" { y = 20 } else { z = 30 }
-fn (hello) { hello ++ [=[world]=] }
+fn (hello) { hello ++ /* block comment */ [=[world]=] }
