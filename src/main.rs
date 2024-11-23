@@ -190,6 +190,7 @@ impl<'a> Tokenizer<'a> {
                     template_tokens.push(Token::Literal(current_literal.clone()));
                     current_literal.clear();
                 }
+                template_tokens.push(Token::Encloser(Side::Left("$[".to_string())));
                 let remaining = &self.input[self.position..];
                 let mut template_tokenizer = Tokenizer::new(remaining);
                 let tokens = template_tokenizer.tokenize(true);
@@ -201,6 +202,7 @@ impl<'a> Tokenizer<'a> {
                     self.advance();
                     count += 1;
                 }
+                template_tokens.push(Token::Encloser(Side::Left("]".to_string())));
             } else {
                 // Regular character
                 current_literal.push(c);
