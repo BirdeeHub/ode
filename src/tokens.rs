@@ -97,6 +97,16 @@ impl Enclosers {
             _ => Side::Neither(op.to_string()),
         }
     }
+    pub fn get_right(op: &str) -> Option<String> {
+        if is_literal_left(op) && ! op.ends_with("=") {
+            Some(op.replace("[","]"))
+        } else {
+            Self::OPS
+                .iter()
+                .find(|(left, _right)| left == &op)
+                .map(|(_, right)| right.to_string())
+        }
+    }
     pub fn is_fragment(op: &str) -> bool {
         Self::OPS.iter().any(|(l_def, r_def)| {
             (l_def != &op && l_def.starts_with(op)) || (r_def != &op && r_def.starts_with(op))

@@ -18,6 +18,10 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
+    fn get_pos(&self) -> usize {
+        self.position
+    }
+
     fn get_char(&self) -> Option<char> {
         self.input[self.position..].chars().next()
     }
@@ -26,8 +30,9 @@ impl<'a> Tokenizer<'a> {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
 
-    fn tokenize(&mut self) -> Vec<Token> {
+    fn tokenize(&mut self, in_template: bool) -> Vec<Token> {
         let mut tokens = Vec::new();
+        let mut opened_stack: Vec<String> = Vec::new();
 
         while let Some(c) = self.get_char() {
             let token = match c {
@@ -50,7 +55,40 @@ impl<'a> Tokenizer<'a> {
                                 tokens.push(enclosetok);
                                 self.consume_literal(&mut tokens, item)
                             } else {
+                                opened_stack.push(item);
                                 enclosetok
+                            }
+                        },
+                        Side::Right(item) => {
+                            match opened_stack.last() {
+                                Some(last_left) => {
+                                    match Enclosers::get_right(last_left) {
+                                        Some(right) => {
+                                            // is match, close it, advance, return.
+                                            if item == *right {
+                                                opened_stack.pop();
+                                                self.advance();
+                                                Token::Encloser(Side::Right(item))
+                                            // cant close a right that wasnt opened
+                                            } else {
+                                                panic!("{:?}", item);
+                                            }
+                                        },
+                                        // If it didnt have a right it wouldnt be have seen as left and put in opened_stack
+                                        _ => {
+                                            panic!("{:?}", item)
+                                        },
+                                    }
+                                },
+                                // no more to close
+                                _ => {
+                                    if in_template && item == "]" {
+                                        self.advance();
+                                        return tokens;
+                                    } else {
+                                        panic!("{:?}", item)
+                                    }
+                                },
                             }
                         },
                         Side::Either(item) => {
@@ -123,14 +161,56 @@ impl<'a> Tokenizer<'a> {
         Token::Encloser(Side::Right(end_encloser))
     }
     fn consume_template(&mut self, tokens: &mut Vec<Token>) -> Token {
-        // TODO:
-        // Read input until non-escaped closing "
-        // make the string parts into literals
-        // and read the $[interpolated parts] into a string.
-        // Call tokenizer on that string.
-        // push resulting vec of tokens into tokens as a Tokens::Template
-        // return closing " encloser
-        Token::Unknown(' ')
+        let mut template_tokens = Vec::new();
+        let mut current_literal = String::new();
+        let mut is_escaped = false;
+
+        while let Some(c) = self.get_char() {
+            self.advance();
+
+            if is_escaped {
+                // Handle escaped characters
+                current_literal.push(c);
+                is_escaped = false;
+            } else if c == '\\' {
+                // Escape next character
+                is_escaped = true;
+            } else if c == '"' {
+                // Closing quote found, finalize the template
+                if !current_literal.is_empty() {
+                    template_tokens.push(Token::Literal(current_literal.clone()));
+                    current_literal.clear();
+                }
+                break;
+            } else if c == '$' && self.get_char() == Some('[') {
+                // Start of an interpolated segment
+                self.advance(); // Skip the '['
+                if !current_literal.is_empty() {
+                    template_tokens.push(Token::Literal(current_literal.clone()));
+                    current_literal.clear();
+                }
+                let remaining = &self.input[self.position..];
+                let mut template_tokenizer = Tokenizer::new(remaining);
+                let tokens = template_tokenizer.tokenize(true);
+                for token in tokens {
+                    template_tokens.push(token);
+                }
+                let mut count = 1;
+                while count < template_tokenizer.get_pos() {
+                    self.advance();
+                    count += 1;
+                }
+            } else {
+                // Regular character
+                current_literal.push(c);
+            }
+        }
+
+        // Push the template tokens as a Token::Template
+        tokens.push(Token::Template(template_tokens));
+
+        // Return the closing quote as a Token::Encloser
+        Token::Encloser(Side::Right("\"".to_string()))
     }
 
     fn consume_op(&mut self) -> String {
@@ -199,7 +279,7 @@ fn main() -> io::Result<()> {
     let contents = contents?;
 
     let mut tokenizer = Tokenizer::new(&contents);
-    let tokens = tokenizer.tokenize();
+    let tokens = tokenizer.tokenize(false);
 
     for token in tokens {
         println!("{:?}", token);
