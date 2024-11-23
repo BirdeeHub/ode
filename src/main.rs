@@ -69,7 +69,6 @@ impl<'a> Tokenizer<'a> {
                 },
                 _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
                     let enclosestr = self.consume_encloser();
-                    if enclosestr.ends_with("=") { panic!("invalid literal string opener") }
                     let encloser = Enclosers::l_or_r(enclosestr.clone());
                     let enclosetok = Token::Encloser(encloser);
                     match Enclosers::l_or_r(enclosestr) {
@@ -162,7 +161,9 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
         }
-        self.input[start..self.position].to_string()
+        let enclosestr = self.input[start..self.position].to_string();
+        if ! Enclosers::is(&enclosestr) || enclosestr.ends_with("=") { panic!("invalid opener {}", enclosestr) };
+        enclosestr
     }
     fn consume_comment(&mut self, block: bool) {
         while let Some(_c) = self.get_char() {
@@ -259,7 +260,9 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
         }
-        self.input[start..self.position].to_string()
+        let operator = self.input[start..self.position].to_string();
+        if ! Ops::is(&operator) { panic!("invalid operator {}", operator) };
+        operator
     }
 
     fn consume_numeric(&mut self) -> String {
