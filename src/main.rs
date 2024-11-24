@@ -68,6 +68,7 @@ impl<'a> Tokenizer<'a> {
                     Token::Semicolon
                 },
                 _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
+                    let start = self.position;
                     let enclosestr = self.consume_encloser();
                     let encloser = Enclosers::l_or_r(enclosestr.clone());
                     let enclosetok = Token::Encloser(encloser);
@@ -92,6 +93,12 @@ impl<'a> Tokenizer<'a> {
                                                 self.advance();
                                                 Token::Encloser(Side::Right(item))
                                             // cant close a right that wasnt opened
+                                            } else if Ops::is(&item) && Ops::is_fragment(&item) {
+                                                let count = 0;
+                                                while count < (self.position - start) {
+                                                    self.position -= 1;
+                                                }
+                                                Token::Op(self.consume_op())
                                             } else {
                                                 panic!("{:?}", item);
                                             }
@@ -107,8 +114,15 @@ impl<'a> Tokenizer<'a> {
                                     if in_template && item == "]" {
                                         self.advance();
                                         return tokens;
+                                    // cant close a right that wasnt opened
+                                    } else if Ops::is(&item) && Ops::is_fragment(&item) {
+                                        let count = 0;
+                                        while count < (self.position - start) {
+                                            self.position -= 1;
+                                        }
+                                        Token::Op(self.consume_op())
                                     } else {
-                                        panic!("{:?}", item)
+                                        panic!("{:?}", item);
                                     }
                                 },
                             }
