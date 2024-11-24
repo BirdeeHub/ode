@@ -2,132 +2,57 @@
 pub enum Token {
     Identifier(String),
     Op(String),
-    Keyword(String),
-    Encloser(Side<String>),
-    Numeric(String),  // int or float in string form
-    Literal(String),  // between literal enclosers
-    Template(Format), // between " enclosers
-    Semicolon,
-    Eof, // End of file/input
-    Unknown(char),
+    Numeric(String), // int or float in string form
+    Literal(String),
+    Eof,
 }
 
-pub type Format = Vec<Token>;
-
-pub struct Keywords;
-
-impl Keywords {
-    const WORDS: &'static [&'static str] = &[
-        "if", "else", "while", "where", "for", "mod", "return", "fn", "let", "mut", "const",
-        "match",
-    ];
-
-    pub fn is(word: &str) -> bool {
-        Self::WORDS.contains(&word)
-    }
-    pub fn is_fragment(word: &str) -> bool {
-        Self::WORDS
-            .iter()
-            .any(|&key| key != word && key.starts_with(word))
-    }
+fn is_literal_left_frag(op: &str) -> bool {
+    op == "[" || op.starts_with("[") && op.len() > 1
+        && op[1..].chars().all(|c| c == '=')
 }
-
-pub struct Enclosers;
-
-#[derive(Debug, PartialEq)]
-pub enum Side<T> {
-    Left(T),
-    Right(T),
-    Either(T),
-    Neither(T),
-}
-
-fn is_literal_left(op: &str) -> bool {
-    if op.len() < 2 {
-        false
-    } else if op == "[[" {
-        true
-    } else {
-        op.starts_with("[=")
-            && ((op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
-                || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '=')))
-    }
-}
-fn is_literal_right(op: &str) -> bool {
-    if op.len() < 2 {
-        false
-    } else if op == "]]" {
-        true
-    } else {
-        op.starts_with("]=")
-            && ((op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
-                || (op.ends_with("=") && op[1..op.len()].chars().all(|c| c == '=')))
-    }
-}
-
-impl Enclosers {
-    const OPS: &'static [(&'static str, &'static str)] = &[
-        ("(", ")"),
-        ("{", "}"),
-        ("$[", "]"),
-        ("#<", ">"),
-        ("<", ">"),
-        ("[", "]"),
-        ("`", "`"),
-        ("\"", "\""),
-        ("\'", "\'"),
-    ];
-
-    pub fn is(op: &str) -> bool {
-        Self::OPS
-            .iter()
-            .any(|(left, right)| left == &op || right == &op)
-            || Self::is_literal(op)
-    }
-    pub fn is_literal(op: &str) -> bool {
-        is_literal_left(op) || is_literal_right(op)
-    }
-    pub fn l_or_r(op: String) -> Side<String> {
-        match op {
-            _ if is_literal_left(op.as_str()) => Side::Left(op),
-            _ if is_literal_right(op.as_str()) => Side::Right(op),
-            _ if op == "`" || op == "\"" => Side::Either(op),
-            _ if Self::OPS.iter().any(|(left, _right)| left == &op) => Side::Left(op),
-            _ if Self::OPS.iter().any(|(_left, right)| right == &op) => Side::Right(op),
-            _ => Side::Neither(op.to_string()),
-        }
-    }
-    pub fn get_right(op: &str) -> Option<String> {
-        if is_literal_left(op) && ! op.ends_with("=") {
-            Some(op.replace("[","]"))
-        } else {
-            Self::OPS
-                .iter()
-                .find(|(left, _right)| left == &op)
-                .map(|(_, right)| right.to_string())
-        }
-    }
-    pub fn is_fragment(op: &str) -> bool {
-        Self::OPS.iter().any(|(l_def, r_def)| {
-            (l_def != &op && l_def.starts_with(op)) || (r_def != &op && r_def.starts_with(op))
-        }) || Self::is_literal(op) && op.ends_with("=")
-    }
+fn is_literal_right_frag(op: &str) -> bool {
+    op == "]" || op.starts_with("]") && op.len() > 1
+        && op[1..].chars().all(|c| c == '=')
 }
 
 pub struct Ops;
 
 impl Ops {
-    const OPS: &'static [&'static str] = &[
+    pub const BLOCKCOMSTART: &'static str = "/*";
+    pub const BLOCKCOMEND: &'static str = "*/";
+    pub const LINECOM: &'static str = "//";
+    const OPS: &'static [&'static str] = &[ Self::BLOCKCOMSTART, Self::BLOCKCOMEND, Self::LINECOM,
         "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&", ".", "|", "&&", "||", "==",
-        "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++", ":", "::",
+        "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++", ":",
+        "::", ";", "{", "}", "[", "]",
+    ];
+    const CAPOPS: &'static [&'static str] = &[
+        "'", "\"",
     ];
 
     pub fn is(op: &str) -> bool {
-        Self::OPS.contains(&op)
+        Self::OPS.contains(&op) || Self::CAPOPS.contains(&op) ||
+        Self::is_literal_left(op) || Self::is_literal_right(op)
     }
     pub fn is_fragment(op: &str) -> bool {
         Self::OPS
             .iter()
-            .any(|&op_def| op_def != op && op_def.starts_with(op))
+            .any(|&op_def| op_def != op && op_def.starts_with(op)) ||
+        is_literal_left_frag(op) || is_literal_right_frag(op)
     }
+
+    pub fn is_other_capturing(op: &str) -> bool {
+        Self::CAPOPS.contains(&op)
+    }
+
+    pub fn is_literal_left(op: &str) -> bool {
+        op.starts_with("[") && op.len() > 1
+            && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
+    }
+    pub fn is_literal_right(op: &str) -> bool {
+        op.starts_with("]") && op.len() > 1
+            && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
+    }
+
 }

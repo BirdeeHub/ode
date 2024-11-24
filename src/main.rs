@@ -12,151 +12,62 @@ struct Tokenizer<'a> {
 
 impl<'a> Tokenizer<'a> {
     fn new(input: &'a str) -> Tokenizer<'a> {
-        Tokenizer {
-            input,
-            position: 0,
-        }
-    }
-
-    fn get_pos(&self) -> usize {
-        self.position
+        Tokenizer { input, position: 0 }
     }
 
     fn get_char(&self) -> Option<char> {
         self.input[self.position..].chars().next()
     }
 
-    fn peek_next(&self) -> Option<char> {
-        let mut iterator = self.input[self.position..].chars();
-        iterator.next();
-        iterator.next()
-    }
-
     fn advance(&mut self) {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
 
-    fn tokenize(&mut self, in_template: bool) -> Vec<Token> {
+    fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
-        let mut opened_stack: Vec<String> = Vec::new();
-
         while let Some(c) = self.get_char() {
             let token = match c {
-                '/' if matches!(self.peek_next(), Some('/') | Some('*')) => {
-                    match self.peek_next() {
-                        Some('/') => {
+                _ if c.is_whitespace() => {
+                    self.advance();
+                    continue; // Skip whitespace
+                }
+                '0'..='9' => {
+                    let number = self.consume_numeric();
+                    Token::Numeric(number)
+                }
+                _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
+                    let op = self.consume_op();
+                    match op {
+                        _ if op == Ops::BLOCKCOMSTART => {
+                            self.advance();
+                            self.advance();
+                            self.consume_comment(true);
+                            continue;
+                        }
+                        _ if op == Ops::LINECOM => {
                             self.advance();
                             self.advance();
                             self.consume_comment(false);
                             continue;
                         }
-                        Some('*') => {
-                            self.advance();
-                            self.advance();
-                            self.consume_comment(true);
-                            continue;
+                        _ if Ops::is_literal_left(&op) => {
+                            tokens.push(Token::Op(op.clone()));
+                            self.consume_literal(&mut tokens, op)
                         },
-                        _ => panic!("expected slash or star"),
-                    }
-                },
-                ' ' | '\n' | '\t' => {
-                    self.advance();
-                    continue; // Skip whitespace
-                },
-                ';' => {
-                    self.advance();
-                    Token::Semicolon
-                },
-                _ if Enclosers::is(&c.to_string()) || Enclosers::is_fragment(&c.to_string()) => {
-                    let start = self.position;
-                    let enclosestr = self.consume_encloser();
-                    let encloser = Enclosers::l_or_r(enclosestr.clone());
-                    let enclosetok = Token::Encloser(encloser);
-                    match Enclosers::l_or_r(enclosestr) {
-                        Side::Left(item) => {
-                            if Enclosers::is_literal(&item) {
-                                tokens.push(enclosetok);
-                                self.consume_literal(&mut tokens, item)
-                            } else {
-                                opened_stack.push(item);
-                                enclosetok
+                        _ if Ops::is_other_capturing(&op) => {
+                            tokens.push(Token::Op(op.clone()));
+                            match op.chars().next() {
+                                Some(c) => self.consume_string(&mut tokens, c),
+                                None => panic!("Non-literal capturing operators must be single characters"),
                             }
                         },
-                        Side::Right(item) => {
-                            match opened_stack.last() {
-                                Some(last_left) => {
-                                    match Enclosers::get_right(last_left) {
-                                        Some(right) => {
-                                            // is match, close it, advance, return.
-                                            if item == *right {
-                                                opened_stack.pop();
-                                                self.advance();
-                                                Token::Encloser(Side::Right(item))
-                                            // cant close a right that wasnt opened
-                                            } else if Ops::is(&item) && Ops::is_fragment(&item) {
-                                                let count = 0;
-                                                while count < (self.position - start) {
-                                                    self.position -= 1;
-                                                }
-                                                Token::Op(self.consume_op())
-                                            } else {
-                                                panic!("{:?}", item);
-                                            }
-                                        },
-                                        // If it didnt have a right it wouldnt be have seen as left and put in opened_stack
-                                        _ => {
-                                            panic!("{:?}", item)
-                                        },
-                                    }
-                                },
-                                // no more to close
-                                _ => {
-                                    if in_template && item == "]" {
-                                        self.advance();
-                                        return tokens;
-                                    // cant close a right that wasnt opened
-                                    } else if Ops::is(&item) && Ops::is_fragment(&item) {
-                                        let count = 0;
-                                        while count < (self.position - start) {
-                                            self.position -= 1;
-                                        }
-                                        Token::Op(self.consume_op())
-                                    } else {
-                                        panic!("{:?}", item);
-                                    }
-                                },
-                            }
-                        },
-                        Side::Either(item) => {
-                            if item == "\"" {
-                                tokens.push(enclosetok);
-                                self.consume_template(&mut tokens)
-                            } else {
-                                enclosetok
-                            }
-                        },
-                        _ => enclosetok,
+                        _ if Ops::is(&op) => Token::Op(op),
+                        _ => Token::Identifier(op),
                     }
-                },
-                _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
-                    let op = self.consume_op();
-                    Token::Op(op)
-                },
-                '0'..='9' => {
-                    let number = self.consume_numeric();
-                    Token::Numeric(number)
-                },
-                'a'..='z' | 'A'..='Z' | '_' => {
-                    let identifier = self.consume_identifier();
-                    match identifier.as_str() {
-                        _ if Keywords::is(&identifier) => Token::Keyword(identifier),
-                        _ => Token::Identifier(identifier),
-                    }
-                },
+                }
                 _ => {
-                    self.advance();
-                    Token::Unknown(c)
-                },
+                    Token::Identifier(self.consume_identifier())
+                }
             };
             tokens.push(token);
         }
@@ -165,24 +76,10 @@ impl<'a> Tokenizer<'a> {
         tokens
     }
 
-    fn consume_encloser(&mut self) -> String {
-        let start = self.position;
-        let mut buffer = String::new();
-        while let Some(c) = self.get_char() {
-            buffer.push(c);
-            if !Enclosers::is(buffer.as_str()) && !Enclosers::is_fragment(buffer.as_str()) {
-                break;
-            }
-            self.advance();
-        }
-        let enclosestr = self.input[start..self.position].to_string();
-        if ! Enclosers::is(&enclosestr) || enclosestr.ends_with("=") { panic!("invalid opener {}", enclosestr) };
-        enclosestr
-    }
     fn consume_comment(&mut self, block: bool) {
         while let Some(_c) = self.get_char() {
             let remaining = &self.input[self.position..];
-            if remaining.starts_with(if block {"*/"} else {"\n"}) {
+            if remaining.starts_with(if block { Ops::BLOCKCOMEND } else { "\n" }) {
                 self.advance();
                 self.advance();
                 break;
@@ -191,7 +88,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: String) -> Token {
-        let end_encloser = start_encloser.replace("[","]");
+        let end_encloser = start_encloser.replace("[", "]");
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];
@@ -207,63 +104,27 @@ impl<'a> Tokenizer<'a> {
             literal.push(c);
         }
         tokens.push(Token::Literal(literal));
-        Token::Encloser(Side::Right(end_encloser))
+        Token::Op(end_encloser)
     }
-    fn consume_template(&mut self, tokens: &mut Vec<Token>) -> Token {
-        let mut template_tokens = Vec::new();
+    fn consume_string(&mut self, tokens: &mut Vec<Token>, start_encloser: char) -> Token {
         let mut current_literal = String::new();
         let mut is_escaped = false;
-
         while let Some(c) = self.get_char() {
             self.advance();
-
             if is_escaped {
-                // Handle escaped characters
                 current_literal.push(c);
                 is_escaped = false;
             } else if c == '\\' {
-                // Escape next character
                 is_escaped = true;
-            } else if c == '"' {
-                // Closing quote found, finalize the template
-                if !current_literal.is_empty() {
-                    template_tokens.push(Token::Literal(current_literal.clone()));
-                    current_literal.clear();
-                }
+            } else if c == start_encloser {
                 break;
-            } else if c == '$' && self.get_char() == Some('[') {
-                // Start of an interpolated segment
-                self.advance(); // Skip the '['
-                if !current_literal.is_empty() {
-                    template_tokens.push(Token::Literal(current_literal.clone()));
-                    current_literal.clear();
-                }
-                template_tokens.push(Token::Encloser(Side::Left("$[".to_string())));
-                let remaining = &self.input[self.position..];
-                let mut template_tokenizer = Tokenizer::new(remaining);
-                let tokens = template_tokenizer.tokenize(true);
-                for token in tokens {
-                    template_tokens.push(token);
-                }
-                let mut count = 1;
-                while count < template_tokenizer.get_pos() {
-                    self.advance();
-                    count += 1;
-                }
-                template_tokens.push(Token::Encloser(Side::Left("]".to_string())));
             } else {
-                // Regular character
                 current_literal.push(c);
             }
         }
-
-        // Push the template tokens as a Token::Template
-        tokens.push(Token::Template(template_tokens));
-
-        // Return the closing quote as a Token::Encloser
-        Token::Encloser(Side::Right("\"".to_string()))
+        tokens.push(Token::Literal(current_literal.clone()));
+        Token::Op(start_encloser.to_string())
     }
-
     fn consume_op(&mut self) -> String {
         let start = self.position;
         let mut buffer = String::new();
@@ -276,7 +137,6 @@ impl<'a> Tokenizer<'a> {
         }
         self.input[start..self.position].to_string()
     }
-
     fn consume_numeric(&mut self) -> String {
         let start = self.position;
         let mut is_float = false;
@@ -292,7 +152,7 @@ impl<'a> Tokenizer<'a> {
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
         while let Some(c) = self.get_char() {
-            if !(c.is_alphanumeric() || c == '_') {
+            if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) || c.is_whitespace() {
                 break;
             }
             self.advance();
@@ -302,7 +162,6 @@ impl<'a> Tokenizer<'a> {
 }
 
 fn read_file(file_path: &str) -> io::Result<String> {
-
     // Open the file
     let mut file = File::open(file_path)?;
 
@@ -324,13 +183,16 @@ fn main() -> io::Result<()> {
     let contents = if args.len() > 1 {
         read_file(&args[1])
     } else {
-        Err(io::Error::new(io::ErrorKind::InvalidInput, "No file path provided"))
+        Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "No file path provided",
+        ))
     };
 
     let contents = contents?;
 
     let mut tokenizer = Tokenizer::new(&contents);
-    let tokens = tokenizer.tokenize(false);
+    let tokens = tokenizer.tokenize();
 
     for token in tokens {
         println!("{:?}", token);
