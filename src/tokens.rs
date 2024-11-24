@@ -55,7 +55,7 @@ impl<'a> Ops<'a> {
 
     pub fn is(&self, op: &str) -> bool {
         self.ops.contains(&op) || self.capops.contains(&op) ||
-        Ops::<'a>::is_literal_left(op) || Ops::<'a>::is_literal_right(op)
+        Ops::is_literal_left(op) || Ops::is_literal_right(op)
     }
     pub fn is_fragment(&self, op: &str) -> bool {
         self.ops
