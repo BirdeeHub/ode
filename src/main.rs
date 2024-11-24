@@ -8,11 +8,12 @@ use tokens::*;
 struct Tokenizer<'a> {
     input: &'a str,
     position: usize,
+    ops_struct: Ops<'a>,
 }
 
 impl<'a> Tokenizer<'a> {
-    fn new(input: &'a str) -> Tokenizer<'a> {
-        Tokenizer { input, position: 0 }
+    fn new(input: &'a str, options: TokenizerSettings<'a>) -> Tokenizer<'a> {
+        Tokenizer { input, position: 0, ops_struct: Ops::new(options) }
     }
 
     fn get_char(&self) -> Option<char> {
@@ -35,16 +36,16 @@ impl<'a> Tokenizer<'a> {
                     let number = self.consume_numeric();
                     Token::Numeric(number)
                 }
-                _ if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) => {
+                _ if self.ops_struct.is(&c.to_string()) || self.ops_struct.is_fragment(&c.to_string()) => {
                     let op = self.consume_op();
                     match op {
-                        _ if op == Ops::BLOCKCOMSTART => {
+                        _ if op == self.ops_struct.blockcomstart => {
                             self.advance();
                             self.advance();
                             self.consume_comment(true);
                             continue;
                         }
-                        _ if op == Ops::LINECOM => {
+                        _ if op == self.ops_struct.linecom => {
                             self.advance();
                             self.advance();
                             self.consume_comment(false);
@@ -54,14 +55,14 @@ impl<'a> Tokenizer<'a> {
                             tokens.push(Token::Op(op.clone()));
                             self.consume_literal(&mut tokens, &op)
                         },
-                        _ if Ops::is_other_capturing(&op) => {
+                        _ if self.ops_struct.is_other_capturing(&op) => {
                             tokens.push(Token::Op(op.clone()));
                             match op.chars().next() {
                                 Some(c) => self.consume_capturing(&mut tokens, c),
                                 None => panic!("Non-literal capturing operators must be single characters"),
                             }
                         },
-                        _ if Ops::is(&op) => Token::Op(op),
+                        _ if self.ops_struct.is(&op) => Token::Op(op),
                         _ => Token::Identifier(op),
                     }
                 }
@@ -79,7 +80,7 @@ impl<'a> Tokenizer<'a> {
     fn consume_comment(&mut self, block: bool) {
         while let Some(_c) = self.get_char() {
             let remaining = &self.input[self.position..];
-            if remaining.starts_with(if block { Ops::BLOCKCOMEND } else { "\n" }) {
+            if remaining.starts_with(if block { self.ops_struct.blockcomend } else { "\n" }) {
                 self.advance();
                 self.advance();
                 break;
@@ -130,7 +131,7 @@ impl<'a> Tokenizer<'a> {
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
             buffer.push(c);
-            if !(Ops::is(buffer.as_str()) || Ops::is_fragment(buffer.as_str())) {
+            if !(self.ops_struct.is(buffer.as_str()) || self.ops_struct.is_fragment(buffer.as_str())) {
                 break;
             }
             self.advance();
@@ -152,7 +153,7 @@ impl<'a> Tokenizer<'a> {
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
         while let Some(c) = self.get_char() {
-            if Ops::is(&c.to_string()) || Ops::is_fragment(&c.to_string()) || c.is_whitespace() {
+            if self.ops_struct.is(&c.to_string()) || self.ops_struct.is_fragment(&c.to_string()) || c.is_whitespace() {
                 break;
             }
             self.advance();
@@ -191,7 +192,20 @@ fn main() -> io::Result<()> {
 
     let contents = contents?;
 
-    let mut tokenizer = Tokenizer::new(&contents);
+    let settings = TokenizerSettings {
+        blockcomstart: "/*",
+        blockcomend: "*/",
+        linecom: "//",
+        ops: &[
+            "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&",
+            ".", "|", "&&", "||", "==", "!=", "<", "<=", ">", ">=", "=>", "|>", "<|",
+            "'", "!", "=~", "?", ",", "++", ":", "::", ";", "{", "}", "[", "]", "(",
+            ")",
+        ],
+        capops: &["'", "\""],
+    };
+
+    let mut tokenizer = Tokenizer::new(&contents, settings);
     let tokens = tokenizer.tokenize();
 
     for token in tokens {

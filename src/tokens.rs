@@ -16,34 +16,56 @@ fn is_literal_right_frag(op: &str) -> bool {
         && op[1..].chars().all(|c| c == '=')
 }
 
-pub struct Ops;
+pub struct Ops<'a> {
+    pub blockcomstart: &'a str,
+    pub blockcomend: &'a str,
+    pub linecom: &'a str,
+    ops: &'a [&'a str],
+    capops: &'a [&'a str],
+}
 
-impl Ops {
-    pub const BLOCKCOMSTART: &'static str = "/*";
-    pub const BLOCKCOMEND: &'static str = "*/";
-    pub const LINECOM: &'static str = "//";
-    const OPS: &'static [&'static str] = &[ Self::BLOCKCOMSTART, Self::BLOCKCOMEND, Self::LINECOM,
-        "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&", ".", "|", "&&", "||", "==",
-        "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++", ":",
-        "::", ";", "{", "}", "[", "]", "(", ")",
-    ];
-    const CAPOPS: &'static [&'static str] = &[
-        "'", "\"",
-    ];
+pub struct TokenizerSettings<'a> {
+    pub blockcomstart: &'a str,
+    pub blockcomend: &'a str,
+    pub linecom: &'a str,
+    pub ops: &'a [&'a str],
+    pub capops: &'a [&'a str],
+}
 
-    pub fn is(op: &str) -> bool {
-        Self::OPS.contains(&op) || Self::CAPOPS.contains(&op) ||
-        Self::is_literal_left(op) || Self::is_literal_right(op)
+impl<'a> Ops<'a> {
+    pub fn new(options: TokenizerSettings<'a>) -> Ops<'a> {
+        // Create a new vector for ops that includes blockcomstart, blockcoment, and linecom.
+        let mut combined_ops = Vec::new();
+        combined_ops.push(options.blockcomstart);
+        combined_ops.push(options.blockcomend);
+        combined_ops.push(options.linecom);
+        combined_ops.extend_from_slice(options.ops);
+
+        // Convert Vec to slice for the new Ops struct
+        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
+
+        Ops {
+            blockcomstart: options.blockcomstart,
+            blockcomend: options.blockcomend,
+            linecom: options.linecom,
+            ops: combined_ops,
+            capops: options.capops,
+        }
     }
-    pub fn is_fragment(op: &str) -> bool {
-        Self::OPS
+
+    pub fn is(&self, op: &str) -> bool {
+        self.ops.contains(&op) || self.capops.contains(&op) ||
+        Ops::<'a>::is_literal_left(op) || Ops::<'a>::is_literal_right(op)
+    }
+    pub fn is_fragment(&self, op: &str) -> bool {
+        self.ops
             .iter()
             .any(|&op_def| op_def != op && op_def.starts_with(op)) ||
         is_literal_left_frag(op) || is_literal_right_frag(op)
     }
 
-    pub fn is_other_capturing(op: &str) -> bool {
-        Self::CAPOPS.contains(&op)
+    pub fn is_other_capturing(&self, op: &str) -> bool {
+        self.capops.contains(&op)
     }
 
     pub fn is_literal_left(op: &str) -> bool {
