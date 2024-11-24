@@ -52,7 +52,7 @@ impl<'a> Tokenizer<'a> {
                         }
                         _ if Ops::is_literal_left(&op) => {
                             tokens.push(Token::Op(op.clone()));
-                            self.consume_literal(&mut tokens, op)
+                            self.consume_literal(&mut tokens, &op)
                         },
                         _ if Ops::is_other_capturing(&op) => {
                             tokens.push(Token::Op(op.clone()));
@@ -87,8 +87,8 @@ impl<'a> Tokenizer<'a> {
             self.advance();
         }
     }
-    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: String) -> Token {
-        let end_encloser = start_encloser.replace("[", "]");
+    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
+        let end_encloser = Ops::get_literal_left(start_encloser);
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];

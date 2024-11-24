@@ -50,6 +50,9 @@ impl Ops {
         op.starts_with("[") && op.len() > 1
             && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
+    pub fn get_literal_left(left_lit_op: &str) -> String {
+        left_lit_op.replace("[", "]")
+    }
     pub fn is_literal_right(op: &str) -> bool {
         op.starts_with("]") && op.len() > 1
             && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
