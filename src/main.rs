@@ -57,7 +57,7 @@ impl<'a> Tokenizer<'a> {
                         _ if Ops::is_other_capturing(&op) => {
                             tokens.push(Token::Op(op.clone()));
                             match op.chars().next() {
-                                Some(c) => self.consume_string(&mut tokens, c),
+                                Some(c) => self.consume_capturing(&mut tokens, c),
                                 None => panic!("Non-literal capturing operators must be single characters"),
                             }
                         },
@@ -106,7 +106,7 @@ impl<'a> Tokenizer<'a> {
         tokens.push(Token::Literal(literal));
         Token::Op(end_encloser)
     }
-    fn consume_string(&mut self, tokens: &mut Vec<Token>, start_encloser: char) -> Token {
+    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: char) -> Token {
         let mut current_literal = String::new();
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
@@ -116,14 +116,14 @@ impl<'a> Tokenizer<'a> {
                 is_escaped = false;
             } else if c == '\\' {
                 is_escaped = true;
-            } else if c == start_encloser {
+            } else if c == end_encloser {
                 break;
             } else {
                 current_literal.push(c);
             }
         }
         tokens.push(Token::Literal(current_literal.clone()));
-        Token::Op(start_encloser.to_string())
+        Token::Op(end_encloser.to_string())
     }
     fn consume_op(&mut self) -> String {
         let start = self.position;
