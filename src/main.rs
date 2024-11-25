@@ -9,11 +9,19 @@ struct Tokenizer<'a> {
     input: &'a str,
     position: usize,
     ops_struct: Ops<'a>,
+    in_template: bool,
+    options: &'a TokenizerSettings<'a>,
 }
 
 impl<'a> Tokenizer<'a> {
-    fn new(input: &'a str, options: TokenizerSettings<'a>) -> Tokenizer<'a> {
-        Tokenizer { input, position: 0, ops_struct: Ops::new(options) }
+    fn new(input: &'a str, options: &'a TokenizerSettings<'a>, in_template: bool) -> Tokenizer<'a> {
+        Tokenizer {
+            input,
+            position: 0,
+            ops_struct: Ops::new(options),
+            in_template,
+            options,
+        }
     }
 
     fn get_char(&self) -> Option<char> {
@@ -26,8 +34,53 @@ impl<'a> Tokenizer<'a> {
 
     fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens = Vec::new();
+        let mut is_templ_literal = self.in_template;
+        let mut level = 0;
         while let Some(c) = self.get_char() {
             let token = match c {
+                _ if self.in_template && is_templ_literal => {
+                    is_templ_literal = false;
+                    self.consume_capturing(&mut tokens, self.ops_struct.interstart, true)
+                },
+                _ if self.ops_struct.is(&c.to_string())
+                    || self.ops_struct.is_fragment(&c.to_string()) =>
+                {
+                    let op = self.consume_op();
+                    match op {
+                        _ if op == self.ops_struct.blockcomstart => {
+                            self.consume_comment(true);
+                            continue;
+                        }
+                        _ if op == self.ops_struct.linecom => {
+                            self.consume_comment(false);
+                            continue;
+                        }
+                        _ if Ops::is_literal_left(&op) => {
+                            tokens.push(Token::Op(op.clone()));
+                            self.consume_literal(&mut tokens, &op)
+                        }
+                        _ if self.ops_struct.is_other_capturing(&op) => {
+                            tokens.push(Token::Op(op.clone()));
+                            self.consume_capturing(&mut tokens, &op, false)
+                        }
+                        _ if self.in_template && self.ops_struct.is_right_encloser(&op) || self.ops_struct.interend == op => {
+                            if level == 0 {
+                                is_templ_literal = true;
+                            } else {
+                                level -= 1;
+                            }
+                            Token::Op(op)
+                        }
+                        _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
+                            level += 1;
+                            Token::Op(op)
+                        }
+                        _ if self.ops_struct.is(&op) => {
+                            Token::Op(op)
+                        }
+                        _ => Token::Identifier(op),
+                    }
+                }
                 _ if c.is_whitespace() => {
                     self.advance();
                     continue; // Skip whitespace
@@ -36,53 +89,26 @@ impl<'a> Tokenizer<'a> {
                     let number = self.consume_numeric();
                     Token::Numeric(number)
                 }
-                _ if self.ops_struct.is(&c.to_string()) || self.ops_struct.is_fragment(&c.to_string()) => {
-                    let op = self.consume_op();
-                    match op {
-                        _ if op == self.ops_struct.blockcomstart => {
-                            self.advance();
-                            self.advance();
-                            self.consume_comment(true);
-                            continue;
-                        }
-                        _ if op == self.ops_struct.linecom => {
-                            self.advance();
-                            self.advance();
-                            self.consume_comment(false);
-                            continue;
-                        }
-                        _ if Ops::is_literal_left(&op) => {
-                            tokens.push(Token::Op(op.clone()));
-                            self.consume_literal(&mut tokens, &op)
-                        },
-                        _ if self.ops_struct.is_other_capturing(&op) => {
-                            tokens.push(Token::Op(op.clone()));
-                            match op.chars().next() {
-                                Some(c) => self.consume_capturing(&mut tokens, c),
-                                None => panic!("Non-literal capturing operators must be single characters"),
-                            }
-                        },
-                        _ if self.ops_struct.is(&op) => Token::Op(op),
-                        _ => Token::Identifier(op),
-                    }
-                }
-                _ => {
-                    Token::Identifier(self.consume_identifier())
-                }
+                _ => Token::Identifier(self.consume_identifier()),
             };
             tokens.push(token);
         }
-
-        tokens.push(Token::Eof); // End of file
+        if ! self.in_template {
+            tokens.push(Token::Eof); // End of file
+        }
         tokens
     }
 
     fn consume_comment(&mut self, block: bool) {
+        let endchar = if block { self.ops_struct.blockcomend } else { "\n" };
         while let Some(_c) = self.get_char() {
             let remaining = &self.input[self.position..];
-            if remaining.starts_with(if block { self.ops_struct.blockcomend } else { "\n" }) {
-                self.advance();
-                self.advance();
+            if remaining.starts_with(endchar) {
+                let mut count = 0;
+                while count < endchar.len() {
+                    self.advance();
+                    count += 1;
+                }
                 break;
             }
             self.advance();
@@ -107,31 +133,49 @@ impl<'a> Tokenizer<'a> {
         tokens.push(Token::Literal(literal));
         Token::Op(end_encloser)
     }
-    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: char) -> Token {
-        let mut current_literal = String::new();
+    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str, template_literal: bool) -> Token {
+        let mut literal = String::new();
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
-            self.advance();
-            if is_escaped {
-                current_literal.push(c);
-                is_escaped = false;
-            } else if c == '\\' {
-                is_escaped = true;
-            } else if c == end_encloser {
+            let remaining = &self.input[self.position..];
+            if remaining.starts_with(end_encloser) && ! is_escaped {
+                let mut count = 0;
+                while count < end_encloser.len() {
+                    count += 1;
+                    self.advance();
+                }
                 break;
+            }
+            self.advance();
+            is_escaped = c == '\\';
+            if is_escaped && self.input[self.position..].starts_with(end_encloser) {
             } else {
-                current_literal.push(c);
+                literal.push(c);
             }
         }
-        tokens.push(Token::Literal(current_literal.clone()));
-        Token::Op(end_encloser.to_string())
+        if ! template_literal {
+            if self.ops_struct.is_template_op(end_encloser) {
+                let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
+                tokens.push(Token::Format(format_tokens));
+            } else {
+                tokens.push(Token::Literal(literal));
+            }
+            Token::Op(end_encloser.to_string())
+        } else if self.ops_struct.is_template_op(end_encloser) {
+            let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
+            Token::Format(format_tokens)
+        } else {
+            Token::Literal(literal)
+        }
     }
     fn consume_op(&mut self) -> String {
         let start = self.position;
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
             buffer.push(c);
-            if !(self.ops_struct.is(buffer.as_str()) || self.ops_struct.is_fragment(buffer.as_str())) {
+            if !(self.ops_struct.is(buffer.as_str())
+                || self.ops_struct.is_fragment(buffer.as_str()))
+            {
                 break;
             }
             self.advance();
@@ -153,7 +197,10 @@ impl<'a> Tokenizer<'a> {
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
         while let Some(c) = self.get_char() {
-            if self.ops_struct.is(&c.to_string()) || self.ops_struct.is_fragment(&c.to_string()) || c.is_whitespace() {
+            if self.ops_struct.is(&c.to_string())
+                || self.ops_struct.is_fragment(&c.to_string())
+                || c.is_whitespace()
+            {
                 break;
             }
             self.advance();
@@ -197,15 +244,18 @@ fn main() -> io::Result<()> {
         blockcomend: "*/",
         linecom: "//",
         ops: &[
-            "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&",
-            ".", "|", "&&", "||", "==", "!=", "<", "<=", ">", ">=", "=>", "|>", "<|",
-            "'", "!", "=~", "?", ",", "++", ":", "::", ";", "{", "}", "[", "]", "(",
-            ")",
+            "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&", ".", "|", "&&", "||", "==",
+            "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "'", "!", "=~", "?", ",", "++", ":",
+            "::", ";",
         ],
-        capops: &["'", "\""],
+        enclosers: &[("(", ")"), ("[", "]"), ("{", "}")],
+        capops: &["'"],
+        templops: &["\""],
+        interstart: "$[",
+        interend: "]",
     };
 
-    let mut tokenizer = Tokenizer::new(&contents, settings);
+    let mut tokenizer = Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
 
     for token in tokens {

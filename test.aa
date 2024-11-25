@@ -2,5 +2,6 @@
 // some comment here
 if (x + 10.0) f = "hel\"lo_$[sdasad + jhkljhkljh]sda'fgfgj" +a { y = 20 } else { z = 30 }
 fn (hello) { hello ++ /* block comment */ [=[world]=] }
+'dhfgddfdfghd\"'  ghgh '\''
 >>=
 sss
