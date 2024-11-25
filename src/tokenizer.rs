@@ -1,11 +1,17 @@
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Identifier(String),
-    Op(String),
-    Numeric(String), // int or float in string form
-    Literal(String),
+    Identifier(Coin),
+    Op(Coin),
+    Numeric(Coin), // int or float in string form
+    Literal(Coin),
     Format(Vec<Token>),
     Eof,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Coin {
+    pub val: String,
+    pub pos: usize,
 }
 
 fn is_literal_left_frag(op: &str) -> bool {
@@ -174,11 +180,11 @@ impl<'a> Tokenizer<'a> {
                             continue;
                         }
                         _ if Ops::is_literal_left(&op) => {
-                            tokens.push(Token::Op(op.clone()));
+                            tokens.push(Token::Op(Coin{ val: op.clone(), pos: self.position}));
                             self.consume_literal(&mut tokens, &op)
                         }
                         _ if self.ops_struct.is_other_capturing(&op) => {
-                            tokens.push(Token::Op(op.clone()));
+                            tokens.push(Token::Op(Coin{ val: op.clone(), pos: self.position}));
                             self.consume_capturing(&mut tokens, &op)
                         }
                         _ if self.in_template && self.ops_struct.is_right_encloser(&op) || self.ops_struct.interend == op => {
@@ -187,16 +193,16 @@ impl<'a> Tokenizer<'a> {
                             } else {
                                 level -= 1;
                             }
-                            Token::Op(op)
+                            Token::Op(Coin{ val: op, pos: self.position})
                         }
                         _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                             level += 1;
-                            Token::Op(op)
+                            Token::Op(Coin{ val: op, pos: self.position})
                         }
                         _ if self.ops_struct.is(&op) => {
-                            Token::Op(op)
+                            Token::Op(Coin{ val: op, pos: self.position})
                         }
-                        _ => Token::Identifier(op),
+                        _ => Token::Identifier(Coin{ val: op, pos: self.position}),
                     }
                 }
                 _ if c.is_whitespace() => {
@@ -204,10 +210,9 @@ impl<'a> Tokenizer<'a> {
                     continue; // Skip whitespace
                 }
                 '0'..='9' => {
-                    let number = self.consume_numeric();
-                    Token::Numeric(number)
+                    Token::Numeric(Coin{ val: self.consume_numeric(), pos: self.position})
                 }
-                _ => Token::Identifier(self.consume_identifier()),
+                _ => Token::Identifier(Coin{ val: self.consume_identifier(), pos: self.position}),
             };
             tokens.push(token);
         }
@@ -248,8 +253,8 @@ impl<'a> Tokenizer<'a> {
             self.advance();
             literal.push(c);
         }
-        tokens.push(Token::Literal(literal));
-        Token::Op(end_encloser)
+        tokens.push(Token::Literal(Coin{ val: literal, pos: self.position}));
+        Token::Op(Coin{ val: end_encloser, pos: self.position})
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
@@ -276,14 +281,14 @@ impl<'a> Tokenizer<'a> {
                 let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
                 tokens.push(Token::Format(format_tokens));
             } else {
-                tokens.push(Token::Literal(literal));
+                tokens.push(Token::Literal(Coin{ val: literal, pos: self.position}));
             }
-            Token::Op(end_encloser.to_string())
+            Token::Op(Coin{ val: end_encloser.to_string(), pos: self.position})
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
             Token::Format(format_tokens)
         } else {
-            Token::Literal(literal)
+            Token::Literal(Coin{ val: literal, pos: self.position})
         }
     }
     fn consume_op(&mut self) -> String {
@@ -326,4 +331,3 @@ impl<'a> Tokenizer<'a> {
         self.input[start..self.position].to_string()
     }
 }
-
