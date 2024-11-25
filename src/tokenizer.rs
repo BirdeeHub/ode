@@ -23,8 +23,8 @@ struct Ops<'a> {
     interend: &'a str,
     enclosers: Vec<(&'a str, &'a str)>,
     ops: &'a [&'a str],
-    capops: &'a [&'a str],
-    templops: &'a [&'a str],
+    charop: &'a str,
+    templop: &'a str,
     escape_char: char,
 }
 
@@ -34,8 +34,8 @@ pub struct TokenizerSettings<'a> {
     pub blockcomend: &'a str,
     pub linecom: &'a str,
     pub ops: &'a [&'a str],
-    pub capops: &'a [&'a str],
-    pub templops: &'a [&'a str],
+    pub charop: &'a str,
+    pub templop: &'a str,
     pub enclosers: &'a [(&'a str, &'a str)],
     pub interstart: &'a str,
     pub interend: &'a str,
@@ -50,10 +50,10 @@ impl<'a> Ops<'a> {
             options.linecom,
             options.interstart,
             options.interend,
+            options.charop,
+            options.templop,
         ];
         combined_ops.extend_from_slice(options.ops);
-        combined_ops.extend_from_slice(options.capops);
-        combined_ops.extend_from_slice(options.templops);
         for (open, close) in options.enclosers {
             combined_ops.push(open);
             combined_ops.push(close);
@@ -73,8 +73,8 @@ impl<'a> Ops<'a> {
             blockcomend: options.blockcomend,
             linecom: options.linecom,
             ops: combined_ops,
-            capops: options.capops,
-            templops: options.templops,
+            charop: options.charop,
+            templop: options.templop,
             enclosers: filtered_enclosers,
             interstart: options.interstart,
             interend: options.interend,
@@ -94,11 +94,11 @@ impl<'a> Ops<'a> {
     }
 
     fn is_template_op(&self, op: &str) -> bool {
-        self.templops.contains(&op)
+        self.templop == op
     }
 
     fn is_other_capturing(&self, op: &str) -> bool {
-        self.capops.contains(&op) || self.templops.contains(&op)
+        self.templop == op || self.charop == op
     }
 
     fn is_left_encloser(&self, op: &str) -> bool {
