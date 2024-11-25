@@ -1,8 +1,6 @@
 use std::fs::File;
 use std::io::{self, Read};
-
-mod tokens;
-use tokens::*;
+mod tokenizer;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     // Open the file
@@ -34,7 +32,7 @@ fn main() -> io::Result<()> {
 
     let contents = contents?;
 
-    let settings = TokenizerSettings {
+    let settings = tokenizer::TokenizerSettings {
         blockcomstart: "/*",
         blockcomend: "*/",
         linecom: "//",
@@ -50,7 +48,7 @@ fn main() -> io::Result<()> {
         interend: "]",
     };
 
-    let mut tokenizer = Tokenizer::new(&contents, &settings, false);
+    let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
 
     for token in tokens {
