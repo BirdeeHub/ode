@@ -46,6 +46,7 @@ fn main() -> io::Result<()> {
         templops: &["\""],
         interstart: "$[",
         interend: "]",
+        escape_char: '\\',
     };
 
     let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);

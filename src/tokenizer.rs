@@ -16,15 +16,16 @@ fn is_literal_right_frag(op: &str) -> bool {
 }
 
 struct Ops<'a> {
-    pub blockcomstart: &'a str,
-    pub blockcomend: &'a str,
-    pub linecom: &'a str,
-    pub interstart: &'a str,
-    pub interend: &'a str,
+    blockcomstart: &'a str,
+    blockcomend: &'a str,
+    linecom: &'a str,
+    interstart: &'a str,
+    interend: &'a str,
     enclosers: Vec<(&'a str, &'a str)>,
     ops: &'a [&'a str],
     capops: &'a [&'a str],
     templops: &'a [&'a str],
+    escape_char: char,
 }
 
 #[derive(Clone)]
@@ -38,6 +39,7 @@ pub struct TokenizerSettings<'a> {
     pub enclosers: &'a [(&'a str, &'a str)],
     pub interstart: &'a str,
     pub interend: &'a str,
+    pub escape_char: char,
 }
 
 impl<'a> Ops<'a> {
@@ -76,6 +78,7 @@ impl<'a> Ops<'a> {
             enclosers: filtered_enclosers,
             interstart: options.interstart,
             interend: options.interend,
+            escape_char: options.escape_char,
         }
     }
 
@@ -263,7 +266,7 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
             self.advance();
-            is_escaped = c == '\\';
+            is_escaped = c == self.ops_struct.escape_char;
             if is_escaped && self.input[self.position..].starts_with(end_encloser) {
             } else {
                 literal.push(c);
