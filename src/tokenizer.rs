@@ -1,16 +1,16 @@
 #[derive(Debug, PartialEq)]
 pub enum Token {
-    Identifier(Coin),
-    Op(Coin),
-    Numeric(Coin), // int or float in string form
-    Literal(Coin),
-    Format(Vec<Token>),
+    Identifier(Coin<String>),
+    Op(Coin<String>),
+    Numeric(Coin<String>), // int or float in string form
+    Literal(Coin<String>),
+    Format(Coin<Vec<Token>>),
     Eof,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Coin {
-    pub val: String,
+pub struct Coin<T> {
+    pub val: T,
     pub pos: usize,
 }
 
@@ -279,14 +279,14 @@ impl<'a> Tokenizer<'a> {
         if ! self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
                 let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
-                tokens.push(Token::Format(format_tokens));
+                tokens.push(Token::Format(Coin{ val: format_tokens, pos: self.position}));
             } else {
                 tokens.push(Token::Literal(Coin{ val: literal, pos: self.position}));
             }
             Token::Op(Coin{ val: end_encloser.to_string(), pos: self.position})
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
-            Token::Format(format_tokens)
+            Token::Format(Coin{ val: format_tokens, pos: self.position})
         } else {
             Token::Literal(Coin{ val: literal, pos: self.position})
         }
