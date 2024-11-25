@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, Read};
 mod tokenizer;
+mod parser;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     // Open the file
@@ -37,11 +38,9 @@ fn main() -> io::Result<()> {
         blockcomend: "*/",
         linecom: "//",
         ops: &[
-            "=", "+=", "-=", "*=", "/=", "+", "-", "*", "/", "%", "&", ".", "|", "&&", "||", "==",
-            "!=", "<", "<=", ">", ">=", "=>", "|>", "<|", "!", "=~", "?", ",", "++", ":",
-            "::", ";", ">>=", "`",
+            "=", "+", "-", "*", "/", "%", ";", "|",
         ],
-        enclosers: &[("(", ")"), ("[", "]"), ("{", "}")],
+        enclosers: &[("(", ")")],
         charop: "'",
         templop: "\"",
         interstart: "$[",
@@ -55,6 +54,10 @@ fn main() -> io::Result<()> {
     for token in tokens {
         println!("{:?}", token);
     }
+
+    //let parser_obj = parser::Parser::new(tokens);
+    //let tree = parser_obj.parse();
+    //println!("{:?}", tree);
 
     Ok(())
 }

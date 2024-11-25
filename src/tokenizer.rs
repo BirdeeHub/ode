@@ -8,10 +8,16 @@ pub enum Token {
     Eof,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Coin<T> {
     pub val: T,
     pub pos: usize,
+}
+
+impl<T: PartialEq> PartialEq for Coin<T> {
+    fn eq(&self, other: &Coin<T>) -> bool {
+        self.val == other.val
+    }
 }
 
 fn is_literal_left_frag(op: &str) -> bool {
