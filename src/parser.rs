@@ -1,6 +1,16 @@
 use crate::tokenizer::{Token, Coin};
 
+enum TokenType {
+}
 
+struct UnaryExpr {
+}
+
+struct InfixExpr {
+}
+
+struct ExprTree {
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Parser {

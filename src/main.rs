@@ -55,7 +55,7 @@ fn main() -> io::Result<()> {
         println!("{:?}", token);
     }
 
-    //let parser_obj = parser::Parser::new(tokens);
+    //let parser_obj = parser::Parser::new(lang_tokens);
     //let tree = parser_obj.parse();
     //println!("{:?}", tree);
 
