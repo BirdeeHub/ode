@@ -138,7 +138,11 @@ pub struct Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn new(input: &'a str, options: &'a TokenizerSettings<'a>, in_template: bool) -> Tokenizer<'a> {
+    pub fn new(
+        input: &'a str,
+        options: &'a TokenizerSettings<'a>,
+        in_template: bool,
+    ) -> Tokenizer<'a> {
         Tokenizer {
             input,
             position: 0,
@@ -165,7 +169,7 @@ impl<'a> Tokenizer<'a> {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
                     self.consume_capturing(&mut tokens, self.ops_struct.interstart)
-                },
+                }
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
                 {
@@ -180,50 +184,76 @@ impl<'a> Tokenizer<'a> {
                             continue;
                         }
                         _ if Ops::is_literal_left(&op) => {
-                            tokens.push(Token::Op(Coin{ val: op.clone(), pos: self.position}));
+                            tokens.push(Token::Op(Coin {
+                                val: op.clone(),
+                                pos: self.position,
+                            }));
                             self.consume_literal(&mut tokens, &op)
                         }
                         _ if self.ops_struct.is_other_capturing(&op) => {
-                            tokens.push(Token::Op(Coin{ val: op.clone(), pos: self.position}));
+                            tokens.push(Token::Op(Coin {
+                                val: op.clone(),
+                                pos: self.position,
+                            }));
                             self.consume_capturing(&mut tokens, &op)
                         }
-                        _ if self.in_template && self.ops_struct.is_right_encloser(&op) || self.ops_struct.interend == op => {
+                        _ if self.in_template && self.ops_struct.is_right_encloser(&op)
+                            || self.ops_struct.interend == op =>
+                        {
                             if level == 0 {
                                 is_templ_literal = true;
                             } else {
                                 level -= 1;
                             }
-                            Token::Op(Coin{ val: op, pos: self.position})
+                            Token::Op(Coin {
+                                val: op,
+                                pos: self.position,
+                            })
                         }
                         _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                             level += 1;
-                            Token::Op(Coin{ val: op, pos: self.position})
+                            Token::Op(Coin {
+                                val: op,
+                                pos: self.position,
+                            })
                         }
-                        _ if self.ops_struct.is(&op) => {
-                            Token::Op(Coin{ val: op, pos: self.position})
-                        }
-                        _ => Token::Identifier(Coin{ val: op, pos: self.position}),
+                        _ if self.ops_struct.is(&op) => Token::Op(Coin {
+                            val: op,
+                            pos: self.position,
+                        }),
+                        _ => Token::Identifier(Coin {
+                            val: op,
+                            pos: self.position,
+                        }),
                     }
                 }
                 _ if c.is_whitespace() => {
                     self.advance();
                     continue; // Skip whitespace
                 }
-                '0'..='9' => {
-                    Token::Numeric(Coin{ val: self.consume_numeric(), pos: self.position})
-                }
-                _ => Token::Identifier(Coin{ val: self.consume_identifier(), pos: self.position}),
+                '0'..='9' => Token::Numeric(Coin {
+                    val: self.consume_numeric(),
+                    pos: self.position,
+                }),
+                _ => Token::Identifier(Coin {
+                    val: self.consume_identifier(),
+                    pos: self.position,
+                }),
             };
             tokens.push(token);
         }
-        if ! self.in_template {
+        if !self.in_template {
             tokens.push(Token::Eof); // End of file
         }
         tokens
     }
 
     fn consume_comment(&mut self, block: bool) {
-        let endchar = if block { self.ops_struct.blockcomend } else { "\n" };
+        let endchar = if block {
+            self.ops_struct.blockcomend
+        } else {
+            "\n"
+        };
         while let Some(_c) = self.get_char() {
             let remaining = &self.input[self.position..];
             if remaining.starts_with(endchar) {
@@ -253,15 +283,21 @@ impl<'a> Tokenizer<'a> {
             self.advance();
             literal.push(c);
         }
-        tokens.push(Token::Literal(Coin{ val: literal, pos: self.position}));
-        Token::Op(Coin{ val: end_encloser, pos: self.position})
+        tokens.push(Token::Literal(Coin {
+            val: literal,
+            pos: self.position,
+        }));
+        Token::Op(Coin {
+            val: end_encloser,
+            pos: self.position,
+        })
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];
-            if remaining.starts_with(end_encloser) && ! is_escaped {
+            if remaining.starts_with(end_encloser) && !is_escaped {
                 let mut count = 0;
                 while count < end_encloser.len() {
                     count += 1;
@@ -276,19 +312,34 @@ impl<'a> Tokenizer<'a> {
                 literal.push(c);
             }
         }
-        if ! self.in_template || self.get_char().is_some() {
+        if !self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
                 let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
-                tokens.push(Token::Format(Coin{ val: format_tokens, pos: self.position}));
+                tokens.push(Token::Format(Coin {
+                    val: format_tokens,
+                    pos: self.position,
+                }));
             } else {
-                tokens.push(Token::Literal(Coin{ val: literal, pos: self.position}));
+                tokens.push(Token::Literal(Coin {
+                    val: literal,
+                    pos: self.position,
+                }));
             }
-            Token::Op(Coin{ val: end_encloser.to_string(), pos: self.position})
+            Token::Op(Coin {
+                val: end_encloser.to_string(),
+                pos: self.position,
+            })
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
-            Token::Format(Coin{ val: format_tokens, pos: self.position})
+            Token::Format(Coin {
+                val: format_tokens,
+                pos: self.position,
+            })
         } else {
-            Token::Literal(Coin{ val: literal, pos: self.position})
+            Token::Literal(Coin {
+                val: literal,
+                pos: self.position,
+            })
         }
     }
     fn consume_op(&mut self) -> String {
