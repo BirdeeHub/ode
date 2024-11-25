@@ -21,7 +21,7 @@ pub struct Ops<'a> {
     pub linecom: &'a str,
     pub interstart: &'a str,
     pub interend: &'a str,
-    pub enclosers: Vec<(&'a str, &'a str)>,
+    enclosers: Vec<(&'a str, &'a str)>,
     ops: &'a [&'a str],
     capops: &'a [&'a str],
     templops: &'a [&'a str],
