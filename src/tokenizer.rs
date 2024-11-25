@@ -28,7 +28,6 @@ struct Ops<'a> {
     escape_char: char,
 }
 
-#[derive(Clone)]
 pub struct TokenizerSettings<'a> {
     pub blockcomstart: &'a str,
     pub blockcomend: &'a str,
