@@ -40,7 +40,7 @@ impl<'a> Tokenizer<'a> {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
-                    self.consume_capturing(&mut tokens, self.ops_struct.interstart, true)
+                    self.consume_capturing(&mut tokens, self.ops_struct.interstart)
                 },
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
@@ -61,7 +61,7 @@ impl<'a> Tokenizer<'a> {
                         }
                         _ if self.ops_struct.is_other_capturing(&op) => {
                             tokens.push(Token::Op(op.clone()));
-                            self.consume_capturing(&mut tokens, &op, false)
+                            self.consume_capturing(&mut tokens, &op)
                         }
                         _ if self.in_template && self.ops_struct.is_right_encloser(&op) || self.ops_struct.interend == op => {
                             if level == 0 {
@@ -133,7 +133,7 @@ impl<'a> Tokenizer<'a> {
         tokens.push(Token::Literal(literal));
         Token::Op(end_encloser)
     }
-    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str, template_literal: bool) -> Token {
+    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
@@ -153,7 +153,7 @@ impl<'a> Tokenizer<'a> {
                 literal.push(c);
             }
         }
-        if ! template_literal {
+        if ! self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
                 let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
                 tokens.push(Token::Format(format_tokens));
