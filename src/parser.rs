@@ -4,12 +4,56 @@ struct Meta {
     debug_pos: usize, // <-- position in vector
 }
 
+// mutability operators: ` (or `= if type is being inferred for assignments)
+// shadowing is allowed in interior scopes but not in the same scope.
+
 // [] indicates optional in these snippets
-// fn syntax: \:name some[:default:type], args[:default:type] -> [ret_type] { body }
-// fn syntax: myfn = \ some[:default:type], args[:default:type] -> [ret_type] { body }
-// functions are closures
+// fn syntax: \:name [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+// anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+// infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+// functions are closures and your function must be declared as mutable if it references mutable values (but not mutable functions?)
+// and if they return a mutable reference their return value will retain its mutable type
+
+// infix makes it so that the first arg may be on the left.
+// if functions are declared in impl blocks they may have first argument self.
+// doing infix would then make the second arg the left arg
 
 // calling function requires no parenthesis around args other than for grouping
+
+// scopes can be used as let in, all return a value or () if no value,
+// can return a value by not including semicolon on last value,
+// and also must be marked as mutable if they contain mutable values
+// all scopes can return early with << val
+
+// All this requiring of marking things mutable is very important.
+// The idea is to be explicit enough about it that it is possible to
+// lazily evaluate all non-mutable things.
+
+// tuples are [ [type]:val, [type]:val2 ] and can be destructured the same way on argument and return, (with [:default] as well)
+// if mutable this is a list if generic and an array if not
+// if lazy it can always be made contiguous in memory like a struct can (hopefully)
+
+// generic sets can be made with { sdadsa = sdasdadas[,] }
+// differentiated from block by using , instead of ; (if no trailing , the last line has = whereas in a scope it either needs a semicolon, or wouldnt have an =)
+// If not mutable, they can recursively self-access
+
+// `if cond then val else val end` is: cond => {} >> {}
+// `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
+
+// ~@ Ident { Pattern [cond] => {}[,] }
+// Ident ~@ { Pattern [cond] => {}[,] } // where Pattern is a rust-style match case or _
+
+// in this language, you will be able to implement traits on structs not created by your file if they are mutable, sometimes allowing pseudo-structural typing
+// you may not have mutable instances of immutable structs or vice versa
+// mutable structs may have immutable values, immutable structs may NOT have mutable values
+
+// struct instances may have values added but not removed if marked. Struct instances are basically generic sets but with expected values
+
+// for iter \ k v {} OR for cond {}
+// iter can also be something that implements iter
+// for list \ k v {}
+
+// `pub` may be used for top level items but not within structs or impl blocks themselves
 
 // infer types where possible
 
@@ -17,11 +61,12 @@ struct Meta {
 pub struct Atom {
 }
 
-//struct PreExpr { <-- infix operators and prefix operators are to be the same thing, 1 arg can only be called prefix, for methods, self var eats the ability to be infix
-//}
+#[derive(Debug, PartialEq)]
+struct PreExpr {
+}
 
 #[derive(Debug, PartialEq)]
-pub struct Expr {
+pub struct InfixExpr {
 }
 
 //struct PostExpr { <- will be infix operators with default value instead. you may curry up until the first default argument,

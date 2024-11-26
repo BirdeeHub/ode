@@ -4,31 +4,33 @@ use crate::tokenizer::{Token, Coin};
 pub enum Lexemes {
     ParenB(Meta), // (
     ParenE(Meta), // )
-    ScopeB(Meta), // {
-    ScopeE(Meta), // }
+    ScopeB(Meta), // { Can also be generic set if , instead of ;
+    ScopeE(Meta), // } All scopes return a value or () (good substitute for let in)
     InterpolateB(Meta), // $[
     InterpolateE(Meta), // ]
     FormatB(Meta), // "
     FormatE(Meta), // "
+    AngleB(Meta), // <
+    AngleE(Meta), // >
     CharS(Meta), // '
-    SquareB(Meta), // [
+    SquareB(Meta), // [ Will be tuples
     SquareE(Meta), // ]
     Chain(Meta), // ,
     Add(Meta), // +
     Sub(Meta), // -
-    Mult(Meta), // *
+    Star(Meta), // *
     Div(Meta), // /
     Pow(Meta), // ^
     Mod(Meta), // %
     FnOp(Meta), // \
+    Return(Meta), // << for early return
     FnOpNamed(Meta), // \: followed by IDENT
+    FnOpInfix(Meta), // \:: followed by IDENT
     Pipe(Meta), // |>
-    Pub(Meta), // pub
     Hex(Meta, i64),
     Int(Meta, i64),
     Float(Meta, f64),
     Char(Meta, char),
-    Type(Meta, String), // <-- will probably need to be a type struct
     Ident(Meta, String),
     Literal(Meta, String),
     Assign(Meta), // =
@@ -41,22 +43,25 @@ pub enum Lexemes {
     GtEq(Meta), // >=
     LtEq(Meta), // <=
     Eq(Meta), // =
-    Colon(Meta), // ":"
     Semicolon(Meta), // ";"
-    StaticField(Meta), // ::
+    TypeSep(Meta), // :
     Field(Meta), // .
     BitAnd(Meta), // &
     BitOr(Meta), // |
     And(Meta), // &&
     Or(Meta), // ||
-    For(Meta), // for
     True(Meta), // true
     False(Meta), // false
     Enum(Meta), // enum
-    Match(Meta), // match
+    For(Meta), // for
+    Match(Meta), // ~@ 
+    Then(Meta), // =>
+    Else(Meta), // >>
+    ElseIf(Meta), // >>>
     Struct(Meta), // struct
     Implement(Meta), // impl <-- in this language, you will be able to implement traits on structs not created by your file, allowing pseudo-structural typing
     Trait(Meta), // trait
+    Pub(Meta), // pub
 }
 
 #[derive(Debug, PartialEq)]
