@@ -1,6 +1,7 @@
 use crate::tokenizer::{Token, Coin};
 
-enum Lexemes {
+#[derive(Debug, PartialEq)]
+pub enum Lexemes {
     ParenB(Meta), // (
     ParenE(Meta), // )
     ScopeB(Meta), // {
@@ -21,6 +22,7 @@ enum Lexemes {
     Mod(Meta), // %
     FnOp(Meta), // \
     FnOpNamed(Meta), // \: followed by IDENT
+    Pipe(Meta), // |>
     Pub(Meta), // pub
     Hex(Meta, i64),
     Int(Meta, i64),
@@ -57,7 +59,8 @@ enum Lexemes {
     Trait(Meta), // trait
 }
 
-struct Meta {
+#[derive(Debug, PartialEq)]
+pub struct Meta {
     debug_pos: usize, // <-- position in vector
 }
 

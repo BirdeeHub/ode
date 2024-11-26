@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::{self, Read};
+mod lexxer;
 mod parser;
 mod tokenizer;
-mod lexxer;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     // Open the file
@@ -40,7 +40,7 @@ fn main() -> io::Result<()> {
         linecom: "//",
         ops: &[
             "=", "+", "-", "*", "/", "%", ";", ",", "\\", "\\:", ":", "`", "::", "||", "|", "&&",
-            "&", "-=", "+=", "!", "!=", "==", "<=", ">=", "`="
+            "&", "-=", "+=", "!", "!=", "==", "<=", ">=", "`=", "|>",
         ],
         enclosers: &[("(", ")"), ("[", "]"), ("{", "}")],
         charop: "'",
@@ -53,22 +53,19 @@ fn main() -> io::Result<()> {
     let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
 
-    let lexxer = lexxer::Lexxer::new(&tokens);
-    let lexemes = lexxer.lex();
-    for token in tokens {
+    for token in &tokens {
         println!("{:?}", token);
     }
-    for lexeme in lexemes {
+
+    let lexxer = lexxer::Lexxer::new(&tokens);
+    let lexemes = lexxer.lex();
+    for lexeme in &lexemes {
         println!("{:?}", lexeme);
     }
 
     //let parser = parser::Parser::new(&lexemes);
     //let tree = parser.parse();
     //println!("{:?}", tree);
-
-    for token in tokens {
-        println!("{:?}", token);
-    }
 
     Ok(())
 }
