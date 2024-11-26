@@ -14,14 +14,17 @@ This is effectively just me drawing in the margins of my notebook.
 
 ```
 
-mutability operators: ` (or `= if type is being inferred in assignments)
+mutability operators: ` (or `= for when you want mutable but otherwise want to infer the type)
 shadowing is allowed in interior scopes but not in the same scope.
 
 [] indicates optional in these snippets
-fn syntax: \:name [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+fn syntax: \:myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2 { body }
+infix fn syntax: \::myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+multiple ret fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2 { body }
+mutable fn syntax: `\:myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+mutable anon fn syntax: myfn = `\ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 
 last arg may be named ... for varargs
 
@@ -41,10 +44,15 @@ you may curry up until the first default argument,
 at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
 if a function returns multiple values the types must be specified
 
-scopes can be used as let in, all return a value or () if no value,
-can return a value by not including semicolon on last value,
+Scopes all return a value or () if no value,
+scopes can be used as let in if immutable (order doesnt matter)
 and also must be marked as mutable if they contain mutable values
-all scopes can return early with << val
+
+mutable scopes can return early with << val
+and can return a value by not including semicolon on last value,
+
+immutable scopes MUST return with << val; and may only do so once
+Conventional to place it at beginning or end of scope
 
 All this requiring of marking things mutable is very important.
 The idea is to be explicit enough about it that it is possible to
