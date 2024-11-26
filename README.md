@@ -73,6 +73,9 @@ Hammer:Swingable,Breakable,Eq ^= `{
 
 mace:Hammer = { weight = 10, length = 20, };
 
+// You must create values of types by assignment, or by creating a new function that returns it
+// Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
+
 [] indicates optional in these snippets
 fn syntax: \:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
 anon fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
