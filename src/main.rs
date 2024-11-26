@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, Read};
-mod tokenizer;
 mod parser;
+mod tokenizer;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     // Open the file
@@ -38,7 +38,8 @@ fn main() -> io::Result<()> {
         blockcomend: "*/",
         linecom: "//",
         ops: &[
-            "=", "+", "-", "*", "/", "%", ";", ",", "\\", "\\:", ":", "`", "::", "||", "|", "&&", "&", ":=", "-=", "+=", "!", "!=", "==", "<=", ">=",
+            "=", "+", "-", "*", "/", "%", ";", ",", "\\", "\\:", ":", "`", "::", "||", "|", "&&",
+            "&", "-=", "+=", "!", "!=", "==", "<=", ">=", "`="
         ],
         enclosers: &[("(", ")"), ("[", "]"), ("{", "}")],
         charop: "'",
