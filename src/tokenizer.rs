@@ -365,10 +365,20 @@ impl<'a> Tokenizer<'a> {
     fn consume_numeric(&mut self) -> String {
         let start = self.position;
         let mut is_float = false;
+        let mut is_hex = false;
+        let mut count = 0;
         while let Some(c) = self.get_char() {
-            if !(c.is_ascii_digit() || c == '.') || (c == '.' && is_float) {
+            if (is_float && !c.is_ascii_digit())
+                || (is_hex && !c.is_ascii_hexdigit())
+                || (c == '.' && (is_float || is_hex))
+                || !(is_float || is_hex || c.is_ascii_digit() || c == 'x' || c == '.')
+            {
                 break;
             }
+            if count == 1 && c == 'x' {
+                is_hex = true;
+            }
+            count += 1;
             is_float = c == '.' || is_float;
             self.advance();
         }
