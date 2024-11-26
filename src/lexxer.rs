@@ -63,7 +63,6 @@ pub enum Lexemes {
     Struct(Meta), // struct
     Implement(Meta), // impl <-- in this language, you will be able to implement traits on structs not created by your file, allowing pseudo-structural typing
     Trait(Meta), // trait
-    Pub(Meta), // pub
 }
 
 #[derive(Debug, PartialEq)]

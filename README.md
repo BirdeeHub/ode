@@ -17,19 +17,69 @@ This is effectively just me drawing in the margins of my notebook.
 mutability operators: ` (or `= for when you want mutable but otherwise want to infer the type)
 shadowing is allowed in interior scopes but not in the same scope.
 
+types
+
+Hammer ^= `{
+  int:weight,
+  int:length,
+  int:id,
+}
+Swingable _= {
+  \:swing &self, &thing:target -> bool,
+}
+Breakable _= `{
+  `\:is_broken &self -> bool,
+}
+
+// an immutable impl block can implement immutable constraints
+Hammer:Swingable,Eq ^= {
+  id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
+  \:swing &self, &thing:target -> bool: {
+    << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
+    distance_from_target = thing.distance(self);
+  },
+  \:eq &self, &thing:other -> bool: {
+    << self.id == other.id;
+  },
+}
+
+// an mutable impl block can implement immutable and mutable constraints
+// and may create both immutable and mutable values
+Hammer:Swingable,Eq ^= {
+  id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
+  broken `= false,
+  `\:is_broken &self -> bool: {
+    broken // mutable scope can implicitly return at the end
+  },
+  \:swing &self, &thing:target -> bool: thing.distance(self) < self.length,
+  \:eq &self, &thing:other -> bool: {
+    << self.id == other.id
+  },
+}
+
+mace = Hammer { weight:10, length:20, model:125 };
+
 [] indicates optional in these snippets
-fn syntax: \:myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-infix fn syntax: \::myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-multiple ret fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2 { body }
-mutable fn syntax: `\:myfn [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-mutable anon fn syntax: myfn = `\ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+fn syntax: \:myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+infix fn syntax: \::myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+multiple ret fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2: { body }
+mutable fn syntax: `\:myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+mutable anon fn syntax: myfn = `\ [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
+vararg syntax: \:myfn [type]:args[:default], [type]:named:... -> [ret_type]: { body }
 
-last arg may be named ... for varargs
+\:greet &str:name, &str:followup, &str:greeting:"Hello" -> String: {
+  "$[greeting], $[name]! $[followup]!"
+}
 
-functions are closures and your function must be declared as mutable if it references mutable values as part of its closure,
-but they may have mutable arguments without being marked mutable
+amyGreet = greet "Amy";
+
+greeting = amyGreet "How are you?";
+
+println greeting;
+
+functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
 if they return a mutable value their return value will retain its mutability
 
 functions may return multiple values and then may be used in place of multiple args
@@ -72,23 +122,15 @@ If not mutable, they can recursively self-access
 ~@ Ident { Pattern [cond] => {}[,] }
 Ident ~@ { Pattern [cond] => {}[,] } // where Pattern is a rust-style match case or _
 
-in this language, you will be able to implement traits on structs not created by your file if they are mutable, sometimes allowing pseudo-structural typing
-you may not have mutable instances of immutable structs or vice versa
-mutable structs may have immutable values, immutable structs may NOT have mutable values
-
-struct instances may have values added but not removed if marked. Struct instances are basically generic sets but with expected values
-
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
 for list \ k v {}
 
-`pub` may be used for top level items but not within structs or impl blocks themselves
-
 infer types where possible
 
-Immutable values should be reference counted
-Mutable values should be borrow-checked if possible?
+Immutable should be reference counted
+Mutable should be borrow-checked if possible?
 
-no null, rust options and multiple returns
+rust result/options and multiple returns
 
 ```
