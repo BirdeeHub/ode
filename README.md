@@ -17,9 +17,9 @@ This is effectively just me drawing in the margins of my notebook.
 mutability operators: ` (or `= for when you want mutable but otherwise want to infer the type)
 shadowing is allowed in interior scopes but not in the same scope.
 
-type constraints
+type constraints can contain mixed functions and types if desired
 
-Tool _= `{
+Tool _= {
   int:weight,
   int:length,
   int:id,
@@ -31,14 +31,14 @@ Breakable _= `{
   `\:is_broken &self -> bool,
 }
 
-// enums can contain types or values
+// enums can contain type constraints, or implemented types
 Tool @= `{
-  UnbreakableHammer(Tool:Swingable),
-  Hammer(Tool:Swingable:Breakable),
+  IndestructibleHmmr(Tool:Swingable),
+  Hmmr(Tool:Swingable:Breakable),
 }
 
 // an immutable generic set can implement immutable constraints
-Hammer:Tool,Swingable,Eq = {
+UnbreakableHammer:Tool,Swingable,Eq = {
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   \:swing &self, &thing:target -> bool: {
     << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
@@ -51,7 +51,7 @@ Hammer:Tool,Swingable,Eq = {
 
 // an mutable impl block can implement immutable and mutable constraints
 // and may create both immutable and mutable values
-Hammer:Swingable,BreakableEq ^= `{
+Hammer:Swingable,Breakable,Eq ^= `{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   broken `= false,
   `\:is_broken &self -> bool: {
