@@ -41,8 +41,8 @@ ToolKind =| `{
 // Generics come first in <>
 
 <T, `U:Tool>GenericTypeStruct _= {
-  T:meta,
-  U:item,
+  meta:T,
+  item:U,
 },
 
 // an immutable generic set can implement immutable constraints
@@ -165,9 +165,9 @@ recieve is pid <@ msg {
 you can chain in a match then
 
 res = pid <@ msg ~| {
-  Exit(val) isFloat val => Ok(val),
+  Exit(val) isFloat val => Ok val,
   Exit(val) => Err("Execution Error: $[val]"),
-  Time => Err("TIMED OUT"),
+  Time => Err "TIMED OUT",
 }
 
 ```
