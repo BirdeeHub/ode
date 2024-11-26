@@ -19,7 +19,7 @@ shadowing is allowed in interior scopes but not in the same scope.
 
 types
 
-Hammer ^= `{
+Hammer _= `{
   int:weight,
   int:length,
   int:id,
