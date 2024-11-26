@@ -4,15 +4,16 @@ struct Meta {
     debug_pos: usize, // <-- position in vector
 }
 
-// mutability operators: ` (or `= if type is being inferred for assignments)
+// mutability operators: ` (or `= if type is being inferred in assignments)
 // shadowing is allowed in interior scopes but not in the same scope.
 
 // [] indicates optional in these snippets
 // fn syntax: \:name [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 // anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 // infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
-// functions are closures and your function must be declared as mutable if it references mutable values (but not mutable functions?)
-// and if they return a mutable reference their return value will retain its mutable type
+// functions are closures and your function must be declared as mutable if it references mutable values as part of its closure,
+// but they may have mutable arguments without being marked mutable
+// if they return a mutable value their return value will retain its mutability
 
 // infix makes it so that the first arg may be on the left.
 // if functions are declared in impl blocks they may have first argument self.
