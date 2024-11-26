@@ -366,6 +366,9 @@ impl<'a> Tokenizer<'a> {
         let start = self.position;
         let mut is_float = false;
         while let Some(c) = self.get_char() {
+            if c.is_ascii_hexdigit() && ! c.is_ascii_digit() && is_float {
+                break;
+            }
             if !(c.is_ascii_digit() || c == '.') || (c == '.' && is_float) {
                 break;
             }
