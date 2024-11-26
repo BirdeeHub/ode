@@ -11,13 +11,13 @@ Breakable _= `{
 }
 
 // enums can contain type constraints, or implemented types
-Tool @= `{
+Tool =| `{
   IndestructibleHmmr(Tool:Swingable),
   Hmmr(Tool:Swingable:Breakable),
 }
 
-// an immutable generic set can implement immutable constraints
-UnbreakableHammer:Tool,Swingable,Eq = {
+// an immutable impl block can implement immutable constraints
+UnbreakableHammer:Tool,Swingable,Eq ^= {
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   \:swing &self, &thing:target -> bool: {
     << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
