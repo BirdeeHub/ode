@@ -11,15 +11,23 @@ struct Meta {
 // fn syntax: \:name [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 // anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 // infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
+// infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2 { body }
+
 // functions are closures and your function must be declared as mutable if it references mutable values as part of its closure,
 // but they may have mutable arguments without being marked mutable
 // if they return a mutable value their return value will retain its mutability
+
+// functions may return multiple values and then may be used in place of multiple args
 
 // infix makes it so that the first arg may be on the left.
 // if functions are declared in impl blocks they may have first argument self.
 // doing infix would then make the second arg the left arg
 
 // calling function requires no parenthesis around args other than for grouping
+
+// you may curry up until the first default argument,
+// at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
+// if a function returns multiple values the types must be specified
 
 // scopes can be used as let in, all return a value or () if no value,
 // can return a value by not including semicolon on last value,
@@ -58,6 +66,9 @@ struct Meta {
 
 // infer types where possible
 
+// Immutable values should be reference counted
+// Mutable values should be borrow-checked if possible?
+
 #[derive(Debug, PartialEq)]
 pub struct Atom {
 }
@@ -70,8 +81,8 @@ struct PreExpr {
 pub struct InfixExpr {
 }
 
-//struct PostExpr { <- will be infix operators with default value instead. you may curry up until the first default argument,
-//}               at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
+//struct PostExpr { <- will be infix operators with default value as a second arg instead.
+//}
 
 #[derive(Debug, PartialEq)]
 pub struct ExprTree {
