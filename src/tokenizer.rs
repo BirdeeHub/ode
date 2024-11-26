@@ -370,7 +370,7 @@ impl<'a> Tokenizer<'a> {
         while let Some(c) = self.get_char() {
             if (is_float && !c.is_ascii_digit())
                 || (is_hex && !c.is_ascii_hexdigit())
-                || (c == '.' && (is_float || is_hex))
+                || ((c == '.' || c == 'x') && (is_float || is_hex))
                 || !(is_float || is_hex || c.is_ascii_digit() || c == 'x' || c == '.')
             {
                 break;
