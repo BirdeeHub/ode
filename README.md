@@ -139,6 +139,6 @@ Mutable should be borrow-checked if possible?
 
 rust result/options and multiple returns
 
-
+mutable scopes can create actor processes but immutable ones cant? Unsure if this will be a thing.
 
 ```
