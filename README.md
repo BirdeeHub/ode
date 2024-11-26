@@ -146,7 +146,8 @@ for list \ k v {}
 infer types where possible
 
 Immutable should be reference counted
-Mutable should be borrow-checked if possible?
+Mutable should be borrow-checked, if lifetime is required it goes before the ` (mutability operator)
+which is always at the beginning of the type, or name if type is inferred.
 
 rust result/options and multiple returns
 
