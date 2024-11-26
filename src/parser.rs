@@ -13,6 +13,8 @@ struct Meta {
 // infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type] { body }
 // infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2 { body }
 
+// last arg may be named ... for varargs
+
 // functions are closures and your function must be declared as mutable if it references mutable values as part of its closure,
 // but they may have mutable arguments without being marked mutable
 // if they return a mutable value their return value will retain its mutability
@@ -68,6 +70,8 @@ struct Meta {
 
 // Immutable values should be reference counted
 // Mutable values should be borrow-checked if possible?
+
+// no null, rust options and multiple returns
 
 #[derive(Debug, PartialEq)]
 pub struct Atom {
