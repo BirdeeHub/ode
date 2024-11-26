@@ -32,9 +32,10 @@ Breakable _= `{
 }
 
 // enums can contain type constraints, or implemented types
-Tool @= `{
+ToolKind =@ `{
   IndestructibleHmmr(Tool:Swingable),
   Hmmr(Tool:Swingable:Breakable),
+  Hmr(Hammer),
 }
 
 // an immutable generic set can implement immutable constraints
