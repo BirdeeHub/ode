@@ -151,8 +151,8 @@ which is always at the beginning of the type, or name if type is inferred.
 
 rust result/options and multiple returns
 
-mutable scopes can create actor processes but immutable ones cant.
-Immutable will be lazy, and it will also attempt to automatically parallelize if possible.
+Immutable will be lazy.
+Actors are parallelized.
 
 // where node implements Node which defines message types and timeout value and other stuff
 mutable scopes can spawn an actor with pid = node @ function args...
