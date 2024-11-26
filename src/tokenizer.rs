@@ -368,10 +368,9 @@ impl<'a> Tokenizer<'a> {
         let mut is_hex = false;
         let mut count = 0;
         while let Some(c) = self.get_char() {
-            if (is_float && !c.is_ascii_digit())
-                || (is_hex && !c.is_ascii_hexdigit())
+            if (is_float && !c.is_ascii_digit()) || (is_hex && !c.is_ascii_hexdigit())
                 || ((c == '.' || c == 'x') && (is_float || is_hex))
-                || !(is_float || is_hex || c.is_ascii_digit() || c == 'x' || c == '.')
+                || !(is_float || is_hex || c.is_ascii_digit() || (c == 'x' && count == 1) || c == '.')
             {
                 break;
             }
