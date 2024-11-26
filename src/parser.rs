@@ -34,20 +34,22 @@ struct Meta {
 
 // infer types where possible
 
-struct Atom {
+#[derive(Debug, PartialEq)]
+pub struct Atom {
 }
 
 //struct PreExpr { <-- infix operators and prefix operators are to be the same thing, 1 arg can only be called prefix, for methods, self var eats the ability to be infix
 //}
 
-struct Expr {
+#[derive(Debug, PartialEq)]
+pub struct Expr {
 }
 
 //struct PostExpr { <- will be infix operators with default value instead. you may curry up until the first default argument,
-//                      at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
-//}
+//}               at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
 
-struct ExprTree {
+#[derive(Debug, PartialEq)]
+pub struct ExprTree {
 }
 
 #[derive(Debug, PartialEq)]
@@ -58,7 +60,7 @@ impl<'a> Parser<'a> {
     pub fn new(in_tokens: &'a Vec<Token>) -> Parser {
         Parser{ in_tokens, }
     }
-    pub fn parse(&self) -> () {
+    pub fn parse(&self) -> ExprTree {
         todo!()
     }
 }
