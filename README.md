@@ -45,7 +45,7 @@ Hammer:Swingable,Eq ^= {
 
 // an mutable impl block can implement immutable and mutable constraints
 // and may create both immutable and mutable values
-Hammer:Swingable,Eq ^= {
+Hammer:Swingable,Eq ^= `{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   broken `= false,
   `\:is_broken &self -> bool: {
