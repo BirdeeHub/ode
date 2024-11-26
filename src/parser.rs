@@ -1,65 +1,15 @@
 use crate::tokenizer::{Token, Coin};
 
-enum TokenType {
-    ParenB(Meta), // (
-    ParenE(Meta), // )
-    ScopeB(Meta), // {
-    ScopeE(Meta), // }
-    InterpolateB(Meta), // $[
-    InterpolateE(Meta), // ]
-    FormatB(Meta), // "
-    FormatE(Meta), // "
-    CharS(Meta), // '
-    SquareB(Meta), // [
-    SquareE(Meta), // ]
-    Chain(Meta), // ,
-    Add(Meta), // +
-    Sub(Meta), // -
-    Mult(Meta), // *
-    Div(Meta), // /
-    Pow(Meta), // ^
-    Mod(Meta), // %
-    FnOp(Meta), // \
-    FnOpNamed(Meta), // \:IDENT
-    Pub(Meta), // pub
-    Hex(Meta, i64),
-    Int(Meta, i64),
-    Float(Meta, f64),
-    Char(Meta, char),
-    Literal(Meta, String),
-    Assign(Meta), // =
-    Mut(Meta), // `
-    MutAssign(Meta), // `=
-    SubAssign(Meta), // -=
-    AddAssign(Meta), // +=
-    Gt(Meta), // >
-    Lt(Meta), // <
-    GtEq(Meta), // >=
-    LtEq(Meta), // <=
-    Eq(Meta), // =
-    Type(Meta, String), // <-- will probably need to be a type struct
-    Colon(Meta), // ":"
-    Semicolon(Meta), // ";"
-    StaticField(Meta), // ::
-    Dot(Meta), // .
-    BitAnd(Meta), // &
-    BitOr(Meta), // |
-    And(Meta), // &&
-    Or(Meta), // ||
-}
-
 struct Meta {
     debug_pos: usize, // <-- position in vector
 }
 
 // [] indicates optional in these snippets
-// fn syntax: \:name ret_type (tuple[:default:type], of[:default:type], args[:default:type]) { body }
-// fn syntax: myfn = \ ret_type (tuple[:default:type], of[:default:type], args[:default:type]) { body }
+// fn syntax: \:name some[:default:type], args[:default:type] -> [ret_type] { body }
+// fn syntax: myfn = \ some[:default:type], args[:default:type] -> [ret_type] { body }
+// functions are closures
 
-// if it ends up manual memory or something like borrow checked,
-// you might be able to mark it `\ instead to make it no longer a closure? idk havent got that far yet
-
-// calling fn: name with (args like nix)
+// calling function requires no parenthesis around args other than for grouping
 
 // infer types where possible
 
