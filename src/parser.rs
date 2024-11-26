@@ -55,10 +55,17 @@ pub struct ExprTree {
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {
     in_tokens: &'a Vec<Token>,
+    position: usize,
 }
 impl<'a> Parser<'a> {
     pub fn new(in_tokens: &'a Vec<Token>) -> Parser {
-        Parser{ in_tokens, }
+        Parser{ in_tokens, position: 0, }
+    }
+    fn get_token(&self) -> Option<&Token> {
+        self.in_tokens.get(self.position)
+    }
+    fn advance(&self) -> Option<&Token> {
+        self.in_tokens.get(self.position)
     }
     pub fn parse(&self) -> ExprTree {
         todo!()
