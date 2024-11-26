@@ -153,7 +153,7 @@ rust result/options and multiple returns
 mutable scopes can create actor processes but immutable ones cant.
 Immutable will be lazy, and it will also attempt to automatically parallelize if possible.
 
-// where node implements Node which defines message types and timeout value
+// where node implements Node which defines message types and timeout value and other stuff
 mutable scopes can spawn an actor with pid = node @ function args...
 
 send is Message @> pid
