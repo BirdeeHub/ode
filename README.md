@@ -14,15 +14,15 @@ This is effectively just me drawing in the margins of my notebook.
 
 ```
 
-mutability operators: ` (or `= for when you want mutable but otherwise want to infer the type)
+mutability operator: `
 shadowing is allowed in interior scopes but not in the same scope.
 
 type constraints can contain mixed functions and types if desired
 
 Tool _= {
-  int:weight,
-  int:length,
-  int:id,
+  weight:int,
+  length:int,
+  id:int,
 }
 Swingable _= {
   \:swing &self, &thing:target -> bool,
@@ -32,11 +32,18 @@ Breakable _= `{
 }
 
 // enums can contain type constraints, or implemented types
-ToolKind =@ `{
+ToolKind =| `{
   IndestructibleHmmr(Tool:Swingable),
   Hmmr(Tool:Swingable:Breakable),
   Hmr(Hammer),
 }
+
+// Generics come first in <>
+
+<T, `U:Tool>GenericTypeStruct _= {
+  T:meta,
+  U:item,
+},
 
 // an immutable generic set can implement immutable constraints
 UnbreakableHammer:Tool,Swingable,Eq = {
@@ -126,8 +133,8 @@ If not mutable, they can recursively self-access
 `if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
-~@ Ident { Pattern [cond] => {}[,] }
-Ident ~@ { Pattern [cond] => {}[,] } // where Pattern is a rust-style match case or _
+~| Ident { Pattern [cond] => {}[,] }
+Ident ~| { Pattern [cond] => {}[,] } // where Pattern is a rust-style match case or _
 
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
