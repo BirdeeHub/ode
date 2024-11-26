@@ -17,9 +17,9 @@ This is effectively just me drawing in the margins of my notebook.
 mutability operators: ` (or `= for when you want mutable but otherwise want to infer the type)
 shadowing is allowed in interior scopes but not in the same scope.
 
-types
+type constraints
 
-Hammer _= `{
+Tool _= `{
   int:weight,
   int:length,
   int:id,
@@ -31,8 +31,14 @@ Breakable _= `{
   `\:is_broken &self -> bool,
 }
 
-// an immutable impl block can implement immutable constraints
-Hammer:Swingable,Eq ^= {
+// enums can contain types or values
+Tool @= `{
+  UnbreakableHammer(Tool:Swingable),
+  Hammer(Tool:Swingable:Breakable),
+}
+
+// an immutable generic set can implement immutable constraints
+Hammer:Tool,Swingable,Eq = {
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   \:swing &self, &thing:target -> bool: {
     << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
@@ -45,7 +51,7 @@ Hammer:Swingable,Eq ^= {
 
 // an mutable impl block can implement immutable and mutable constraints
 // and may create both immutable and mutable values
-Hammer:Swingable,Eq ^= `{
+Hammer:Swingable,BreakableEq ^= `{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   broken `= false,
   `\:is_broken &self -> bool: {
@@ -57,19 +63,19 @@ Hammer:Swingable,Eq ^= `{
   },
 }
 
-mace = Hammer { weight:10, length:20, model:125 };
+mace = Hammer { weight:10, length:20, };
 
 [] indicates optional in these snippets
-fn syntax: \:myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-anon fn syntax: myfn = \ [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-infix fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-infix fn syntax: \::myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-multiple ret fn syntax: myfn = \:: [type]:named[:default], [type]:args[:default] -> ret_type, ret_type2: { body }
-mutable fn syntax: `\:myfn [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-mutable anon fn syntax: myfn = `\ [type]:named[:default], [type]:args[:default] -> [ret_type]: { body }
-vararg syntax: \:myfn [type]:args[:default], [type]:named:... -> [ret_type]: { body }
+fn syntax: \:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+anon fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+infix fn syntax: myfn = \:: named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+infix fn syntax: \::myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+multiple ret fn syntax: myfn = \:: named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
+mutable fn syntax: `\:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+mutable anon fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+vararg syntax: \:myfn named[:type[:default]], named[:type]:... -> [ret_type]: { body }
 
-\:greet &str:name, &str:followup, &str:greeting:"Hello" -> String: {
+\:greet name:&str, followup:&str, greeting:&str:"Hello" -> String: {
   "$[greeting], $[name]! $[followup]!"
 }
 
@@ -132,5 +138,7 @@ Immutable should be reference counted
 Mutable should be borrow-checked if possible?
 
 rust result/options and multiple returns
+
+
 
 ```
