@@ -26,6 +26,8 @@ pub enum Lexemes {
     Return(Meta), // << for early return
     FnOpNamed(Meta), // \: followed by IDENT
     FnOpInfix(Meta), // \:: followed by IDENT
+    VarArg(Meta), // ...
+    SelfArg(Meta), // self may be first argument to mark as method
     Pipe(Meta), // |>
     Hex(Meta, i64),
     Int(Meta, i64),
