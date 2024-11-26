@@ -51,13 +51,13 @@ fn main() -> io::Result<()> {
     let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
 
+    let parser_obj = parser::Parser::new(&tokens);
+    let tree = parser_obj.parse();
+    println!("{:?}", tree);
+
     for token in tokens {
         println!("{:?}", token);
     }
-
-    //let parser_obj = parser::Parser::new(lang_tokens);
-    //let tree = parser_obj.parse();
-    //println!("{:?}", tree);
 
     Ok(())
 }

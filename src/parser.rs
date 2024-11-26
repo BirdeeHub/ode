@@ -20,7 +20,7 @@ enum TokenType {
 }
 
 struct Meta {
-    debug_pos: usize,
+    debug_pos: usize, // <-- position in vector
 }
 
 // [] indicates optional in these snippets
@@ -51,11 +51,11 @@ struct ExprTree {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Parser {
-    in_tokens: Vec<Token>,
+pub struct Parser<'a> {
+    in_tokens: &'a Vec<Token>,
 }
-impl Parser {
-    pub fn new(in_tokens: Vec<Token>) -> Parser {
+impl<'a> Parser<'a> {
+    pub fn new(in_tokens: &'a Vec<Token>) -> Parser {
         Parser{ in_tokens, }
     }
     pub fn parse(&self) -> () {
