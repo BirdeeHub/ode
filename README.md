@@ -71,7 +71,7 @@ Hammer:Swingable,Breakable,Eq ^= `{
   },
 }
 
-mace = Hammer { weight:10, length:20, };
+mace:Hammer = { weight = 10, length = 20, };
 
 [] indicates optional in these snippets
 fn syntax: \:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
