@@ -139,6 +139,9 @@ Mutable should be borrow-checked if possible?
 
 rust result/options and multiple returns
 
-mutable scopes can create actor processes but immutable ones cant? Unsure if this will be a thing.
+possible:?????
+
+mutable scopes can create actor processes but immutable ones cant?
+Immutable will be lazy, and it will also attempt to automatically parallelize if possible.
 
 ```
