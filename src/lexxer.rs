@@ -27,6 +27,7 @@ pub enum Lexemes {
     FnOpNamed(Meta), // \: followed by IDENT
     FnOpInfix(Meta), // \:: followed by IDENT
     VarArg(Meta), // ...
+    ArgEnd(Meta), // ->
     SelfArg(Meta), // self may be first argument to mark as method
     Pipe(Meta), // |>
     Hex(Meta, i64),
@@ -37,9 +38,6 @@ pub enum Lexemes {
     Literal(Meta, String),
     Assign(Meta), // =
     Mut(Meta), // `
-    MutAssign(Meta), // `=
-    SubAssign(Meta), // -=
-    AddAssign(Meta), // +=
     Gt(Meta), // >
     Lt(Meta), // <
     GtEq(Meta), // >=
@@ -54,15 +52,18 @@ pub enum Lexemes {
     Or(Meta), // ||
     True(Meta), // true
     False(Meta), // false
-    Enum(Meta), // enum
+    Enum(Meta), // =|
     For(Meta), // for
-    Match(Meta), // ~@ 
+    Match(Meta), // ~|
     Then(Meta), // =>
     Else(Meta), // >>
     ElseIf(Meta), // >>>
     Struct(Meta), // struct
-    Implement(Meta), // impl <-- in this language, you will be able to implement traits on structs not created by your file, allowing pseudo-structural typing
-    Trait(Meta), // trait
+    Implement(Meta), // ^=
+    ConstraintAssign(Meta), // _=
+    Send(Meta), // <@
+    Recieve(Meta), // @>
+    Spawn(Meta), // @
 }
 
 #[derive(Debug, PartialEq)]

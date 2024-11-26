@@ -147,9 +147,22 @@ Mutable should be borrow-checked if possible?
 
 rust result/options and multiple returns
 
-possible:?????
-
-mutable scopes can create actor processes but immutable ones cant?
+mutable scopes can create actor processes but immutable ones cant.
 Immutable will be lazy, and it will also attempt to automatically parallelize if possible.
+
+mutable scopes can spawn an actor with pid = Node @ function args...
+
+send is Message @> pid
+
+recieve is pid <@ \ msg -> {
+}
+
+you can chain in a match then
+
+res = pid <@ \ msg -> ~| msg {
+  Exit(val) isFloat val => Ok(val),
+  Exit(val) => Err("Execution Error: $[val]"),
+  (time 5000) => Err("TIMED OUT"),
+}
 
 ```
