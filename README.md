@@ -239,3 +239,79 @@ It is likely not a good idea to do it a ton,
 because thats the only case when circular dependency matters.
 
 In all other cases it should be possible to declare the contents lazily without circular dependency causing much issue.
+
+### Currently Completely BS EBNF:
+
+currently this is AI generated BS to get me started
+
+My next effort will be to formally specify a context free grammar so that
+I have an actual yardstick to aim at for the parser.
+
+Again, currently, this EBNF is completely BS
+
+```EBNF
+(* Types and Declarations *)
+TypeDef          = Identifier, "_=", (Struct | Enum | GenericStruct | ImplBlock).
+Struct           = "{", { Field, "," }, "}".
+Field            = Identifier, ":", Type.
+Enum             = "`{", EnumVariant, { ",", EnumVariant }, "}".
+EnumVariant      = Identifier, "(", TypeConstraints, ")".
+TypeConstraints  = Type, { "+", Type } | Type, { "|", Type }.
+GenericStruct    = "<", Generics, ">:GenericTypeStruct", Struct.
+Generics         = Identifier, { ",", "`", Identifier, ":", Type }.
+ImplBlock        = "^=", "`{", { Method | Field }, "}".
+Method           = Identifier, "=", ("\\", Parameters, "->", Type?, ":", ScopeBody).
+
+(* Parameters *)
+Parameters       = Parameter, { ",", Parameter }.
+Parameter        = Identifier, [":", Type, ["=", DefaultValue]].
+Type             = Identifier | TypeConstraints.
+DefaultValue     = Literal | Expression.
+
+(* Scopes *)
+ScopeBody        = ImmutableScope | MutableScope.
+ImmutableScope   = "`{", { Statement, ";" }, "}".
+MutableScope     = "`{", { Statement }, "}".
+
+(* Statements *)
+Statement        = Expression | ReturnStatement.
+Expression       = Assignment | FunctionCall | Operation | MatchExpression.
+ReturnStatement  = "<<", Expression, ";".
+Assignment       = Identifier, "=", Expression.
+FunctionCall     = Identifier, { Argument, "," }.
+Argument         = Identifier, [":", Type, ["=", DefaultValue]].
+Operation        = Expression, Operator, Expression.
+MatchExpression  = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
+MatchArm         = Pattern, ["is", Type], ["=>", Expression], [";"].
+Pattern          = Identifier | "_".
+
+(* Functions *)
+FunctionDecl     = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody.
+ReturnTypes      = Type, { ",", Type }.
+MutableFunction  = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope.
+
+(* Control Structures *)
+IfElse           = Condition, "=>", ScopeBody, ["else", ScopeBody], ";".
+ForLoop          = "for", Iterator, "\\", Key, Value, ScopeBody.
+WhileLoop        = ">>>", Iterator, ScopeBody.
+
+(* Literals and Identifiers *)
+Literal          = Integer | String | Float | Boolean.
+Identifier       = Letter, { Letter | Digit | "_" }.
+Operator         = "+", "-", "*", "/", "=", "==", "!=", "<=", ">=", "&&", "||", "|>", "<-", "->", "\\:", "~", "|".
+
+(* Miscellaneous *)
+Comment          = LineComment | BlockComment.
+LineComment      = "//", { AnyChar }.
+BlockComment     = "/*", { AnyChar }, "*/".
+
+(* File Structure *)
+File             = { Declaration | UseStatement }.
+Declaration      = TypeDef | FunctionDecl | VariableDecl.
+VariableDecl     = Identifier, "=", Expression.
+UseStatement     = "use", String, "as", Identifier.
+
+(* Enclosures *)
+Enclosure        = "(", Expression, ")" | "[", ListItems, "]" | "{", ScopeBody, "}".
+ListItems        = Expression, { ",", Expression }.
+```
