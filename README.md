@@ -218,7 +218,7 @@ If you were wishing you could do that, make some types... Its basically that
 
 `\ args, list ->` This is an actual first class thing, it is a function that takes a scope.
 
-The scope declared is either the {} or until the next semicolon
+The scope declared is either the ```[~`[:ret_type]]{}```  or until the next semicolon
 
 `~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms.
 It doesnt have `<-` and the last semicolon is optional, but including it or not doesnt change behavior.
