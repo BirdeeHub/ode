@@ -274,7 +274,7 @@ MutableScope     = "`{", { Statement }, "}".
 (* Statements *)
 Statement        = Expression | ReturnStatement.
 Expression       = Assignment | FunctionCall | Operation | MatchExpression.
-ReturnStatement  = "<<", Expression, ";".
+ReturnStatement  = "<-", Expression, ";".
 Assignment       = Identifier, "=", Expression.
 FunctionCall     = Identifier, { Argument, "," }.
 Argument         = Identifier, [":", Type, ["=", DefaultValue]].
