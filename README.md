@@ -153,8 +153,8 @@ If not mutable, they can recursively self-access
 `if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
-~ Ident { Pattern, [cond] => {}[,] }
-Ident ~ { Pattern, [cond] => {}[,] } // where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
+~ Ident { Pattern, [cond] => {}; }
+Ident ~ { Pattern, [cond] => {}; } // where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
 
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
@@ -220,8 +220,8 @@ If you were wishing you could do that, make some types... Its basically that
 
 The scope declared is either the {} or until the next semicolon
 
-`~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms
-It changes it such that `<-` means default return and is optional if exhaustive, and makes it so that regardless of mutability type, the arms run in order.
+`~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms.
+It doesnt have `<-` and the last semicolon is optional, but including it or not doesnt change behavior.
 
 `\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator. It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
