@@ -10,7 +10,9 @@ currently its just a tokenizer but this is all of the rust code I have ever writ
 
 Do not expect progress in this repository, learning is the goal, not a good language.
 
-This is effectively just me drawing in the margins of my notebook.
+This is effectively just me drawing in the margins of my notebook for now.
+
+But the idea is cool, I was forced to. An ode to an idea I guess.
 
 ### Planning notes:
 
