@@ -264,13 +264,16 @@ GenericDecl       = "<", Generics, ">", ":".
 Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
 
 (* Parameters *) 
+
+(* Scopes *)
+Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
+ScopeBody         = { [ "<-",] Statement[, ";" ] }.
+MatchArms         = { Pattern, [",", Expression], ["=>", Expression], [";"] }.
+FnArgs            = "\", Parameters, "->".
+InlineFnArgs      = "\:", [GenericDecl ,] Parameters, "->".
 Parameters        = Parameter, { ",", Parameter }.
 Parameter         = Identifier, [":", Type, [":", DefaultValue]].
 DefaultValue      = Literal | Expression.
-
-(* Scopes *)
-Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{", { [ "<-",] Statement[, ";" ] }, "}".
-FnArgs            = "\\", Parameters, "->".
 
 (* Statements *)
 Statement         = Expression | ReturnStatement.
@@ -280,15 +283,8 @@ Assignment        = Identifier, "=", Expression.
 FunctionCall      = Identifier, { " ", Argument, }.
 Argument          = Identifier, [":", Type, ["=", DefaultValue]].
 Operation         = Expression, Operator, Expression.
-MatchExpression   = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
-MatchArm          = Pattern, [",", Expression], ["=>", Expression], [";"].
 Pattern           = Identifier, "(", TypeConstraints, ")".
 PatternConstr     = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
-
-(* Functions *)  
-FunctionDecl      = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody, ";".
-ReturnTypes       = Type, { ",", Type }.
-MutableFunction   = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope, ";".
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
