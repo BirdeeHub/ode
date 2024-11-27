@@ -93,7 +93,7 @@ greetAmy = greeting "Amy";
 
 println greetAmy;
 
-greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: `{
+greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: `{ // if this were infix, \:<T>: instead of \<T>:
   "$[greeting], $[name]!"
 } "Wazzup");
 
