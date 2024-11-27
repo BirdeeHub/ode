@@ -78,7 +78,7 @@ mace:Hammer = { weight = 10, length = 20, };
 
 [] indicates optional in these snippets
 fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-infix fn syntax: myfn = \_ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+infix fn syntax: myfn = \: named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
 multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
 mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
 vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type]: { body }
