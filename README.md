@@ -133,8 +133,8 @@ If not mutable, they can recursively self-access
 `if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
-~| Ident { Pattern, [cond] => {}[,] }
-Ident ~| { Pattern, [cond] => {}[,] } // where Pattern is a rust-style match case or _
+~ Ident { Pattern, [cond] => {}[,] }
+Ident ~ { Pattern, [cond] => {}[,] } // where Pattern is a rust-style match case or _
 
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
@@ -164,21 +164,27 @@ response = pid @> \ msg -> ~ {
 };
 
 // stream iterator
-res = @>> Ok(msg), Timeout(5000)|Tries(20) -> ~ {
+res = @>> \ Ok(msg), TTL(ttlval) -> ~ {
   Ok(val) isFloat val => Ok val,
-  Err(val) => Err "Wrong type! $[inspect(val)]",
+  Ok(val) => Err "Wrong type! $[inspect(val)]",
   Err(val) => Err "Execution Error: $[inspect(val)]",
-  Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
+  TTL(val), ttlval > 5000 => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
 };
+
+// argument specififications such as in match and fn decleration may reference earier arguments
+
+// A typematch is to be an actual type.
 
 file structure.
 
 Top level must be immutable, or typedef/impl
 
-all files may contain a scope, mutable or immutable, at top level
+all files may contain a single scope, mutable or immutable, at top level
 
 files with a mutable scope at top level and a node type to implement may be called as actors.
 
 files with an immutable scope at top level may be called as lazily evaluated functions.
+
+Scopes may only be declared anonymously. (Top level file scopes may be upvalued with use keyword if your scope has a compatible mutablility type?)
 
 ```

@@ -51,17 +51,6 @@ fn main() -> io::Result<()> {
             ":", ",", ";",
             "#",
         ],
-        // ` mutability op (lifetime if needed goes before, & goes after)
-        // \ arg, arg -> {}
-        // left (\: arg, arg -> {}) right
-        // then => else !> and match ~ only
-        // enum ~= constraint |= impl ^=
-        // [[<T>]:`type:] [`]{}
-        // while (pid @~ match) cond {}
-        // <@ is value to stream/actor
-        // @ is value from stream/actor
-        // These are also used in message passing
-        // >>> while >>| continue >>! break
         enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">")],
         charop: "'",
         templop: "\"",
@@ -69,6 +58,19 @@ fn main() -> io::Result<()> {
         interend: "]",
         escape_char: '\\',
     };
+    // ` mutability op (lifetime if needed goes before, & goes after)
+    // \ arg, arg -> {}
+    // left (\: arg, arg -> {}) right
+    // then => else !> and match ~ only
+    // enum ~= constraint |= impl ^=
+    // [[<T>]:`type:] [`]{}
+    // while (pid @~ match) cond {}
+    // <@ is value to stream/actor
+    // @ is create/get stream/actor
+    // @> is value from stream/actor
+    // @>> untilcond, fallback TTL(int)
+    // These are also used in message passing
+    // >>> while >>| continue >>! break
 
     let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
