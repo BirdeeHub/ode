@@ -246,12 +246,10 @@ In all other cases it should be possible to declare the contents lazily without 
 
 ### Currently Completely BS EBNF:
 
-currently this is AI generated BS to get me started
-
 My next effort will be to formally specify a context free grammar so that
 I have an actual yardstick to aim at for the parser.
 
-Again, currently, this EBNF is completely BS
+Again, currently, this EBNF is still a work in progress.
 
 ```EBNF
 (* Types and Declarations *)
