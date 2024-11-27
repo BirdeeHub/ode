@@ -263,14 +263,15 @@ TypeConstraints   = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } |
 GenericDecl       = "<", Generics, ">", ":".
 Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
 
-(* Parameters *) 
-
 (* Scopes *)
 Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
 ScopeBody         = { [ "<-",] Statement[, ";" ] }.
 MatchArms         = { Pattern, [",", Expression], ["=>", Expression], [";"] }.
+ScopeType         = "~"|[Identifier, ]"`"
+
+(* Functions *)  
 FnArgs            = "\", Parameters, "->".
-InlineFnArgs      = "\:", [GenericDecl ,] Parameters, "->".
+InfixFnArgs       = "\:", [GenericDecl ,] Parameters, "->".
 Parameters        = Parameter, { ",", Parameter }.
 Parameter         = Identifier, [":", Type, [":", DefaultValue]].
 DefaultValue      = Literal | Expression.
