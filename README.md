@@ -289,7 +289,7 @@ PatternConstr     = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } |
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
-Loop              = ">>>", FnArgs, ScopeBody.
+Loop              = ">>>", FnArgs, ScopeBody, ";".
 
 (* Literals and Identifiers *)
 Literal           = Integer | String | Float | Boolean.
