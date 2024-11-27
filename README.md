@@ -191,6 +191,6 @@ files with an immutable scope at top level may be called as lazily evaluated fun
 
 Scopes may only be declared anonymously. (Top level file scopes may be upvalued with use keyword if your scope has a compatible mutablility type?)
 
-If you were wishing you could do that, make some types...
+If you were wishing you could do that, make some types... Its basically that
 
 ```
