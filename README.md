@@ -255,21 +255,18 @@ Constraint       = Identifier, "_=", "{", { Field, "," }, "}".
 Impl             = Identifier, "^=", "{", { Assignment, ";" }, "}".
 Enum             = Identifier, "~=", "{", { EnumPattern, "," }, "}".
 EnumPattern      = Identifier, "(", TypeConstraints, ")".
-TypeConstraints  = Type, { "+", Type } | Type, { "|", Type }.
+TypeConstraints  = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
 GenericDecl      = "<", Generics, ">", ":".
-Generics         = Identifier, { ",", Identifier, ":", Type }.
-FnArgs           = "\\", Parameters, "->", [ Type, ] ":".
+Generics         = { Identifier, ":", TypeConstraints [, "," ] }.
 
 (* Parameters *)
 Parameters       = Parameter, { ",", Parameter }.
 Parameter        = Identifier, [":", Type, [":", DefaultValue]].
-Type             = Identifier | TypeConstraints.
 DefaultValue     = Literal | Expression.
 
 (* Scopes *)
-ScopeBody        = ImmutableScope | MutableScope.
-ImmutableScope   = "{", { Statement, ";" }, "}".
-MutableScope     = "`{", { Statement }, "}".
+Scope            = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{", { [ "<-",] Statement[, ";" ] }, "}".
+FnArgs           = "\\", Parameters, "->".
 
 (* Statements *)
 Statement        = Expression | ReturnStatement.
