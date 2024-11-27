@@ -1,3 +1,5 @@
+# ODE (Orthographic Dynamic Execution)
+
 learning how to write a programming language
 
 I dont know a ton, I'm just going to try it.
@@ -278,7 +280,8 @@ Argument         = Identifier, [":", Type, ["=", DefaultValue]].
 Operation        = Expression, Operator, Expression.
 MatchExpression  = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
 MatchArm         = Pattern, [",", Expression], ["=>", Expression], [";"].
-Pattern          = Identifier | "_".
+Pattern          = Identifier, "(", TypeConstraints, ")".
+PatternConstr    = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
 
 (* Functions *)
 FunctionDecl     = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody, ";".
