@@ -233,4 +233,4 @@ immutable ones are executed lazily in the best order when needed and return is R
 
 All files can contain 1 top level anonymous non-typedef thing that the file can return. And then any number of `_=` `~=` `^` typedefs, named immutable functions, and immutable variables.
 
-`use "name" file_descriptor` keyword will return the anonymous thing as name, and define the types, functions and constants under "name.thing";
+`val = use "name" file_descriptor` keyword will return the anonymous thing as val, and define the types, functions and constants under "name.thing";
