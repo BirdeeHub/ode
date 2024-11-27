@@ -284,9 +284,9 @@ MatchArm         = Pattern, [",", Expression], ["=>", Expression], [";"].
 Pattern          = Identifier | "_".
 
 (* Functions *)
-FunctionDecl     = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody.
+FunctionDecl     = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody, ";".
 ReturnTypes      = Type, { ",", Type }.
-MutableFunction  = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope.
+MutableFunction  = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope, ";".
 
 (* Control Structures *)
 IfElse           = Condition, "=>", ScopeBody, ["else", ScopeBody], ";".
