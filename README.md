@@ -110,7 +110,7 @@ greeting3 = `\ greeting:&str -> String: `{
 println (greeting3 "Hi");
 
 personname="Mrowwwwwww!";
-greetOphelia = greeting3 "AAAAHHHH!!";
+`greetOphelia = greeting3 "AAAAHHHH!!";
 println greetOphelia;
 
 functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
