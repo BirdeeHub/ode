@@ -215,3 +215,9 @@ Scopes may only be declared anonymously. (Top level file scopes may be upvalued 
 If you were wishing you could do that, make some types... Its basically that
 
 ```
+
+`\ args, list` This is an actual first class thing
+
+`->` this is an infix operator that takes an args list and a typedef and returns a function that recieves a scope (which can only be declared anonymously).
+
+The scope declared is either the {} or until the next semicolon
