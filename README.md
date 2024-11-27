@@ -256,7 +256,7 @@ Impl             = Identifier, "^=", "{", { Assignment, ";" }, "}".
 Enum             = Identifier, "~=", "{", { EnumPattern, "," }, "}".
 EnumPattern      = Identifier, "(", TypeConstraints, ")".
 TypeConstraints  = Type, { "+", Type } | Type, { "|", Type }.
-GenericDecl      = "<", Generics, ">", ":", Struct.
+GenericDecl      = "<", Generics, ">", ":".
 Generics         = Identifier, { ",", Identifier, ":", Type }.
 FnArgs           = "\\", Parameters, "->", [ Type, ] ":".
 
@@ -289,9 +289,8 @@ ReturnTypes      = Type, { ",", Type }.
 MutableFunction  = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope, ";".
 
 (* Control Structures *)
-IfElse           = Condition, "=>", ScopeBody, ["else", ScopeBody], ";".
-ForLoop          = "for", Iterator, "\\", Key, Value, ScopeBody.
-WhileLoop        = ">>>", Iterator, ScopeBody.
+ThenElse         = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
+Loop             = ">>>", FnArgs, ScopeBody.
 
 (* Literals and Identifiers *)
 Literal          = Integer | String | Float | Boolean.
