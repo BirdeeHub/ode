@@ -1,0 +1,20 @@
+<T: Eq>my_val:T = `{
+  `x = 55;
+  x = x + 42;
+  x > 42 => `{
+    false
+  } >> `{
+    x
+  }
+}
+
+my_val2:int = { <- z * g;
+  x = 55;
+  y = x + 42;
+  // immutable scopes may have mutable scopes in them as long as they return an immutable value
+  z, g = y > 42 => `{
+    x, 100
+  } >>> `{
+    y, true
+  };
+}

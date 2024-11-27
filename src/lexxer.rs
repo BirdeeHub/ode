@@ -1,7 +1,7 @@
 use crate::tokenizer::{Token, Coin};
 
 #[derive(Debug, PartialEq)]
-pub enum Lexemes {
+pub enum Lexemes<'a> {
     ParenB(Meta), // (
     ParenE(Meta), // )
     ScopeB(Meta), // { Can also be generic set if , instead of ;
@@ -64,11 +64,13 @@ pub enum Lexemes {
     Send(Meta), // <@
     Recieve(Meta), // @>
     Spawn(Meta), // @
+    Format(Meta, &'a Vec<Lexemes<'a>>),
+    Pattern(Meta, &'a Vec<Lexemes<'a>>),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Meta {
-    debug_pos: usize, // <-- position in vector
+    debug_pos: usize, // <-- position in in_tokens vector
 }
 
 #[derive(Debug, PartialEq)]

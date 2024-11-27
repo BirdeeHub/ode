@@ -77,14 +77,11 @@ mace:Hammer = { weight = 10, length = 20, };
 // Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
 
 [] indicates optional in these snippets
-fn syntax: \:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-anon fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-infix fn syntax: myfn = \:: named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-infix fn syntax: \::myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-multiple ret fn syntax: myfn = \:: named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
-mutable fn syntax: `\:myfn named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-mutable anon fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-vararg syntax: \:myfn named[:type[:default]], named[:type]:... -> [ret_type]: { body }
+fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+infix fn syntax: myfn = \_ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
+mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type]: { body }
 
 \:greet name:&str, followup:&str, greeting:&str:"Hello" -> String: {
   "$[greeting], $[name]! $[followup]!"
@@ -157,17 +154,23 @@ Actors are parallelized, and are given a world type defined by the Node instance
 // where node is an instance of Node which defines message types and timeout value and other stuff
 mutable scopes can spawn an actor with pid = node @ function args...
 
-send is Message @> pid
+send is Message @ pid
 
-recieve is pid <@ msg {
-}
+res = pid @ \ msg -> ~ {
+  Ok(val) isFloat val => Ok val,
+  Ok(val) => Err "Wrong type! $[inspect(val)]",
+  Err(val) => Err "Execution Error: $[inspect(val)]",
+  Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
+};
 
-you can chain in a match then
+file structure.
 
-res = pid <@ msg ~| {
-  Exit(val) isFloat val => Ok val,
-  Exit(val) => Err("Execution Error: $[val]"),
-  Time => Err "TIMED OUT",
-}
+Top level must be immutable, or typedef/impl
+
+all files may contain a scope, mutable or immutable, at top level
+
+files with a mutable scope at top level and a node type to implement may be called as actors.
+
+files with an immutable scope at top level may be called as lazily evaluated functions.
 
 ```

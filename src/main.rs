@@ -39,10 +39,21 @@ fn main() -> io::Result<()> {
         blockcomend: "*/",
         linecom: "//",
         ops: &[
-            "=", "+", "-", "*", "/", "%", ";", ",", "\\", "\\:", "\\::", ":", "`", "||", "|", "&&",
-            "&", "!", "!=", "==", "<=", ">=", "=", "|>", "~|", "=|",
-            "=>", ">>", ">>>", "<<", "?", ".", "...", "_=", "^=", "->", "<@", "@", "@>"
+            "=", "+", "-", "*", "/", "%", ";", ",", "\\", "\\:", ":", "`", "||", "&&", "|", "&",
+            ">>", "<<", "!", "!=", "==", "<=", ">=", "=", "|>", ">>>", ">>|", ">>!", "~",
+            "=>", "!>", "?", ".", "...", "|=", "^=", "~=", "->", "<-", "<@", "@", "#",
         ],
+        // ` mutability op (lifetime if needed goes before, & goes after)
+        // \ arg, arg -> {}
+        // left (\: arg, arg -> {}) right
+        // then => else !> and match ~ only
+        // enum ~= constraint |= impl ^=
+        // [[<T>]:`type:] [`]{}
+        // while (pid @~ match) cond {}
+        // <@ is value to stream/actor
+        // @ is value from stream/actor
+        // These are also used in message passing
+        // >>> while >>| continue >>! break
         enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">")],
         charop: "'",
         templop: "\"",

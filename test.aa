@@ -44,7 +44,7 @@ Hammer:Swingable,Breakable,Eq ^= `{
 
 mace:Hammer = { weight = 10, length = 20, };
 
-\:greet name:&str, followup:&str, greeting:&str:"Hello" -> String: {
+\ name:&str, followup:&str, greeting:&str:"Hello" -> String: {
   "$[greeting], $[name]! $[followup]!"
 }
 
