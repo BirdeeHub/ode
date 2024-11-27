@@ -156,7 +156,7 @@ mutable scopes can spawn an actor with pid = node @ function varargs...
 
 Hopefully I can fold stream iteration and actor message iteration and listening into these @ operators.
 
->>> is simple where and can also take an iterator. @>> produces and loops over an iterator from a stream/actor message queue
+>>> is simple while loop and can also take an iterator. @>> produces and loops over an iterator from a stream/actor message queue
 
 err:Result<String> = pid <@ msg;
 
