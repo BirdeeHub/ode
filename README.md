@@ -234,3 +234,10 @@ immutable ones are executed lazily in the best order when needed and return is R
 All files can contain 1 top level anonymous non-typedef thing that the file can return. And then any number of `_=` `~=` `^` typedefs, named immutable functions, and immutable variables.
 
 `val = use "name" file_descriptor` keyword will return the anonymous thing as val, and define the types, functions and constants under "name.thing";
+
+If the top level anonymous thing is a mutable scope, it is ran when the file `use`ing it is ran.
+
+It is likely not a good idea to do it a ton,
+because thats the only case when circular dependency matters.
+
+In all other cases it should be possible to declare the contents lazily without circular dependency causing much issue.
