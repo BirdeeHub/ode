@@ -255,62 +255,73 @@ Again, currently, this EBNF is completely BS
 
 ```EBNF
 (* Types and Declarations *)
-Constraint       = Identifier, "_=", "{", { Field, "," }, "}".
-Impl             = Identifier, "^=", "{", { Assignment, ";" }, "}".
-Enum             = Identifier, "~=", "{", { EnumPattern, "," }, "}".
-EnumPattern      = Identifier, "(", TypeConstraints, ")".
-TypeConstraints  = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
-GenericDecl      = "<", Generics, ">", ":".
-Generics         = { Identifier, ":", TypeConstraints [, "," ] }.
+Constraint        = Identifier, "_=", "{", { Field, "," }, "}".
+Impl              = Identifier, "^=", "{", { Assignment, ";" }, "}".
+Enum              = Identifier, "~=", "{", { EnumPattern, "," }, "}".
+EnumPattern       = Identifier, "(", TypeConstraints, ")".
+TypeConstraints   = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
+GenericDecl       = "<", Generics, ">", ":".
+Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
 
-(* Parameters *)
-Parameters       = Parameter, { ",", Parameter }.
-Parameter        = Identifier, [":", Type, [":", DefaultValue]].
-DefaultValue     = Literal | Expression.
+(* Parameters *  
+Parameters        = Parameter, { ",", Parameter }.
+Parameter         = Identifier, [":", Type, [":", DefaultValue]].
+DefaultValue      = Literal | Expression.
 
 (* Scopes *)
-Scope            = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{", { [ "<-",] Statement[, ";" ] }, "}".
-FnArgs           = "\\", Parameters, "->".
+Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{", { [ "<-",] Statement[, ";" ] }, "}".
+FnArgs            = "\\", Parameters, "->".
 
-(* Statements *)
-Statement        = Expression | ReturnStatement.
-Expression       = Assignment | FunctionCall | Operation | MatchExpression.
-ReturnStatement  = "<-", Expression, ";".
-Assignment       = Identifier, "=", Expression.
-FunctionCall     = Identifier, { " ", Argument, }.
-Argument         = Identifier, [":", Type, ["=", DefaultValue]].
-Operation        = Expression, Operator, Expression.
-MatchExpression  = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
-MatchArm         = Pattern, [",", Expression], ["=>", Expression], [";"].
-Pattern          = Identifier, "(", TypeConstraints, ")".
-PatternConstr    = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
+(* Statements *  
+Statement         = Expression | ReturnStatement.
+Expression        = Assignment | FunctionCall | Operation | MatchExpression.
+ReturnStatement   = "<-", Expression, ";".
+Assignment        = Identifier, "=", Expression.
+FunctionCall      = Identifier, { " ", Argument, }.
+Argument          = Identifier, [":", Type, ["=", DefaultValue]].
+Operation         = Expression, Operator, Expression.
+MatchExpression   = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
+MatchArm          = Pattern, [",", Expression], ["=>", Expression], [";"].
+Pattern           = Identifier, "(", TypeConstraints, ")".
+PatternConstr     = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
 
-(* Functions *)
-FunctionDecl     = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody, ";".
-ReturnTypes      = Type, { ",", Type }.
-MutableFunction  = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope, ";".
+(* Functions *)  
+FunctionDecl      = Identifier, "=", "\\", Parameters, "->", [ReturnTypes], ":", ScopeBody, ";".
+ReturnTypes       = Type, { ",", Type }.
+MutableFunction   = Identifier, "=", "`\\", Parameters, "->", [ReturnTypes], ":", MutableScope, ";".
 
 (* Control Structures *)
-ThenElse         = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
-Loop             = ">>>", FnArgs, ScopeBody.
+ThenElse          = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
+Loop              = ">>>", FnArgs, ScopeBody.
 
 (* Literals and Identifiers *)
-Literal          = Integer | String | Float | Boolean.
-Identifier       = Letter, { Letter | Digit | "_" }.
-Operator         = "+", "-", "*", "/", "=", "==", "!=", "<=", ">=", "&&", "||", "|>", "<-", "->", "\\:", "~", "|".
+Literal           = Integer | String | Float | Boolean.
+Identifier        = Letter, { Letter | Digit | "_" }.
+Operator          = "=", "+", "-", "/", "%", "||", "&&", "|",
+                    ">>", "<<", "!", "!=", "==", "<=", ">=", "=",
+                    "\\", "\\:", "|>", "<-", "->",
+                    "=>", "!>",
+                    "&", "*", "`",
+                    "|=", "^=", "~=", "...",
+                    "~", "?",
+                    ">>>", ">>|", ">>!",
+                    "<@", "@", "@>", "@>>",
+                    ":", ",", ";",
+                    "#",
 
 (* Miscellaneous *)
-Comment          = LineComment | BlockComment.
-LineComment      = "//", { AnyChar }.
-BlockComment     = "/*", { AnyChar }, "*/".
+Comment           = LineComment | BlockComment.
+LineComment       = "//", { AnyChar }.
+BlockComment      = "/*", { AnyChar }, "*/".
 
 (* File Structure *)
-File             = { Declaration | UseStatement }.
-Declaration      = TypeDef | FunctionDecl | VariableDecl.
-VariableDecl     = Identifier, "=", Expression.
-UseStatement     = "use", String, "as", Identifier.
+File              = { Declaration | UseStatement }.
+Declaration       = TypeDef | FunctionDecl | VariableDecl.
+VariableDecl      = Identifier, "=", Expression.
+UseStatement      = "use", String, "as", Identifier.
 
 (* Enclosures *)
-Enclosure        = "(", Expression, ")" | "[", ListItems, "]" | "{", ScopeBody, "}".
-ListItems        = Expression, { ",", Expression }.
+Enclosure         = "(", Expression, ")" | "[", ListItems, "]" | "{", ScopeBody, "}".
+        (*enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("$[","]")],*)
+ListItems         = Expression, { ",", Expression }.
 ```
