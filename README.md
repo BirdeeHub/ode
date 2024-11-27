@@ -221,3 +221,5 @@ If you were wishing you could do that, make some types... Its basically that
 `->` this is an infix operator that takes an args list and a typedef and returns a function that recieves a scope (which can only be declared anonymously).
 
 The scope declared is either the {} or until the next semicolon
+
+`~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms
