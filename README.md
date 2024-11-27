@@ -223,3 +223,14 @@ If you were wishing you could do that, make some types... Its basically that
 The scope declared is either the {} or until the next semicolon
 
 `~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms
+It changes it such that `<-` means default return and is optional if exhaustive, and makes it so that regardless of mutability type, the arms run in order.
+
+`\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
+
+mutable scopes behave like rust scopes `<-` is return
+
+immutable ones are executed lazily in the best order when needed and return is REQUIRED and can only be called once.
+
+All files can contain 1 top level anonymous non-typedef thing that the file can return. And then any number of `_=` `~=` `^` typedefs, named immutable functions, and immutable variables.
+
+`use "name" file_descriptor` keyword will return the anonymous thing as name, and define the types, functions and constants under "name.thing";
