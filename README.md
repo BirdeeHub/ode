@@ -133,8 +133,8 @@ If not mutable, they can recursively self-access
 `if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
-~| Ident { Pattern [cond] => {}[,] }
-Ident ~| { Pattern [cond] => {}[,] } // where Pattern is a rust-style match case or _
+~| Ident { Pattern, [cond] => {}[,] }
+Ident ~| { Pattern, [cond] => {}[,] } // where Pattern is a rust-style match case or _
 
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
@@ -154,11 +154,19 @@ Actors are parallelized, and are given a world type defined by the Node instance
 // where node is an instance of Node which defines message types and timeout value and other stuff
 mutable scopes can spawn an actor with pid = node @ function args...
 
-send is Message @ pid
+err:Result<String> = pid <@ msg;
 
-res = pid @ \ msg -> ~ {
+response = pid @> \ msg -> ~ {
   Ok(val) isFloat val => Ok val,
   Ok(val) => Err "Wrong type! $[inspect(val)]",
+  Err(val) => Err "Execution Error: $[inspect(val)]",
+  Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
+};
+
+// stream iterator
+res = @>> Ok(msg), Timeout(5000)|Tries(20) -> ~ {
+  Ok(val) isFloat val => Ok val,
+  Err(val) => Err "Wrong type! $[inspect(val)]",
   Err(val) => Err "Execution Error: $[inspect(val)]",
   Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
 };
