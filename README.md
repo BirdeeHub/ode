@@ -164,7 +164,7 @@ response = pid @> \ msg -> ~ {
 };
 
 // stream iterator
-res = @>> \ Ok(msg), TTL(ttlval) -> ~ {
+res = pid @>> \ Ok(msg), TTL(ttlval) -> ~ {
   Ok(val) isFloat val => Ok val,
   Ok(val) => Err "Wrong type! $[inspect(val)]",
   Err(val) => Err "Execution Error: $[inspect(val)]",
