@@ -151,7 +151,7 @@ rust result/options and multiple returns
 Immutable will be lazy.
 Actors are parallelized, and are given a world type defined by the Node instance that they can use in their init scope.
 
-mutable scopes can spawn an actor with pid = node @ function args...
+mutable scopes can spawn an actor with pid = node @ function varargs...
 // where node is an instance of Node which defines message types and timeout value and other stuff
 
 err:Result<String> = pid <@ msg;
