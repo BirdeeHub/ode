@@ -2,7 +2,7 @@ learning how to write a programming language
 
 I dont know a ton, I'm just going to try it.
 
-learning rust
+learning rust, probably doing a lot of copying until I make my noob code use more slices.
 
 currently its just a tokenizer but this is all of the rust code I have ever written in my life so thats a good start!
 
