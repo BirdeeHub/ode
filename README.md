@@ -280,7 +280,7 @@ FunctionCall     = Identifier, { Argument, "," }.
 Argument         = Identifier, [":", Type, ["=", DefaultValue]].
 Operation        = Expression, Operator, Expression.
 MatchExpression  = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
-MatchArm         = Pattern, ["is", Type], ["=>", Expression], [";"].
+MatchArm         = Pattern, [",", Expression], ["=>", Expression], [";"].
 Pattern          = Identifier | "_".
 
 (* Functions *)
