@@ -32,15 +32,15 @@ Breakable _= `{
 }
 
 // enums can contain type constraints, or implemented types
-ToolKind =| `{
+ToolKind ~= `{
   IndestructibleHmmr(Tool:Swingable),
   Hmmr(Tool:Swingable:Breakable),
   Hmr(Hammer),
 }
 
-// Generics come first in <>
+// Generics come first in <> followed by a type separator
 
-<T, `U:Tool>GenericTypeStruct _= {
+<T, `U:Tool>:GenericTypeStruct _= {
   meta:T,
   item:U,
 },
@@ -83,15 +83,35 @@ multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -
 mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type:] { body }
 
-\:greet name:&str, followup:&str, greeting:&str:"Hello" -> String: {
+greet = \ followup:&str, name:&str, greeting:&str:"Hello" -> String: `{
   "$[greeting], $[name]! $[followup]!"
 }
 
-amyGreet = greet "Amy";
+greeting = greet "How are you?";
 
-greeting = amyGreet "How are you?";
+greetAmy = greeting "Amy";
 
-println greeting;
+println greetAmy;
+
+greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: `{
+  "$[greeting], $[name]!"
+} "Wazzup");
+
+greetJosh = greeting2 "Josh";
+
+println joshGreet;
+
+// `mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
+
+`personname="James";
+greeting3 = `\ greeting:&str -> String: `{
+  "$[greeting], $[personname]!"
+};
+println (greeting3 "Hi");
+
+personname="Mrowwwwwww!";
+greetOphelia = greeting3 "AAAAHHHH!!";
+println greetOphelia;
 
 functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
 if they return a mutable value their return value will retain its mutability
