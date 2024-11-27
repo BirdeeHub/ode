@@ -66,7 +66,7 @@ Hammer:Swingable,Breakable,Eq ^= `{
     broken // mutable scope can implicitly return at the end
   },
   \:swing &self, &thing:target -> bool: thing.distance(self) < self.length,
-  \:eq &self, &thing:other -> bool: {
+  eq = \: &self, &thing:other -> bool: {
     << self.id == other.id
   },
 }
@@ -77,11 +77,11 @@ mace:Hammer = { weight = 10, length = 20, };
 // Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
 
 [] indicates optional in these snippets
-fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-infix fn syntax: myfn = \: named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
+fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
+infix fn syntax: myfn = \: named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
-mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type]: { body }
-vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type]: { body }
+mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
+vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type:] { body }
 
 \:greet name:&str, followup:&str, greeting:&str:"Hello" -> String: {
   "$[greeting], $[name]! $[followup]!"
