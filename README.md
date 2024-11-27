@@ -1,6 +1,6 @@
 learning how to write a programming language
 
-No, I have not read anything on the topic. I'm just going to try it.
+I dont know a ton, I'm just going to try it.
 
 learning rust
 
