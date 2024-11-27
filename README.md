@@ -61,8 +61,8 @@ UnbreakableHammer:Tool,Swingable,Eq = {
 // and may create both immutable and mutable values
 Hammer:Swingable,Breakable,Eq ^= `{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
-  broken `= false, // <-- mutable impl can initialize values if desired
-  `\:is_broken &self -> bool: {
+  `broken = false, // <-- mutable impl can initialize values if desired
+  is_broken = \: &self -> bool: `{ // mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a `\:)
     broken // mutable scope can implicitly return at the end
   },
   \:swing &self, &thing:target -> bool: thing.distance(self) < self.length,
