@@ -263,7 +263,7 @@ TypeConstraints   = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } |
 GenericDecl       = "<", Generics, ">", ":".
 Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
 
-(* Parameters *  
+(* Parameters *) 
 Parameters        = Parameter, { ",", Parameter }.
 Parameter         = Identifier, [":", Type, [":", DefaultValue]].
 DefaultValue      = Literal | Expression.
@@ -272,7 +272,7 @@ DefaultValue      = Literal | Expression.
 Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{", { [ "<-",] Statement[, ";" ] }, "}".
 FnArgs            = "\\", Parameters, "->".
 
-(* Statements *  
+(* Statements *)
 Statement         = Expression | ReturnStatement.
 Expression        = Assignment | FunctionCall | Operation | MatchExpression.
 ReturnStatement   = "<-", Expression, ";".
