@@ -251,26 +251,24 @@ Again, currently, this EBNF is completely BS
 
 ```EBNF
 (* Types and Declarations *)
-TypeDef          = Identifier, "_=", (Struct | Enum | GenericStruct | ImplBlock).
-Struct           = "{", { Field, "," }, "}".
-Field            = Identifier, ":", Type.
-Enum             = "`{", EnumVariant, { ",", EnumVariant }, "}".
-EnumVariant      = Identifier, "(", TypeConstraints, ")".
+Constraint       = Identifier, "_=", "{", { Field, "," }, "}".
+Impl             = Identifier, "^=", "{", { Assignment, ";" }, "}".
+Enum             = Identifier, "~=", "{", { EnumPattern, "," }, "}".
+EnumPattern      = Identifier, "(", TypeConstraints, ")".
 TypeConstraints  = Type, { "+", Type } | Type, { "|", Type }.
-GenericStruct    = "<", Generics, ">:GenericTypeStruct", Struct.
-Generics         = Identifier, { ",", "`", Identifier, ":", Type }.
-ImplBlock        = "^=", "`{", { Method | Field }, "}".
-Method           = Identifier, "=", ("\\", Parameters, "->", Type?, ":", ScopeBody).
+GenericDecl      = "<", Generics, ">", ":", Struct.
+Generics         = Identifier, { ",", Identifier, ":", Type }.
+FnArgs           = "\\", Parameters, "->", [ Type, ] ":".
 
 (* Parameters *)
 Parameters       = Parameter, { ",", Parameter }.
-Parameter        = Identifier, [":", Type, ["=", DefaultValue]].
+Parameter        = Identifier, [":", Type, [":", DefaultValue]].
 Type             = Identifier | TypeConstraints.
 DefaultValue     = Literal | Expression.
 
 (* Scopes *)
 ScopeBody        = ImmutableScope | MutableScope.
-ImmutableScope   = "`{", { Statement, ";" }, "}".
+ImmutableScope   = "{", { Statement, ";" }, "}".
 MutableScope     = "`{", { Statement }, "}".
 
 (* Statements *)
