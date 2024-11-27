@@ -276,7 +276,7 @@ Statement        = Expression | ReturnStatement.
 Expression       = Assignment | FunctionCall | Operation | MatchExpression.
 ReturnStatement  = "<-", Expression, ";".
 Assignment       = Identifier, "=", Expression.
-FunctionCall     = Identifier, { Argument, "," }.
+FunctionCall     = Identifier, { " ", Argument, }.
 Argument         = Identifier, [":", Type, ["=", DefaultValue]].
 Operation        = Expression, Operator, Expression.
 MatchExpression  = "~", Identifier, "{", MatchArm, { ",", MatchArm }, "}".
