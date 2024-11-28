@@ -267,6 +267,6 @@ All values from `name` will be accessible at any point in the file `use` was cal
 
 For `val` it depends on the type, and behaves as normal. Mutable scopes execute at call site, and immutable scopes are executed when they are needed, etc...
 
-For monads, pass pure functions a world and world tranformerds, and pipe can become bind ;)
+For monads, pass pure functions a world and world tranformers, and pipe can become bind ;)
 
 Send it back and execute it in order!
