@@ -289,11 +289,11 @@ Send it back and execute it in order by passing it the world!
 
   // unres still hasnt done anything.
 
-  unres = Some("Hello"); // <- now it does (this is a mutable scope)
+  res = unres Some("Hello"); // <- now it does (this is a mutable scope)
 
-  print &unres; // <- would print Hello! Hello!
+  print &res; // <- would print Hello! Hello!
 
-  unres // <- return it I guess idk
+  res // <- return it I guess idk
 
 }
 ```
