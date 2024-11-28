@@ -254,7 +254,7 @@ Again, currently, this EBNF is still a work in progress.
 ```EBNF
 (* Types and Declarations *)
 Constraint        = Identifier, "_=", "{", { Field, "," }, "}".
-Impl              = Identifier, "^=", "{", { Assignment, ";" }, "}".
+Impl              = [GenericDecl], ["`",] Identifier, "^=", "{", { Assignment, ";" }, "}".
 Enum              = Identifier, "~=", "{", { EnumPattern, "," }, "}".
 EnumPattern       = Identifier, "(", TypeConstraints, ")".
 TypeConstraints   = [[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }.
@@ -263,7 +263,7 @@ Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
 Type              = [[Identifier,]"`",["&"|"*",] ] [ Identifier, ] ":".
 
 (* Scopes *)
-Scope             = [ GenericDecl,] [Type,] [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
+Scope             = [Type,] [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
 ScopeBody         = { Statement[, ";" ] }.
 MatchArms         = { Pattern, [",", Expression], ["=>", Expression], [";"] }.
 ScopeType         = "~"|[Identifier,] "`".
@@ -285,12 +285,14 @@ FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Ar
 Operation         = Expression, Operator, Expression.
 Pattern           = Identifier, "(", PatternConstraints, ")".
 PatternConstraints= Literal | ([[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }).
-Argument          = Literal | Expression | Identifier.
+Argument          = Literal | Expression | Identifier | Pattern.
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
 Loop              = Condition|Iter, ">>>", FnArgs, ScopeBody, ";".
-StreamIteration   = Stream|Actor, "@>>", FnArgs, ScopeBody, ";".
+StreamIteration   = Stream|Actor, "@>>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
+SendToStream      = Stream|Actor, "<@", Expression.
+ResponsePattern   = Stream|Actor, "@>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
 
 (* Literals and Identifiers *)
 Literal           = Integer | String | Float | Boolean.
