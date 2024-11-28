@@ -289,7 +289,7 @@ Argument          = Literal | Expression | Identifier.
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
-Loop              = Condition, ">>>", FnArgs, ScopeBody, ";".
+Loop              = Condition|Iter, ">>>", FnArgs, ScopeBody, ";".
 StreamIteration   = Stream, "@>>", FnArgs, ScopeBody, ";".
 
 (* Literals and Identifiers *)
