@@ -1,0 +1,83 @@
+(*
+### Currently Completely BS EBNF:
+
+My next effort will be to formally specify a context free grammar so that
+I have an actual yardstick to aim at for the parser.
+
+Again, currently, this EBNF is still a work in progress.
+*)
+(* Types and Declarations *)
+Constraint        = Identifier, "_=", "{", { Field, "," }, "}".
+Impl              = [GenericDecl], ["`",] Identifier, "^=", "{", { Assignment, ";" }, "}".
+Enum              = Identifier, "~=", "{", { EnumPattern, "," }, "}".
+EnumPattern       = Identifier, "(", TypeConstraints, ")".
+TypeConstraints   = [[Identifier,] "`", [ ("&" | "*" ,) ] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }.
+GenericDecl       = "<", Generics, ">", ":".
+Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
+Type              = [ [ Identifier , ]"`",["&"|"*",] ] [ Identifier, ] ":".
+
+(* Scopes *)
+Scope             = [Type,] [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
+ScopeBody         = { Statement [,";" ] }.
+MatchArms         = { Pattern , [",", Expression], ["=>", Expression], [";"] }.
+ScopeType         = "~" | [ Identifier , ] "`".
+
+(* Functions *)
+FnArgs            = RegFnArgs | InfixFnArgs.
+RegFnArgs         = "\", [GenericDecl , ] Parameters, "->" .
+InfixFnArgs       = "\:", [GenericDecl , ] Parameters, "->" .
+Parameters        = Parameter, { "," , Parameter }.
+Parameter         = Identifier, [":", Type, [":", DefaultValue]].
+DefaultValue      = Literal | Expression.
+
+(* Statements *)
+Statement         = Expression | ReturnStatement.
+Expression        = Assignment | FunctionCall | Operation | Scope | FnArgs | Pattern | Loop | StreamIteration.
+ReturnStatement   = "<-", { Expression, ",", }.
+Assignment        = [GenericDecl,] [Type,] Identifier, "=", Expression.
+FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Argument, }.
+Operation         = Expression, Operator, Expression.
+Pattern           = Identifier, "(", PatternConstraints, ")".
+PatternConstraints= Literal | ([[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }).
+Argument          = Literal | Expression | Identifier | Pattern.
+
+(* Control Structures *)
+ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
+Loop              = Condition|Iter, ">>>", FnArgs, ScopeBody, ";".
+StreamIteration   = Stream|Actor, "@>>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
+SendToStream      = Stream|Actor, "<@", Expression.
+ResponsePattern   = Stream|Actor, "@>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
+
+(* Literals and Identifiers *)
+Literal           = Integer | String | Float | Boolean.
+Identifier        = Letter, { Letter | Digit | "_" }.
+Operator          = "=", "+", "-", "/", "%",
+                    "!", "!=", "==", "<=", ">=",
+                    "=", "<", ">", "||", "&&",
+                    "|", ">>", "<<",
+                    (*above are standard stuff, you should recognize & * ? from below also*)
+                    "\\", "\\:", "|>", "<-", "->", "...",
+                    "~", "?", "&", "*", "`",
+                    "|=", "^=", "~=",
+                    ">>>", ">>|", ">>!", (* while continue break, continue and break can be given values to return matching scope return type *)
+                    "=>", "!>",
+                    "<@", "@", "@>", "@>>",
+                    ":", ",", ";",
+                    "#",
+
+(* Miscellaneous *)
+Comment           = LineComment | BlockComment.
+LineComment       = "//", { AnyChar }.
+BlockComment      = "/*", { AnyChar }, "*/".
+
+(* File Structure *)
+File              = { Declaration | UseStatement }.
+Declaration       = TypeDef | FunctionDecl | VariableDecl.
+VariableDecl      = Identifier, "=", Expression.
+UseStatement      = "use", String, Identifier.
+
+(* Enclosures *)
+Enclosure         = "(", Expression, ")" | "[", ListItems, "]" | Scope.
+        (*enclosers: &[("<", ">"), ("#<", ">"), ("$[","]")],*)
+ListItems         = { ",", Expression }.
+SetItems         = { { Expression, "," } "}".
