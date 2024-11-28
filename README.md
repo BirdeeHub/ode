@@ -158,8 +158,8 @@ If not mutable, they can recursively self-access
 `if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
-~ Ident { Pattern, [cond] => {}; }
-Ident ~ { Pattern, [cond] => {}; } // where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
+~ { Pattern, [cond] => {}; }
+// where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
 
 for iter \ k v {} OR for cond {}
 iter can also be something that implements iter
