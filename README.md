@@ -280,6 +280,9 @@ Send it back and execute it in order by passing it the world!
 
   // pretend the function act1 adds an exclamation point and act2 adds a second copy to the end:
 
+  // also you dont have to declare them as arguments if they will be in scope,
+  // because they are imutable functions and thus wont impact the immutability of our monad
+
   purefunc = \ action1:\ Option -> Option, action2:\ Option -> Option -> action1 |> action2;
 
   unres = unres act1 act2;
