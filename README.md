@@ -219,11 +219,11 @@ Scopes may only be declared anonymously. (Top level file scopes may be upvalued 
 
 If you were wishing you could do that, make some types... Its basically that
 
-lazyfib = \ n:int -> int: {
+lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> rec n;
   rec = \ num -> lazyfib (num-1)+(num-2);
 }
-lazyfib = \ n:int -> int: {
+lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
 
@@ -239,7 +239,7 @@ matchfib = \ n:int -> int:~{
 
 eagerfib = \ n:int -> int:`{
   n <= 1 => <- n;
-  <- eagerfib (n-1)+(n-2);
+  eagerfib (n-1)+(n-2)
 }
 
 eagerfib = \ n:int -> int:`{

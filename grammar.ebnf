@@ -42,11 +42,11 @@ PatternConstraints= Literal | ([[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+
 Argument          = Literal | Expression | Identifier | Pattern.
 
 (* Control Structures *)
-ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
-Loop              = Condition|Iter, ">>>", FnArgs, ScopeBody, ";".
-StreamIteration   = Stream|Actor, "@>>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
+ThenElse          = Condition, "=>", Scope, ["!>", Scope].
+Loop              = Condition|Iter, ">>>", FnArgs, ScopeBody.
+StreamIteration   = Stream|Actor, "@>>", FnArgs, ScopeBody. (* TODO: be more specific about FnArgs here *)
 SendToStream      = Stream|Actor, "<@", Expression.
-ResponsePattern   = Stream|Actor, "@>", FnArgs, ScopeBody, ";". (* TODO: be more specific about FnArgs here *)
+ResponsePattern   = Stream|Actor, "@>", FnArgs, ScopeBody. (* TODO: be more specific about FnArgs here *)
 
 (* Literals and Identifiers *)
 Literal           = Integer | String | Float | Boolean.
