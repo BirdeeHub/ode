@@ -20,6 +20,14 @@ fn read_file(file_path: &str) -> io::Result<String> {
 fn main() -> io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
 
+    let mut dassda:&i32 = &0;
+
+    dassda = &1;
+
+    println!("{:?}", dassda);
+
+    println!("{:?}", dassda);
+
     // Print all arguments
     println!("Arguments: {:?}", args);
 

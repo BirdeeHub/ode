@@ -271,10 +271,6 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 
 
 
-For monads, create a variable of a monad type, pass pure scopes world tranformers, and pipe can become bind ;)
-
-Send it back and execute it in order by passing it the world!
-
 ```
 Result<String>:`{
   
@@ -300,9 +296,9 @@ Result<String>:`{
 
   // unres still hasnt done anything.
 
-  myVal:` = "Hello"; <- you may not pass mutable references this way still
+  myVal:`& = "Hello"; <- ??????????????????????????????
 
-  myVal = unres Some(myVal)?; // returns immutable "Hello! Hello!" eagrly
+  myVal = unres Some(myVal)?; // returns "Hello! Hello!" eagrly
   res2 = unres None; // returns None eagerly
   // also I used the rust style question mark operator
   // which can be used on any enum with a default value (marked with an else !> before it)
