@@ -187,18 +187,18 @@ Hopefully I can fold stream iteration and actor message iteration and listening 
 err:Result<String> = pid <@ msg;
 
 response = pid @> \ msg -> ~ {
-  Ok(val) isFloat val => Ok val,
-  Ok(val) => Err "Wrong type! $[inspect(val)]",
-  Err(val) => Err "Execution Error: $[inspect(val)]",
-  Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
+  Ok(val) isFloat val => Ok val;
+  Ok(val) => Err "Wrong type! $[inspect(val)]";
+  Err(val) => Err "Execution Error: $[inspect(val)]";
+  Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]";
 };
 
 // stream iterator
 res = pid @>> \ Ok(msg), TTL(ttlval) -> ~ {
-  Ok(val) isFloat val => Ok val,
-  Ok(val) => Err "Wrong type! $[inspect(val)]",
-  Err(val) => Err "Execution Error: $[inspect(val)]",
-  TTL(val), ttlval > 5000 => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]",
+  Ok(val) isFloat val => Ok val;
+  Ok(val) => Err "Wrong type! $[inspect(val)]";
+  Err(val) => Err "Execution Error: $[inspect(val)]";
+  TTL(val), ttlval > 5000 => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]";
 };
 
 // argument specififications such as in match and fn decleration may reference earier arguments
