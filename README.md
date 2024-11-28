@@ -289,8 +289,8 @@ Argument          = Literal | Expression | Identifier.
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
-Loop              = ">>>", FnArgs, ScopeBody, ";".
-StreamIteration   = "@>>", FnArgs, ScopeBody, ";".
+Loop              = Condition, ">>>", FnArgs, ScopeBody, ";".
+StreamIteration   = Stream, "@>>", FnArgs, ScopeBody, ";".
 
 (* Literals and Identifiers *)
 Literal           = Integer | String | Float | Boolean.
