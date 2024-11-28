@@ -227,33 +227,33 @@ lazyfib = \ n:int -> int: {
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
 
-matchfib = \ n:int -> int: ~{
+matchfib = \ n:int -> int:~{
   0, n<0 => n;
   1 => n;
   eagerfib (n-1)+(n-2)
 }
-matchfib = \ n:int -> int: ~{
+matchfib = \ n:int -> int:~{
   , n<=1 => n;
   eagerfib (n-1)+(n-2)
 }
 
-eagerfib = \ n:int -> int: `{
+eagerfib = \ n:int -> int:`{
   n <= 1 => <- n;
   <- eagerfib (n-1)+(n-2);
 }
 
-eagerfib = \ n:int -> int: `{
+eagerfib = \ n:int -> int:`{
   n <= 1 => <- `{ n };
   <- eagerfib (n-1)+(n-2);
 }
 
 // NOTE: eagerfib cannot be these, because its calling <- within the scope
 // which would just return it from the if statement.
-eagerfib = \ n:int -> int: `{
+eagerfib = \ n:int -> int:`{
   n <= 1 => `{ <- n };
   <- eagerfib (n-1)+(n-2);
 }
-eagerfib = \ n:int -> int: `{
+eagerfib = \ n:int -> int:`{
   n <= 1 => `{ n };
   <- eagerfib (n-1)+(n-2);
 }
