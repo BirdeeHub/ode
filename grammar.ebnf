@@ -7,16 +7,17 @@ I have an actual yardstick to aim at for the parser.
 Again, currently, this EBNF is still a work in progress.
 *)
 (* Types and Declarations *)
-Constraint         = Identifier, "_=", "{", { Field, "," }, "}".
+Proto              = Identifier, "_=", "{", { Field, "," }, "}".
 Impl               = [GenericDecl], ["`",] Identifier, "^=", "{", { Assignment, ";" }, "}".
 Enum               = Identifier, "~=", "{", { EnumPattern, "," }, "}".
-EnumPattern        = Identifier, "(", TypeConstraints, ")".
-TypeConstraints    = [[Identifier,] "`", [ ("&" | "*" ,) ] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }.
+EnumPattern        = Identifier, "(", ProtoType, ")".
+ProtoType          = [[Identifier,] "`", [ ("&" | "*" ,) ] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }.
 GenericDecl        = "<", Generics, ">", ":".
-Generics           = { Identifier, ":", TypeConstraints [, "," ] }.
+Generics           = { Identifier, ":", ProtoType, [ "," ] }.
 Type               = [ [ Identifier , ]"`",["&"|"*",] ] [ Identifier, ] ":".
 
 (* Scopes *)
+Scope              = EagerScope | LazyScope | MatchScope.
 EagerScope         = [Type,] [ScopeType,] "{", [{Statement,";",}] Statement,[";"]"}", ";". (* TODO: ungeneralize Statement *)
 LazyScope          = [Type,] [ScopeType,] "{", [{Statement,";",}]"}", ";".
 MatchScope         = [Type,] [ScopeType,] "{", [[{[Pattern,][",",Expression],["=>",Expression],";"},] {[Pattern,][",",Expression,"=>",]Expression,[";"]} "}", ";".

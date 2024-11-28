@@ -226,6 +226,10 @@ lazyfib = \ n:int -> int:{
 lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
+// has sequenced scope but doesnt depend on outside mutable variables
+lazyfib = \ n:int -> int:`{
+  n <= 1 => n !> lazyfib (num-1)+(num-2)
+}
 
 matchfib = \ n:int -> int:~{
   0, n<0 => n;
@@ -237,50 +241,28 @@ matchfib = \ n:int -> int:~{
   eagerfib (n-1)+(n-2)
 }
 
-eagerfib = \ n:int -> int:`{
-  n <= 1 => <- n;
-  eagerfib (n-1)+(n-2)
-}
-
-eagerfib = \ n:int -> int:`{
-  n <= 1 => <- `{ n };
-  <- eagerfib (n-1)+(n-2);
-}
-
-// NOTE: eagerfib cannot be these, because its calling <- within the scope
-// which would just return it from the if statement.
-eagerfib = \ n:int -> int:`{
-  n <= 1 => `{ <- n };
-  <- eagerfib (n-1)+(n-2);
-}
-eagerfib = \ n:int -> int:`{
-  n <= 1 => `{ n };
-  <- eagerfib (n-1)+(n-2);
-}
-
 ```
 
-`\ args, list ->` This is an actual first class thing, it is a function that takes a scope.
+`\ args, list ->` This is an actual first class thing, it is a function that makes its value available until the next semicolon.
 
-The scope declared is either the ```[~`[:ret_type]]{}```  or until the next semicolon
+Scopes are declared as ```[~`[:ret_type]]{}```
 
-`~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms.
-It doesn't have `<-` and the last semicolon is optional, but including it or not doesnt change behavior.
+`\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
+It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
-`\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator. It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
+`<-` is return FROM CURRENT SCOPE.
+also return-returns the value if its return value was being collected,
+but this is usually irrelevant because it exits that scope.
+But this can come into play in mutable situations.
 
-mutable scopes behave like rust scopes `<-` is return
+mutable scopes behave like rust scopes
 
 immutable ones are executed lazily in the best order when needed and return is REQUIRED and can only be called once.
 
-All files can contain 1 top level anonymous non-typedef thing that the file can return. And then any number of `_=` `~=` `^` typedefs, named immutable functions, and immutable variables.
+All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `~=` `^` typedefs, and immutable variables (includes immutable functions).
 
 `val = use "name" file_descriptor` keyword will return the anonymous thing as val, and define the types, functions and constants under "name.thing";
 
-If the top level anonymous thing is a mutable scope, it is ran when the file `use`ing it is ran.
+All values from `name` will be accessible at any point in the file `use` was called within, because they must be static.
 
-It is likely not a good idea to do it a ton,
-because thats the only case when circular dependency matters.
-
-In all other cases it should be possible to declare the contents lazily without circular dependency causing much issue.
-
+For `val` it depends on the type, and behaves as normal. Mutable scopes execute at call site, and immutable scopes are executed when they are needed, etc...
