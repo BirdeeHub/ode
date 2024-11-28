@@ -257,7 +257,9 @@ But this can come into play in mutable situations.
 
 mutable scopes behave like rust scopes
 
-immutable ones are executed lazily in the best order when needed and return is REQUIRED and can only be called once.
+immutable ones are executed lazily in the best order when needed and returno
+Immutable scopes may only return immutable variables, and cannot use mutable variables from containing scopes.
+Return is REQUIRED and can only be called once.
 
 All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `~=` `^` typedefs, and immutable variables (includes immutable functions).
 
@@ -298,9 +300,9 @@ Result<String>:`{
 
   // unres still hasnt done anything.
 
-  myVal:`& = "Hello";
+  myVal:` = "Hello"; <- you may not pass mutable references this way still
 
-  res = unres Some(myVal)?; // returns "Hello! Hello!" eagrly
+  myVal = unres Some(myVal)?; // returns "Hello! Hello!" eagrly
   res2 = unres None; // returns None eagerly
   // also I used the rust style question mark operator
   // which can be used on any enum with a default value (marked with an else !> before it)
