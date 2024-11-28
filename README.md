@@ -268,7 +268,8 @@ MatchArms         = { Pattern, [",", Expression], ["=>", Expression], [";"] }.
 ScopeType         = "~"|[Identifier, ]"`"
 
 (* Functions *)  
-FnArgs            = "\", Parameters, "->".
+FnArgs            = RegFnArgs | InfixFnArgs.
+RegFnArgs         = "\", [GenericDecl ,] Parameters, "->".
 InfixFnArgs       = "\:", [GenericDecl ,] Parameters, "->".
 Parameters        = Parameter, { ",", Parameter }.
 Parameter         = Identifier, [":", Type, [":", DefaultValue]].
@@ -276,11 +277,10 @@ DefaultValue      = Literal | Expression.
 
 (* Statements *)
 Statement         = Expression | ReturnStatement.
-Expression        = Assignment | FunctionCall | Operation | MatchExpression.
+Expression        = Assignment | FunctionCall | Operation | Scope | FnArgs | Pattern.
 ReturnStatement   = "<-", Expression, ";".
 Assignment        = Identifier, "=", Expression.
 FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Argument, }.
-Argument          = Identifier, [":", Type, ["=", DefaultValue]].
 Operation         = Expression, Operator, Expression.
 Pattern           = Identifier, "(", PatternConstraints, ")".
 PatternConstraints= [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
