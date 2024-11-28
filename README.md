@@ -274,7 +274,7 @@ For monads, create a variable of a monad type, pass pure scopes world tranformer
 Send it back and execute it in order by passing it the world!
 
 ```
-`{
+Result<String>:`{
   
   // define monads for your pure types in eagerly executed contexts to control execution flow
 
@@ -289,11 +289,12 @@ Send it back and execute it in order by passing it the world!
 
   // unres still hasnt done anything.
 
-  res = unres Some("Hello"); // <- now it does (this is a mutable scope)
+  res = unres Some("Hello")?; // <- now it does (this is a mutable scope)
+  // also I used the rust style question mark operator
+  // which can be used on any enum with a default value (marked with an else !> before it)
+  // in order to return a Result type Err
 
-  print &res; // <- would print Hello! Hello!
-
-  res // <- return it I guess idk
+  Ok(res)
 
 }
 ```
