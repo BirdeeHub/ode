@@ -291,7 +291,7 @@ Result<String>:`{
 
   myVal:` = "Hello";
 
-  res = unres Some(myVal)?; // <- now it does (this is a mutable scope)
+  res = unres Some(myVal)?; // <- now it does (this is a mutable scope, and we passed it a mutable value)
   // also I used the rust style question mark operator
   // which can be used on any enum with a default value (marked with an else !> before it)
   // in order to return a Result type Err
