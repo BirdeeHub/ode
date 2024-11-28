@@ -285,7 +285,7 @@ Send it back and execute it in order by passing it the world!
 
   purefunc = \ action1:\ Option -> Option, action2:\ Option -> Option -> action1 |> action2;
 
-  unres = unres act1 act2;
+  unres = purefunc act1 act2;
 
   // unres still hasnt done anything.
 
