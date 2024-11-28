@@ -29,10 +29,11 @@ Tool _= {
   id:int,
 }
 Swingable _= {
-  \:swing &self, &thing:target -> bool,
+  swing = \: &self, &thing:target -> bool,
 }
 Breakable _= `{
-  `\:is_broken &self -> bool,
+  broken:`bool,
+  is_broken = `\: &self -> bool,
 }
 
 // enums can contain type constraints, or implemented types
@@ -50,13 +51,13 @@ ToolKind ~= `{
 },
 
 // an immutable generic set can implement immutable constraints
-UnbreakableHammer:Tool,Swingable,Eq = {
+UnbreakableHammer:Tool,Swingable,Eq ^= {
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
-  \:swing &self, &thing:target -> bool: {
+  swing = \: &self, &thing:target -> bool: {
     << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
     distance_from_target = thing.distance(self);
   },
-  \:eq &self, &thing:other -> bool: {
+  eq = \: &self, &thing:other -> bool: {
     << self.id == other.id;
   },
 }
@@ -69,7 +70,7 @@ Hammer:Swingable,Breakable,Eq ^= `{
   is_broken = \: &self -> bool: `{ // mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a `\:)
     broken // mutable scope can implicitly return at the end
   },
-  \:swing &self, &thing:target -> bool: thing.distance(self) < self.length,
+  swing = \: &self, &thing:target -> bool: thing.distance(self) < self.length,
   eq = \: &self, &thing:other -> bool: {
     << self.id == other.id
   },
