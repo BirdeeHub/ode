@@ -279,14 +279,14 @@ Statement         = Expression | ReturnStatement.
 Expression        = Assignment | FunctionCall | Operation | MatchExpression.
 ReturnStatement   = "<-", Expression, ";".
 Assignment        = Identifier, "=", Expression.
-FunctionCall      = Identifier, { " ", Argument, }.
+FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Argument, }.
 Argument          = Identifier, [":", Type, ["=", DefaultValue]].
 Operation         = Expression, Operator, Expression.
 Pattern           = Identifier, "(", TypeConstraints, ")".
 PatternConstr     = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
 
 (* Control Structures *)
-ThenElse          = Condition, "=>", ScopeBody, ["!>", ScopeBody], ";".
+ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
 Loop              = ">>>", FnArgs, ScopeBody, ";".
 
 (* Literals and Identifiers *)
@@ -294,12 +294,12 @@ Literal           = Integer | String | Float | Boolean.
 Identifier        = Letter, { Letter | Digit | "_" }.
 Operator          = "=", "+", "-", "/", "%", "||", "&&", "|",
                     ">>", "<<", "!", "!=", "==", "<=", ">=", "=",
-                    "\\", "\\:", "|>", "<-", "->",
+                    "\\", "\\:", "|>", "<-", "->", "...",
                     "=>", "!>",
                     "&", "*", "`",
-                    "|=", "^=", "~=", "...",
+                    "|=", "^=", "~=",
                     "~", "?",
-                    ">>>", ">>|", ">>!",
+                    ">>>", ">>|", ">>!", (* while continue break, continue and break can be given values to return matching scope return type *)
                     "<@", "@", "@>", "@>>",
                     ":", ",", ";",
                     "#",
@@ -313,10 +313,11 @@ BlockComment      = "/*", { AnyChar }, "*/".
 File              = { Declaration | UseStatement }.
 Declaration       = TypeDef | FunctionDecl | VariableDecl.
 VariableDecl      = Identifier, "=", Expression.
-UseStatement      = "use", String, "as", Identifier.
+UseStatement      = "use", String, Identifier.
 
 (* Enclosures *)
-Enclosure         = "(", Expression, ")" | "[", ListItems, "]" | "{", ScopeBody, "}".
-        (*enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("$[","]")],*)
-ListItems         = Expression, { ",", Expression }.
+Enclosure         = "(", Expression, ")" | "[", ListItems, "]" | Scope.
+        (*enclosers: &[("<", ">"), ("#<", ">"), ("$[","]")],*)
+ListItems         = { ",", Expression }.
+SetItems         = { ",", Expression }.
 ```
