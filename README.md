@@ -225,7 +225,7 @@ If you were wishing you could do that, make some types... Its basically that
 The scope declared is either the ```[~`[:ret_type]]{}```  or until the next semicolon
 
 `~` match is an operator on the next scope, it takes a thing to match on, can take an args list and match on one of the args at a time in arms.
-It doesnt have `<-` and the last semicolon is optional, but including it or not doesnt change behavior.
+It doesn't have `<-` and the last semicolon is optional, but including it or not doesnt change behavior.
 
 `\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator. It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
@@ -257,17 +257,18 @@ Constraint        = Identifier, "_=", "{", { Field, "," }, "}".
 Impl              = Identifier, "^=", "{", { Assignment, ";" }, "}".
 Enum              = Identifier, "~=", "{", { EnumPattern, "," }, "}".
 EnumPattern       = Identifier, "(", TypeConstraints, ")".
-TypeConstraints   = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
+TypeConstraints   = [[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }.
 GenericDecl       = "<", Generics, ">", ":".
 Generics          = { Identifier, ":", TypeConstraints [, "," ] }.
+Type              = [[Identifier,]"`",["&"|"*",] ] [ Identifier, ] ":".
 
 (* Scopes *)
-Scope             = [ GenericDecl,] [TypeConstraints, ] ":", [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
-ScopeBody         = { [ "<-",] Statement[, ";" ] }.
+Scope             = [ GenericDecl,] [Type,] [ScopeType, ] "{" ScopeBody|MatchArms "}", ";".
+ScopeBody         = { Statement[, ";" ] }.
 MatchArms         = { Pattern, [",", Expression], ["=>", Expression], [";"] }.
-ScopeType         = "~"|[Identifier, ]"`"
+ScopeType         = "~"|[Identifier,] "`".
 
-(* Functions *)  
+(* Functions *)
 FnArgs            = RegFnArgs | InfixFnArgs.
 RegFnArgs         = "\", [GenericDecl ,] Parameters, "->".
 InfixFnArgs       = "\:", [GenericDecl ,] Parameters, "->".
@@ -277,29 +278,33 @@ DefaultValue      = Literal | Expression.
 
 (* Statements *)
 Statement         = Expression | ReturnStatement.
-Expression        = Assignment | FunctionCall | Operation | Scope | FnArgs | Pattern.
-ReturnStatement   = "<-", Expression, ";".
-Assignment        = Identifier, "=", Expression.
+Expression        = Assignment | FunctionCall | Operation | Scope | FnArgs | Pattern | Loop | StreamIteration.
+ReturnStatement   = "<-", { Expression, ",", }.
+Assignment        = [GenericDecl,] [Type,] Identifier, "=", Expression.
 FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Argument, }.
 Operation         = Expression, Operator, Expression.
 Pattern           = Identifier, "(", PatternConstraints, ")".
-PatternConstraints= [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
+PatternConstraints= Literal | ([[Identifier,]"`",["&"|"*",] ] Identifier, { ( "+", Identifier ) | ( "|", Identifier ) }).
+Argument          = Literal | Expression | Identifier.
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
 Loop              = ">>>", FnArgs, ScopeBody, ";".
+StreamIteration   = "@>>", FnArgs, ScopeBody, ";".
 
 (* Literals and Identifiers *)
 Literal           = Integer | String | Float | Boolean.
 Identifier        = Letter, { Letter | Digit | "_" }.
-Operator          = "=", "+", "-", "/", "%", "||", "&&", "|",
-                    ">>", "<<", "!", "!=", "==", "<=", ">=", "=",
+Operator          = "=", "+", "-", "/", "%",
+                    "!", "!=", "==", "<=", ">=",
+                    "=", "<", ">", "||", "&&",
+                    "|", ">>", "<<",
+                    (*above are standard stuff, you should recognize & * ? from below also*)
                     "\\", "\\:", "|>", "<-", "->", "...",
-                    "=>", "!>",
-                    "&", "*", "`",
+                    "~", "?", "&", "*", "`",
                     "|=", "^=", "~=",
-                    "~", "?",
                     ">>>", ">>|", ">>!", (* while continue break, continue and break can be given values to return matching scope return type *)
+                    "=>", "!>",
                     "<@", "@", "@>", "@>>",
                     ":", ",", ";",
                     "#",
@@ -319,5 +324,5 @@ UseStatement      = "use", String, Identifier.
 Enclosure         = "(", Expression, ")" | "[", ListItems, "]" | Scope.
         (*enclosers: &[("<", ">"), ("#<", ">"), ("$[","]")],*)
 ListItems         = { ",", Expression }.
-SetItems         = { ",", Expression }.
+SetItems         = { { Expression, "," } "}".
 ```
