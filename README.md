@@ -282,8 +282,8 @@ Assignment        = Identifier, "=", Expression.
 FunctionCall      = Identifier, { { " " | "\n" | "\t" | "\r" | "\f" | "\b" }, Argument, }.
 Argument          = Identifier, [":", Type, ["=", DefaultValue]].
 Operation         = Expression, Operator, Expression.
-Pattern           = Identifier, "(", TypeConstraints, ")".
-PatternConstr     = [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
+Pattern           = Identifier, "(", PatternConstraints, ")".
+PatternConstraints= [[Identifier,]"`",["&",] ] Identifier, { "+", Identifier } | Identifier, { "|", Identifier }.
 
 (* Control Structures *)
 ThenElse          = Condition, "=>", Scope, ["!>", Scope], ";".
