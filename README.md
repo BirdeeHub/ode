@@ -285,12 +285,12 @@ Result<String>:`{
   // also you dont have to declare them as arguments if they will be in scope,
   // because they are imutable functions and thus wont impact the immutability of our monad
 
-  action1 = \ val:Option<String> -> Option: ~{
-    Some(val) => Some (val+"!");
+  action1 = \ val:Option<String> -> Option: val ~{
+    Some(v) => Some (v+"!");
     None
   }
-  action2 = \ val:Option<String> -> Option: ~{
-    Some(val) => Some (val+val);
+  action2 = \ val:Option<String> -> Option: val ~{
+    Some(v) => Some (v+v);
     None
   }
 
