@@ -294,7 +294,7 @@ Result<String>:`{
     None
   }
 
-  purefunc = \ x:bool -> Option -> ~{ true => action1 |> action2; action2 |> action1; };
+  purefunc = \ x:bool -> Option -> { <- ~{ true => action1 |> action2; action2 |> action1; } };
 
   unres = purefunc true;
 
@@ -302,7 +302,7 @@ Result<String>:`{
 
   myVal:` = "Hello"; <- you may not pass mutable references this way still
 
-  myVal = unres Some(myVal)?; // returns "Hello! Hello!" eagrly
+  myVal = unres Some(myVal)?; // returns immutable "Hello! Hello!" eagrly
   res2 = unres None; // returns None eagerly
   // also I used the rust style question mark operator
   // which can be used on any enum with a default value (marked with an else !> before it)
