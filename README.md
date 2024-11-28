@@ -223,6 +223,9 @@ lazyfib = \ n:int -> int: {
   <- n <= 1 => n !> rec n;
   rec = \ num -> lazyfib (num-1)+(num-2);
 }
+lazyfib = \ n:int -> int: {
+  <- n <= 1 => n !> lazyfib (num-1)+(num-2);
+}
 
 matchfib = \ n:int -> int: ~{
   0, n<0 => n;
