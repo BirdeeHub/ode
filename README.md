@@ -218,6 +218,10 @@ Scopes may only be declared anonymously. (Top level file scopes may be upvalued 
 
 If you were wishing you could do that, make some types... Its basically that
 
+lazyfib = \ n:int -> int: {
+  <- (n<=1) => n !> lazyfib (n - 1) + (n -2);
+}
+
 ```
 
 `\ args, list ->` This is an actual first class thing, it is a function that takes a scope.
