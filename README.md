@@ -283,16 +283,16 @@ Result<String>:`{
   // also you dont have to declare them as arguments if they will be in scope,
   // because they are imutable functions and thus wont impact the immutability of our monad
 
-  action1 = \ val:Option<String> -> Option ~{
+  action1 = \ val:Option<String> -> Option: ~{
     Some(val) => Some (val+"!");
     None
   }
-  action2 = \ val:Option<String> -> Option ~{
+  action2 = \ val:Option<String> -> Option: ~{
     Some(val) => Some (val+val);
     None
   }
 
-  purefunc = \ x:bool -> Option -> ~{ true => action1 |> action2; action2 |> action1; };
+  purefunc = \ x:bool -> Option: ~{ true => action1 |> action2; action2 |> action1; };
 
   unres = purefunc true;
 
