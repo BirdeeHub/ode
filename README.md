@@ -274,13 +274,6 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 ```
 Result<String>:`{
   
-  // define monads for your pure types in eagerly executed contexts to control execution flow
-
-  // pretend the function act1 adds an exclamation point and act2 adds a second copy to the end:
-
-  // also you dont have to declare them as arguments if they will be in scope,
-  // because they are imutable functions and thus wont impact the immutability of our monad
-
   action1 = \ val:Option<String> -> Option: val ~{
     Some(v) => Some (v+"!");
     None
@@ -290,19 +283,19 @@ Result<String>:`{
     None
   }
 
-  purefunc = \ x:bool -> Option -> { <- ~{ true => action1 |> action2; action2 |> action1; } };
+  purefunc = \ x:bool -> Option -> {
+    <- ~{
+      true => action1 |> action2;
+      action2 |> action1;
+    };
+  };
 
   unres = purefunc true;
 
-  // unres still hasnt done anything.
+  myVal:`& = "Hello";
 
-  myVal:`& = "Hello"; <- ??????????????????????????????
-
-  myVal = unres Some(myVal)?; // returns "Hello! Hello!" eagrly
-  res2 = unres None; // returns None eagerly
-  // also I used the rust style question mark operator
-  // which can be used on any enum with a default value (marked with an else !> before it)
-  // and returns the value
+  myVal = unres Some(myVal)?;
+  res2 = unres None;
 
   Ok(res)
 
