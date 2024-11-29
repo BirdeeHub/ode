@@ -283,10 +283,10 @@ Result<String>:`{
     None
   }
 
-  purefunc = \ x:bool -> Option -> {
+  purefunc = \ x:bool -> Option: {
     <- ~{
       true => action1 |> action2;
-      action2 |> action1;
+      action2 |> action1
     };
   };
 
