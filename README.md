@@ -294,13 +294,13 @@ Option<String>:`{
 
   myVal:`& = "Hello";
 
-  myVal = unres Some(myVal)?;
+  res = unres Some(myVal)?;
 
-  Some(myVal)
+  Some(res)
 
 }
 what happens here? This is kinda a problem.
-is myVal lazy or eager? Is it mutable?
+is res lazy or eager? Is it mutable?
 What if the inner immutable transformations contain mutable scopes which got your ref and changed it?
 I think I need to find something different from borrow checking.
 
