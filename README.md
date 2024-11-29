@@ -294,7 +294,7 @@ Result<String>:`{
 
   myVal:`& = "Hello";
 
-  myVal = unres Some(myVal)?;
+  myVal = unres Some(myVal)?; // <-- what happens here?
   res2 = unres None;
 
   Ok(res)
