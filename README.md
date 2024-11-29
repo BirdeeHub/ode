@@ -295,19 +295,20 @@ Result<String>:`{
   myVal:`& = "Hello";
 
   myVal = unres Some(myVal)?;
-  // what happens here? This is kinda a problem.
-  // is myVal lazy or eager? Is it mutable?
-  // What if the inner immutable transformations contain mutable scopes which got your ref and changed it?
-  // I think I need to find something different from borrow checking.
-  // The above example would be fine, because the resulting string is a different one now,
-  // but it would be possible to create an internal mutable scope and mutate it...
-  // I only like this whole scoping operations idea if I can still make mutable scopes in immutable ones.
-
-  // So its the memory model for mutable variables that has to change from borrow checking to something else.
-  // or maybe I need to make it so that you cant change the scope of a mutable variable without defining a linear type for it,
-  // and then making a nice way for doing that?
 
   Ok(res)
 
 }
+what happens here? This is kinda a problem.
+is myVal lazy or eager? Is it mutable?
+What if the inner immutable transformations contain mutable scopes which got your ref and changed it?
+I think I need to find something different from borrow checking.
+
+The above example would be fine, because the resulting string is a different one now,
+but it would be possible to create an internal mutable scope and mutate it...
+
+I only like this whole scoping operations idea if I can still make mutable scopes in immutable ones.
+So its the memory model for mutable variables that has to change from borrow checking to something else.
+or maybe I need to make it so that you cant change the scope of a mutable variable without defining a linear type for it,
+and then making a nice way for doing that?
 ```
