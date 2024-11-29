@@ -294,8 +294,13 @@ Result<String>:`{
 
   myVal:`& = "Hello";
 
-  myVal = unres Some(myVal)?; // <-- what happens here?
-  res2 = unres None;
+  myVal = unres Some(myVal)?;
+  // what happens here? This is kinda a problem.
+  // is myVal lazy or eager? Is it mutable?
+  // What if the inner immutable transformations contain mutable scopes which got your ref and changed it?
+  // I think I need to find something different from borrow checking.
+  // The above example would be fine, because the resulting string is a different one now,
+  // but it would be possible to create an internal mutable scope and mutate it...
 
   Ok(res)
 
