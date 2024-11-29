@@ -301,6 +301,8 @@ Result<String>:`{
   // I think I need to find something different from borrow checking.
   // The above example would be fine, because the resulting string is a different one now,
   // but it would be possible to create an internal mutable scope and mutate it...
+  // I only like this whole scoping operations idea if I can still make mutable scopes in immutable ones.
+  // So its the memory model for mutable variables that has to change from borrow checking to something else.
 
   Ok(res)
 
