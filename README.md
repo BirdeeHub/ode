@@ -272,7 +272,7 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 
 
 ```
-Result<String>:`{
+Option<String>:`{
   
   action1 = \ val:Option<String> -> Option: val ~{
     Some(v) => Some (v+"!");
@@ -296,7 +296,7 @@ Result<String>:`{
 
   myVal = unres Some(myVal)?;
 
-  Ok(res)
+  Some(myVal)
 
 }
 what happens here? This is kinda a problem.
