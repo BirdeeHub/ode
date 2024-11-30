@@ -293,8 +293,10 @@ Option<String>:`{
   unres = purefunc true;
 
   myVal:`& = "Hello";
-
-  res = unres Some(myVal)?; // I think this is a compiler error. Mutable Some type to an immutable function.
+  // I think this is a compiler error. Mutable Some type to an immutable function.
+  // Its fine if you move the value though...
+  // So, maybe we require all mutable values passed to an immutable function to be moved
+  res = unres Some(myVal)?;
 
   Some(res)
 
