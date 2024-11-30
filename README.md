@@ -294,7 +294,7 @@ Option<String>:`{
 
   myVal:`& = "Hello";
 
-  res = unres Some(myVal)?;
+  res = unres Some(myVal)?; // I think this is a compiler error. Mutable Some type to an immutable function.
 
   Some(res)
 
