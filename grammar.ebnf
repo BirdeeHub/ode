@@ -21,7 +21,7 @@ Scope              = EagerScope | LazyScope | MatchScope.
 EagerScope         = [Type,] [ScopeType,] "{", [{Statement,";",}] Statement,[";"]"}", ";". (* TODO: ungeneralize Statement *)
 LazyScope          = [Type,] [ScopeType,] "{", [{Statement,";",}]"}", ";".
 MatchScope         = [Type,] [ScopeType,] "{", [[{[Pattern,][",",Expression],["=>",Expression],";"},] {[Pattern,][",",Expression,"=>",]Expression,[";"]} "}", ";".
-ScopeType          = "~"|[ Identifier,]"`".
+ScopeType          = "#"|[ Identifier,]"~".
 
 (* Functions *)
 FnArgs             = RegFnArgs | InfixFnArgs.

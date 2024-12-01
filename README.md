@@ -18,7 +18,7 @@ But the idea is cool, I was forced to. An ode to an idea I guess.
 
 ```
 
-mutability operator: `
+mutability operator: ~
 shadowing is allowed in interior scopes but not in the same scope.
 
 type constraints can contain mixed functions and types if desired
@@ -31,13 +31,13 @@ Tool _= {
 Swingable _= {
   swing = \: &self, &thing:target -> bool,
 }
-Breakable _= `{
-  broken:`bool,
-  is_broken = `\: &self -> bool,
+Breakable _= ~{
+  broken:~bool,
+  is_broken = ~\: &self -> bool,
 }
 
 // enums can contain type constraints, or implemented types
-ToolKind ~= `{
+ToolKind ~= ~{
   IndestructibleHmmr(Tool+Swingable), // + for and | for or
   Hmmr(Tool+Swingable+Breakable),
   Hmr(Hammer),
@@ -45,7 +45,7 @@ ToolKind ~= `{
 
 // Generics come first in <> followed by a type separator
 
-<T, `U:Tool>:GenericTypeStruct _= {
+<T, ~U:Tool>:GenericTypeStruct _= {
   meta:T,
   item:U,
 },
@@ -64,10 +64,10 @@ UnbreakableHammer:Tool,Swingable,Eq ^= {
 
 // an mutable impl block can implement immutable and mutable constraints
 // and may create both immutable and mutable values
-Hammer:Swingable,Breakable,Eq ^= `{
+Hammer:Swingable,Breakable,Eq ^= ~{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
-  `broken = false, // <-- mutable impl can initialize values if desired
-  is_broken = \: &self -> bool: `{ // mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a `\:)
+  ~broken = false, // <-- mutable impl can initialize values if desired
+  is_broken = \: &self -> bool: ~{ // mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a ~\:)
     broken // mutable scope can implicitly return at the end
   },
   swing = \: &self, &thing:target -> bool: thing.distance(self) < self.length,
@@ -85,10 +85,10 @@ mace:Hammer = { weight = 10, length = 20, };
 fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 infix fn syntax: myfn = \: named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
-mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
+mutable fn syntax: myfn = ~\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type:] { body }
 
-greet = \ followup:&str, name:&str, greeting:&str:"Hello" -> String: `{
+greet = \ followup:&str, name:&str, greeting:&str:"Hello" -> String: ~{
   "$[greeting], $[name]! $[followup]!"
 }
 
@@ -98,7 +98,7 @@ greetAmy = greeting "Amy";
 
 println greetAmy;
 
-greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: `{ // if this were infix, \:<T>: instead of \<T>:
+greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: ~{ // if this were infix, \:<T>: instead of \<T>:
   "$[greeting], $[name]!"
 } "Wazzup");
 
@@ -106,16 +106,16 @@ greetJosh = greeting2 "Josh";
 
 println joshGreet;
 
-// `mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
+// ~mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
 
-`personname="James";
-greeting3 = `\ greeting:&str -> String: `{
+~personname="James";
+greeting3 = ~\ greeting:&str -> String: ~{
   "$[greeting], $[personname]!"
 };
 println (greeting3 "Hi");
 
 personname="Mrowwwwwww!";
-`greetOphelia = greeting3 "AAAAHHHH!!";
+~greetOphelia = greeting3 "AAAAHHHH!!";
 println greetOphelia;
 
 functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
@@ -155,7 +155,7 @@ generic sets can be made with { sdadsa = sdasdadas[,] }
 differentiated from block by using , instead of ; (if no trailing , the last line has = whereas in a scope it either needs a semicolon, or wouldnt have an =)
 If not mutable, they can recursively self-access
 
-`if cond then val else val end` is: cond => {} >> {}
+~if cond then val else val end` is: cond => {} >> {}
 `if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
 
 ~ { Pattern, [cond] => {}; }
@@ -168,7 +168,7 @@ for list \ k v {}
 infer types where possible
 
 Immutable should be reference counted
-Mutable should be borrow-checked, if lifetime is required it goes before the ` (mutability operator)
+Mutable should be borrow-checked, if lifetime is required it goes before the ~ (mutability operator)
 which is always at the beginning of the type, or name if type is inferred.
 
 rust result/options and multiple returns
@@ -227,7 +227,7 @@ lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
 // has sequenced scope but doesnt depend on outside mutable variables
-lazyfib = \ n:int -> int:`{
+lazyfib = \ n:int -> int:~{
   n <= 1 => n !> lazyfib (num-1)+(num-2)
 }
 
@@ -243,11 +243,11 @@ matchfib = \ n:int -> int:~{
 
 ```
 
-`\ args, list ->` This is an actual first class thing, it is a function that makes its value available until the next semicolon.
+`~\ args, list ->` This is an actual first class thing, it is a function that makes its value available until the next semicolon.
 
-Scopes are declared as ```[~`[:ret_type]]{}```
+Scopes are declared as ```[ret_type][~|#]{}```
 
-`\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
+`\~` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
 It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
 `<-` is return FROM CURRENT SCOPE.
@@ -261,7 +261,7 @@ immutable ones are executed lazily in the best order when needed and returno
 Immutable scopes may only return immutable variables, and cannot use mutable variables from containing scopes.
 Return is REQUIRED and can only be called once.
 
-All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `~=` `^` typedefs, and immutable variables (includes immutable functions).
+All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `#=` `^=` typedefs, and immutable variables (includes immutable functions).
 
 `val = use "name" file_descriptor` keyword will return the anonymous thing as val, and define the types, functions and constants under "name.thing";
 
@@ -292,7 +292,7 @@ Option<String>:`{
 
   unres = purefunc true;
 
-  myVal:`& = "Hello";
+  myVal:~& = "Hello";
   // I think this is a compiler error. Mutable Some type to an immutable function.
   // Its fine if you move the value though...
   // So, maybe we require all mutable values passed to an immutable function to be moved

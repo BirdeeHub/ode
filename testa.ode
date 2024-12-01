@@ -6,12 +6,12 @@ Tool _= {
 Swingable _= {
   \:swing &self, &thing:target -> bool,
 }
-Breakable _= `{
-  `\:is_broken &self -> bool,
+Breakable _= ~{
+  ~\:is_broken &self -> bool,
 }
 
 // enums can contain type constraints, or implemented types
-Tool =| `{
+Tool #= ~{
   IndestructibleHmmr(Tool:Swingable),
   Hmmr(Tool:Swingable:Breakable),
 }
@@ -30,15 +30,15 @@ UnbreakableHammer:Tool,Swingable,Eq ^= {
 
 // an mutable impl block can implement immutable and mutable constraints
 // and may create both immutable and mutable values
-Hammer:Swingable,Breakable,Eq ^= `{
+Hammer:Swingable,Breakable,Eq ^= ~{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
-  broken `= false,
-  `\:is_broken &self -> bool: {
+  broken ~= false,
+  ~\:is_broken &self -> bool: {
     broken // mutable scope can implicitly return at the end
   },
   \:swing &self, &thing:target -> bool: thing.distance(self) < self.length,
   \:eq &self, &thing:other -> bool: {
-    << self.id == other.id
+    <- self.id == other.id
   },
 }
 
