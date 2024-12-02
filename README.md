@@ -37,7 +37,7 @@ Breakable _= ~{
 }
 
 // enums can contain type constraints, or implemented types
-ToolKind ~= ~{
+ToolKind #= ~{
   IndestructibleHmmr(Tool+Swingable), // + for and | for or
   Hmmr(Tool+Swingable+Breakable),
   Hmr(Hammer),
