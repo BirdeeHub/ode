@@ -16,7 +16,7 @@ But the idea is cool, I was forced to. An ode to an idea I guess.
 
 ### Planning notes:
 
-```
+```hs
 
 mutability operator: ~
 shadowing is allowed in interior scopes but not in the same scope.
@@ -72,7 +72,7 @@ Hammer:Swingable,Breakable,Eq ^= ~{
   },
   swing = \: &self, &thing:target -> bool: thing.distance(self) < self.length,
   eq = \: &self, &thing:other -> bool: {
-    << self.id == other.id
+    <- self.id == other.id
   },
 }
 
@@ -117,6 +117,8 @@ println (greeting3 "Hi");
 personname="Mrowwwwwww!";
 ~greetOphelia = greeting3 "AAAAHHHH!!";
 println greetOphelia;
+
+```
 
 functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
 if they return a mutable value their return value will retain its mutability
@@ -180,6 +182,8 @@ mutable scopes can spawn an actor with pid = node @ function varargs...
 // where node is an instance of Node which defines message types and timeout value and other stuff
 
 Hopefully I can fold stream iteration and actor message iteration and listening into these @ operators.
+
+```hs
 
 >>> is simple while loop and can also take an ordinary iterator.
 @>> produces and loops over a stream iterator from a stream/actor message queue
