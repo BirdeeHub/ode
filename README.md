@@ -279,11 +279,11 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 ```hs
 Option<String>:~{
   
-  action1 = \ val:Option<String> -> Option: val ~{
+  action1 = \ val:Option<String> -> Option: val #{
     Some(v) => Some (v+"!");
     None
   }
-  action2 = \ val:Option<String> -> Option: val ~{
+  action2 = \ val:Option<String> -> Option: val #{
     Some(v) => Some (v+v);
     None
   }
