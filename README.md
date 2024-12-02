@@ -248,7 +248,7 @@ matchfib = \ n:int -> int:~{
 
 ```
 
-`~\ args, list ->` This is an actual first class thing, it is a function that makes its value available until the next semicolon.
+`\ args, list ->` This is an actual first class thing, it is a function that makes its value available until the next semicolon.
 
 Scopes are declared as ```[ret_type][~|#]{}```
 
