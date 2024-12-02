@@ -157,15 +157,16 @@ generic sets can be made with { sdadsa = sdasdadas[,] }
 differentiated from block by using , instead of ; (if no trailing , the last line has = whereas in a scope it either needs a semicolon, or wouldnt have an =)
 If not mutable, they can recursively self-access
 
-~if cond then val else val end` is: cond => {} >> {}
-`if cond then val else if cond then val else val end` is: cond => {} >>> cond => {}
+`if cond then val else val end` is: `cond => {} !> {}`
 
-~ { Pattern, [cond] => {}; }
+No else if. Use match for that.
+
+`#{ Pattern, [cond] => {}; }`
 // where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
 
-for iter \ k v {} OR for cond {}
+`for iter \ k v {} OR for cond {}`
 iter can also be something that implements iter
-for list \ k v {}
+`for list \ k v {}`
 
 infer types where possible
 
