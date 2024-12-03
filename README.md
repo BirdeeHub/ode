@@ -191,7 +191,7 @@ Hopefully I can fold stream iteration and actor message iteration and listening 
 
 err:Result<String> = pid <@ msg;
 
-response = pid @> \ msg -> ~ {
+response = pid @> \ msg -> # {
   Ok(val) isFloat val => Ok val;
   Ok(val) => Err "Wrong type! $[inspect(val)]";
   Err(val) => Err "Execution Error: $[inspect(val)]";
@@ -199,7 +199,7 @@ response = pid @> \ msg -> ~ {
 };
 
 // stream iterator
-res = pid @>> \ Ok(msg), TTL(ttlval) -> ~ {
+res = pid @>> \ Ok(msg), TTL(ttlval) -> # {
   Ok(val) isFloat val => Ok val;
   Ok(val) => Err "Wrong type! $[inspect(val)]";
   Err(val) => Err "Execution Error: $[inspect(val)]";
@@ -236,23 +236,23 @@ lazyfib = \ n:int -> int:~{
   n <= 1 => n !> lazyfib (num-1)+(num-2)
 }
 
-matchfib = \ n:int -> int:~{
+matchfib = \ n:int -> int:#{
   0, n<0 => n;
   1 => n;
   eagerfib (n-1)+(n-2)
 }
-matchfib = \ n:int -> int:~{
+matchfib = \ n:int -> int:#{
   , n<=1 => n;
   eagerfib (n-1)+(n-2)
 }
 
 ```
 
-`\ args, list ->` This is an actual first class thing, it represents a closure, and its args are defined for the following expression.
+`\ args, list -> [ret_type:]` This is an actual first class thing, it represents a closure, and its args are defined for the following expression.
 
 Scopes are declared as ```[ret_type][~|#]{}```
 
-`\~` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
+`~` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
 It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
 `<-` is return FROM CURRENT SCOPE.
