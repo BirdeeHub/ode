@@ -37,8 +37,8 @@ Breakable _= ~{
 }
 
 -- enums can contain type constraints, or implemented types
-ToolKind #= ~{
-  IndestructibleHmmr(Tool+Swingable), // + for and | for or
+ToolKind #= { -- they never need to be marked as mutable because the enumeration is unchangeable, regardless of the mutability of the values.
+  IndestructibleHmmr(Tool+Swingable), -- + for and | for or
   Hmmr(Tool+Swingable+Breakable),
   Hmr(Hammer),
 }
@@ -52,23 +52,24 @@ ToolKind #= ~{
 
 -- an immutable generic set can implement immutable constraints
 UnbreakableHammer:Tool,Swingable,Eq ^= {
-  id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
+  id = random(), -- <-- immutable, so this would be ran when the struct is initialized, not now.
   swing = \: &self, &thing:target -> bool: {
-    << distance_from_target < self.length; // immutable scopes require return because they are not ordered.
+    <- distance_from_target < self.length; -- immutable scopes require return because they are not ordered.
     distance_from_target = thing.distance(self);
   },
   eq = \: &self, &thing:other -> bool: {
-    << self.id == other.id;
+    <- self.id == other.id;
   },
 }
 
 -- an mutable impl block can implement immutable and mutable constraints
--- and may create both immutable and mutable values
+-- and may contain compile time constants
 Hammer:Swingable,Breakable,Eq ^= ~{
-  id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
-  ~broken = false, // <-- mutable impl can initialize values if desired
-  is_broken = \: &self -> bool: ~{ // mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a ~\:)
-    broken // mutable scope can implicitly return at the end
+  new = \: weight:int, length:int -> Hammer: ~{
+    { weight = 10, length = 20, id = random(), broken = false, }
+  };
+  is_broken = \: &self -> bool: ~{ -- mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a ~\:)
+    broken -- mutable scope can implicitly return at the end
   },
   swing = \: &self, &thing:target -> bool: thing.distance(self) < self.length,
   eq = \: &self, &thing:other -> bool: {
@@ -76,7 +77,9 @@ Hammer:Swingable,Breakable,Eq ^= ~{
   },
 }
 
-mace:Hammer = { weight = 10, length = 20, };
+mace:Hammer = { weight = 10, length = 20, id = random(), broken = false, };
+
+carpenters = Hammer.new(10,20);
 
 -- You must create values of types by assignment, or by creating a new function that returns it
 -- Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
