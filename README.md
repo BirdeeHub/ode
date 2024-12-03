@@ -291,14 +291,14 @@ Option<String>:~{
     None
   }
 
-  purefunc = \ x:bool -> Option -> Option:~{
+  unpurefunc = \ x:bool -> Option -> Option:~{
     <- x #{
       true => action1 |> action2;
       action2 |> action1;
     };
   };
 
-  unres = purefunc true;
+  unres = unpurefunc true;
 
   myVal:~ = "Hello";
   res = unres Some(&myVal)?;
@@ -319,7 +319,7 @@ Option<String>:~{
     None
   }
 
-  purefunc = \ x:bool -> Option -> Option:~{
+  purefunc = \ x:bool -> Option -> Option:{ -- now this can be an immutable scope that evaluates lazily
     <- x #{
       true => action1 |> action2;
       action2 |> action1;
