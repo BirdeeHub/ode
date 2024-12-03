@@ -201,7 +201,7 @@ response = pid @> \ msg -> # {
   Time(val) => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]";
 };
 
-// stream iterator
+-- stream iterator
 res = pid @>> \ Ok(msg), TTL(ttlval) -> # {
   Ok(val) isFloat val => Ok val;
   Ok(val) => Err "Wrong type! $[inspect(val)]";
@@ -234,7 +234,7 @@ lazyfib = \ n:int -> int:{
 lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
-// has sequenced scope but doesnt depend on outside mutable variables
+-- has sequenced scope but doesnt depend on outside mutable variables
 lazyfib = \ n:int -> int:~{
   n <= 1 => n !> lazyfib (num-1)+(num-2)
 }
