@@ -36,21 +36,21 @@ Breakable _= ~{
   is_broken = ~\: &self -> bool,
 }
 
-// enums can contain type constraints, or implemented types
+-- enums can contain type constraints, or implemented types
 ToolKind #= ~{
   IndestructibleHmmr(Tool+Swingable), // + for and | for or
   Hmmr(Tool+Swingable+Breakable),
   Hmr(Hammer),
 }
 
-// Generics come first in <> followed by a type separator
+-- Generics come first in <> followed by a type separator
 
 <T, ~U:Tool>:GenericTypeStruct _= {
   meta:T,
   item:U,
 },
 
-// an immutable generic set can implement immutable constraints
+-- an immutable generic set can implement immutable constraints
 UnbreakableHammer:Tool,Swingable,Eq ^= {
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   swing = \: &self, &thing:target -> bool: {
@@ -62,8 +62,8 @@ UnbreakableHammer:Tool,Swingable,Eq ^= {
   },
 }
 
-// an mutable impl block can implement immutable and mutable constraints
-// and may create both immutable and mutable values
+-- an mutable impl block can implement immutable and mutable constraints
+-- and may create both immutable and mutable values
 Hammer:Swingable,Breakable,Eq ^= ~{
   id = random(), // <-- immutable, so this would be ran when the struct is initialized, not now.
   ~broken = false, // <-- mutable impl can initialize values if desired
@@ -78,8 +78,8 @@ Hammer:Swingable,Breakable,Eq ^= ~{
 
 mace:Hammer = { weight = 10, length = 20, };
 
-// You must create values of types by assignment, or by creating a new function that returns it
-// Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
+-- You must create values of types by assignment, or by creating a new function that returns it
+-- Likely I will make a constraint that can be implemented by implementing `new` to allow typename to be callable as function with a set as argument
 
 [] indicates optional in these snippets
 fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
@@ -98,7 +98,7 @@ greetAmy = greeting "Amy";
 
 println greetAmy;
 
-greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: ~{ // if this were infix, \:<T>: instead of \<T>:
+greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: ~{ -- if this were infix, \:<T>: instead of \<T>:
   "$[greeting], $[name]!"
 } "Wazzup");
 
@@ -106,7 +106,7 @@ greetJosh = greeting2 "Josh";
 
 println joshGreet;
 
-// ~mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
+-- ~mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
 
 ~personname="James";
 greeting3 = ~\ greeting:&str -> String: ~{
@@ -162,7 +162,7 @@ If not mutable, they can recursively self-access
 No else if. Use match for that.
 
 `#{ Pattern, [cond] => {}; }`
-// where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
+where Pattern is a rust-style match case or _, although I also want to be able to | and & or types, although & will be + because you cant add things in type declarations but you can reference
 
 `for iter \ k v {} OR for cond {}`
 iter can also be something that implements iter
@@ -180,7 +180,7 @@ Immutable will be lazy.
 Actors are parallelized, and are given a world type defined by the Node instance that they can use in their init scope.
 
 mutable scopes can spawn an actor with pid = node @ function varargs...
-// where node is an instance of Node which defines message types and timeout value and other stuff
+where node is an instance of Node which defines message types and timeout value and other stuff
 
 Hopefully I can fold stream iteration and actor message iteration and listening into these @ operators.
 
@@ -206,9 +206,9 @@ res = pid @>> \ Ok(msg), TTL(ttlval) -> ~ {
   TTL(val), ttlval > 5000 => Err "TIMED OUT after $[val.timeout]. Total runtime of actor: $[val.running_time]";
 };
 
-// argument specififications such as in match and fn decleration may reference earier arguments
+-- argument specififications such as in match and fn decleration may reference earier arguments
 
-// A typematch is to be an actual type.
+-- A typematch is to be an actual type.
 
 file structure.
 
@@ -279,17 +279,17 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 ```hs
 Option<String>:~{
   
-  action1 = \ val:Option<String> -> Option: val #{
+  action1 = ~\ val:Option<~&str> -> Option: val #{
     Some(v) => Some (v+"!");
     None
   }
-  action2 = \ val:Option<String> -> Option: val #{
+  action2 = ~\ val:Option<~&str> -> Option: val #{
     Some(v) => Some (v+v);
     None
   }
 
-  purefunc = \ x:bool -> Option -> Option:{
-    <- x ~{
+  purefunc = \ x:bool -> Option -> Option:~{
+    <- x #{
       true => action1 |> action2;
       action2 |> action1;
     };
@@ -297,16 +297,46 @@ Option<String>:~{
 
   unres = purefunc true;
 
-  myVal:~& = "Hello";
-  // I think this is a compiler error. Mutable Some type to an immutable function.
-  // Its fine if you move the value though...
-  // So, maybe we require all mutable values passed to an immutable function to be moved
+  myVal:~ = "Hello";
+  res = unres Some(&myVal)?;
+
+  Some(res)
+
+}
+```
+```hs
+Option<String>:~{
+  
+  action1 = \ val:Option<~String> -> Option: val #{
+    Some(v) => Some (v+"!");
+    None
+  }
+  action2 = \ val:Option<~String> -> Option: val #{ -- immutable functions can have mutable args if they are moved in
+    Some(v) => Some (v+v);
+    None
+  }
+
+  purefunc = \ x:bool -> Option -> Option:~{
+    <- x #{
+      true => action1 |> action2;
+      action2 |> action1;
+    };
+  };
+
+  unres = purefunc true;
+
+  myVal:~ = "Hello";
   res = unres Some(myVal)?;
 
   Some(res)
 
 }
 ```
+I think this is a compiler error if purefunc is an immutable function.
+Mutable Option type to an immutable function.
+Its fine if you move the value though...
+So, maybe we require all mutable values passed to an immutable function to be moved
+
 what happens here? This is kinda a problem.
 is res lazy or eager? Is it mutable?
 

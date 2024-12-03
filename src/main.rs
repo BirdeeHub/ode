@@ -43,13 +43,13 @@ fn main() -> io::Result<()> {
     let contents = contents?;
 
     let settings = tokenizer::TokenizerSettings {
-        blockcomstart: "/*",
-        blockcomend: "*/",
-        linecom: "//",
+        blockcomstart: "--[",
+        blockcomend: "]--",
+        linecom: "--",
         ops: &[
             "=", "+", "-", "/", "%", "||", "&&", "|",
             ">>", "<<", "!", "!=", "==", "<=", ">=", "=",
-            "\\", "\\:", "|>", "<-", "->", "--",
+            "\\", "\\:", "|>", "<-", "->", "//",
             "&", "*", "~",
             "=>", "!>",
             "|=", "^=", "#=", "...",
