@@ -1,27 +1,85 @@
 use crate::tokenizer::{Token, Coin};
+use std::sync::Arc;
 
-struct Meta {
-    debug_pos: usize, // <-- position in vector
+#[derive(Debug, PartialEq)]
+pub enum Lexeme {
+    ParenB, // (
+    ParenE, // )
+    ScopeB, // { Can also be generic set if , instead of ;
+    ScopeE, // } All scopes return a value or () (good substitute for let in)
+    InterpolateB, // $[
+    InterpolateE, // ]
+    FormatB, // "
+    FormatE, // "
+    AngleB, // <
+    AngleE, // >
+    CharS, // '
+    SquareB, // [ Will be tuples
+    SquareE, // ]
+    Chain, // ,
+    Add, // +
+    Sub, // -
+    Star, // *
+    Div, // /
+    Pow, // ^
+    Mod, // %
+    FnOp, // \
+    Return, // << for early return
+    FnOpNamed, // \: followed by IDENT
+    FnOpInfix, // \:: followed by IDENT
+    VarArg, // ...
+    ArgEnd, // ->
+    SelfArg, // self may be first argument to mark as method
+    Pipe, // |>
+    Hex,
+    Int,
+    Float,
+    Char,
+    Ident,
+    Literal,
+    Assign, // =
+    Mut, // `
+    Gt, // >
+    Lt, // <
+    GtEq, // >=
+    LtEq, // <=
+    Eq, // =
+    Semicolon, // ";"
+    TypeSep, // :
+    Field, // .
+    BitAnd, // &
+    BitOr, // |
+    And, // &&
+    Or, // ||
+    True, // true
+    False, // false
+    Enum, // =|
+    For, // for
+    Match, // ~|
+    Then, // =>
+    Else, // >>
+    ElseIf, // >>>
+    Struct, // struct
+    Implement, // ^=
+    ConstraintAssign, // _=
+    Send, // <@
+    Recieve, // @>
+    Spawn, // @
+    Format,
+    Pattern,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Atom {
-}
-
-#[derive(Debug, PartialEq)]
-struct PreExpr {
-}
-
-#[derive(Debug, PartialEq)]
-pub struct InfixExpr {
+pub struct Node {
+    pub token: Token,
+    pub ttype: Lexeme,
+    pub l: Option<Arc<Node>>,
+    pub r: Option<Arc<Node>>,
+    pub scope_id: Option<usize>,
 }
 
 //struct PostExpr { <- will be infix operators with default value as a second arg instead.
 //}
-
-#[derive(Debug, PartialEq)]
-pub struct ExprTree {
-}
 
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {
@@ -38,7 +96,7 @@ impl<'a> Parser<'a> {
     fn advance(&self) -> Option<&Token> {
         self.in_tokens.get(self.position)
     }
-    pub fn parse(&self) -> ExprTree {
+    pub fn parse(&self) -> Node {
         todo!()
     }
 }

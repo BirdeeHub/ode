@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{self, Read};
-mod lexxer;
 mod parser;
 mod tokenizer;
 
@@ -39,10 +38,11 @@ fn main() -> io::Result<()> {
         blockcomend: "#$",
         linecom: "#",
         ops: &[
-            "=", "+", "-", "/", "%", "//", "|", ">>=",
-            ">>", "<<", "!", "||", "&&", "!=", "==", "<=", ">=",
-            "=", "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
-            "\\", "\\:", "...", "->", "<-", "|>", "<|", "?",
+            "=", "+", "-", "/", "%", "//", "|",
+            ">>", "<<", "!", "||", "&&",
+            "!=", "==", "<=", ">=",
+            "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
+            "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
             "`", "&", "*", "\\&",
             "=>", "!>", "~",
             "_=", "^=", "~=",
@@ -81,15 +81,9 @@ fn main() -> io::Result<()> {
         println!("{:?}", token);
     }
 
-    let lexxer = lexxer::Lexxer::new(&tokens);
-    let lexemes = lexxer.lex();
-    for lexeme in &lexemes {
-        println!("{:?}", lexeme);
-    }
-
-    //let parser = parser::Parser::new(&lexemes);
-    //let tree = parser.parse();
-    //println!("{:?}", tree);
+    let parser = parser::Parser::new(&tokens);
+    let ast = parser.parse();
+    println!("{:?}", ast);
 
     Ok(())
 }
