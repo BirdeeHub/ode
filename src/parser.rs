@@ -78,9 +78,6 @@ pub struct Node {
     pub scope_id: Option<usize>,
 }
 
-//struct PostExpr { <- will be infix operators with default value as a second arg instead.
-//}
-
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {
     in_tokens: &'a Vec<Token>,
