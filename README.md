@@ -18,7 +18,7 @@ But the idea is cool, I was forced to. An ode to an idea I guess.
 
 ```hs
 
-mutability operator: ~
+mutability operator: `
 shadowing is allowed in interior scopes but not in the same scope.
 
 type constraints can contain mixed functions and types if desired
@@ -31,13 +31,13 @@ Tool _= {
 Swingable _= {
   swing = \: &self, &thing:target -> bool,
 }
-Breakable _= ~{
-  broken:~bool,
-  is_broken = ~\: &self -> bool,
+Breakable _= `{
+  broken:`bool,
+  is_broken = `\: &self -> bool,
 }
 
 -- enums can contain type constraints, or implemented types
-ToolKind #= { -- they never need to be marked as mutable because the enumeration is unchangeable, regardless of the mutability of the values.
+ToolKind ~= { -- they never need to be marked as mutable because the enumeration is unchangeable, regardless of the mutability of the values.
   IndestructibleHmmr(Tool+Swingable), -- + for and | for or
   Hmmr(Tool+Swingable+Breakable),
   Hmr(Hammer),
@@ -45,7 +45,7 @@ ToolKind #= { -- they never need to be marked as mutable because the enumeration
 
 -- Generics come first in <> followed by a type separator
 
-<T, ~U:Tool>:GenericTypeStruct _= {
+<T, `U:Tool>:GenericTypeStruct _= {
   meta:T,
   item:U,
 },
@@ -64,11 +64,11 @@ UnbreakableHammer:Tool,Swingable,Eq ^= {
 
 -- an mutable impl block can implement immutable and mutable constraints
 -- and may contain compile time constants
-Hammer:Swingable,Breakable,Eq ^= ~{
-  new = \: weight:int, length:int -> Hammer: ~{
+Hammer:Swingable,Breakable,Eq ^= `{
+  new = \: weight:int, length:int -> Hammer: `{
     { weight = 10, length = 20, id = random(), broken = false, }
   };
-  is_broken = \: &self -> bool: ~{ -- mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a ~\:)
+  is_broken = \: &self -> bool: `{ -- mutable scope, immutable function (it doesnt depend on outside mutable values, which would need a `\:)
     broken -- mutable scope can implicitly return at the end
   },
   swing = \: &self, &thing:target -> bool: thing.distance(self) < self.length,
@@ -88,10 +88,10 @@ carpenters = Hammer.new(10,20);
 fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 infix fn syntax: myfn = \: named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 multiple ret fn syntax: myfn = \ named[:type[:default]], args[:type[:default]] -> ret_type, ret_type2: { body }
-mutable fn syntax: myfn = ~\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
+mutable fn syntax: myfn = `\ named[:type[:default]], args[:type[:default]] -> [ret_type:] { body }
 vararg syntax: myfn = \ named[:type[:default]], named[:type]:... -> [ret_type:] { body }
 
-greet = \ followup:&str, name:&str, greeting:&str:"Hello" -> String: ~{
+greet = \ followup:&str, name:&str, greeting:&str:"Hello" -> String: `{
   "$[greeting], $[name]! $[followup]!"
 }
 
@@ -101,7 +101,7 @@ greetAmy = greeting "Amy";
 
 println greetAmy;
 
-greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: ~{ -- if this were infix, \:<T>: instead of \<T>:
+greeting2 = (\<T:Display>: greeting:&T, name:&str -> T: `{ -- if this were infix, \:<T>: instead of \<T>:
   "$[greeting], $[name]!"
 } "Wazzup");
 
@@ -109,24 +109,22 @@ greetJosh = greeting2 "Josh";
 
 println joshGreet;
 
--- ~mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
+-- `mutable functions evaluate eagerly and can only be evaluated without assigning the result in mutable scopes
 
-~personname="James";
-greeting3 = ~\ greeting:&str -> String: ~{
+`personname="James";
+greeting3 = `\ greeting:&str -> String: `{
   "$[greeting], $[personname]!"
 };
 println (greeting3 "Hi");
 
 personname="Mrowwwwwww!";
-~greetOphelia = greeting3 "AAAAHHHH!!";
+`greetOphelia = greeting3 "AAAAHHHH!!";
 println greetOphelia;
 
 ```
 
 functions are closures and your function must be declared as mutable if it references external mutable values as part of its closure,
 if they return a mutable value their return value will retain its mutability
-
-functions may return multiple values and then may be used in place of multiple args
 
 infix makes it so that the first arg may be on the left.
 if functions are declared in impl blocks they may have first argument self.
@@ -136,7 +134,6 @@ calling function requires no parenthesis around args other than for grouping
 
 you may curry up until the first default argument,
 at which point you must provide the rest or it will call, varargs are allowed at end and cannot be curried.
-if a function returns multiple values the types must be specified
 
 Scopes all return a value or () if no value,
 scopes can be used as let in if immutable (order doesnt matter)
@@ -174,7 +171,7 @@ iter can also be something that implements iter
 infer types where possible
 
 Immutable should be reference counted
-Mutable should be borrow-checked, if lifetime is required it goes before the ~ (mutability operator)
+Mutable should be borrow-checked, if lifetime is required it goes before the ` (mutability operator)
 which is always at the beginning of the type, or name if type is inferred.
 
 rust result/options and multiple returns
@@ -194,7 +191,7 @@ Hopefully I can fold stream iteration and actor message iteration and listening 
 
 err:Result<String> = pid <@ msg;
 
-response = pid @> \ msg -> # {
+response = pid @> \ msg -> ~ {
   Ok(val) isFloat val => Ok val;
   Ok(val) => Err "Wrong type! $[inspect(val)]";
   Err(val) => Err "Execution Error: $[inspect(val)]";
@@ -202,7 +199,7 @@ response = pid @> \ msg -> # {
 };
 
 -- stream iterator
-res = pid @>> \ Ok(msg), TTL(ttlval) -> # {
+res = pid @>> \ Ok(msg), TTL(ttlval) -> ~ {
   Ok(val) isFloat val => Ok val;
   Ok(val) => Err "Wrong type! $[inspect(val)]";
   Err(val) => Err "Execution Error: $[inspect(val)]";
@@ -235,16 +232,16 @@ lazyfib = \ n:int -> int:{
   <- n <= 1 => n !> lazyfib (num-1)+(num-2);
 }
 -- has sequenced scope but doesnt depend on outside mutable variables
-lazyfib = \ n:int -> int:~{
+lazyfib = \ n:int -> int:`{
   n <= 1 => n !> lazyfib (num-1)+(num-2)
 }
 
-matchfib = \ n:int -> int:#{
+matchfib = \ n:int -> int:~{
   0, n<0 => n;
   1 => n;
   eagerfib (n-1)+(n-2)
 }
-matchfib = \ n:int -> int:#{
+matchfib = \ n:int -> int:~{
   , n<=1 => n;
   eagerfib (n-1)+(n-2)
 }
@@ -253,9 +250,9 @@ matchfib = \ n:int -> int:#{
 
 `\ args, list -> [ret_type:]` This is an actual first class thing, it represents a closure, and its args are defined for the following expression.
 
-Scopes are declared as ```[ret_type][~|#]{}```
+Scopes are declared as ```[ret_type][`|~]{}```
 
-`~` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
+`\`` is also an operator on the next scope or args list or variable declaration. It is the mutability operator.
 It also doubles as the thing you put lifetime before, because only mutable things use borrow checking.
 
 `<-` is return FROM CURRENT SCOPE.
@@ -269,7 +266,7 @@ immutable ones are executed lazily in the best order when needed and returno
 Immutable scopes may only return immutable variables, and cannot use mutable variables from containing scopes.
 Return is REQUIRED and can only be called once.
 
-All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `#=` `^=` typedefs, and immutable variables (includes immutable functions).
+All files can contain 1 top level anonymous thing that the file can return. And then any number of `_=` `~=` `^=` typedefs, and immutable variables (includes immutable functions).
 
 `val = use "name" file_descriptor` keyword will return the anonymous thing as val, and define the types, functions and constants under "name.thing";
 
@@ -280,19 +277,19 @@ For `val` it depends on the type, and behaves as normal. Mutable scopes execute 
 
 
 ```hs
-Option<String>:~{
+Option<String>:`{
   
-  action1 = ~\ val:Option<~&str> -> Option: val #{
+  action1 = `\ val:Option<`&str> -> Option: val ~{
     Some(v) => Some (v+"!");
     None
   }
-  action2 = ~\ val:Option<~&str> -> Option: val #{
+  action2 = `\ val:Option<`&str> -> Option: val ~{
     Some(v) => Some (v+v);
     None
   }
 
-  unpurefunc = \ x:bool -> Option -> Option:~{
-    <- x #{
+  unpurefunc = \ x:bool -> Option -> Option:`{
+    <- x ~{
       true => action1 |> action2;
       action2 |> action1;
     };
@@ -300,7 +297,7 @@ Option<String>:~{
 
   unres = unpurefunc true;
 
-  myVal:~ = "Hello";
+  myVal:` = "Hello";
   res = unres Some(&myVal)?;
 
   Some(res)
@@ -308,19 +305,19 @@ Option<String>:~{
 }
 ```
 ```hs
-Option<String>:~{
+Option<String>:`{
   
-  action1 = \ val:Option<~String> -> Option: val #{
+  action1 = \ val:Option<`String> -> Option: val ~{
     Some(v) => Some (v+"!");
     None
   }
-  action2 = \ val:Option<~String> -> Option: val #{ -- immutable functions can have mutable args if they are moved in
+  action2 = \ val:Option<`String> -> Option: val ~{ -- immutable functions can have mutable args if they are moved in
     Some(v) => Some (v+v);
     None
   }
 
   purefunc = \ x:bool -> Option -> Option:{ -- now this can be an immutable scope that evaluates lazily
-    <- x #{
+    <- x ~{
       true => action1 |> action2;
       action2 |> action1;
     };
@@ -328,7 +325,7 @@ Option<String>:~{
 
   unres = purefunc true;
 
-  myVal:~ = "Hello";
+  myVal:` = "Hello";
   res = unres Some(myVal)?;
 
   Some(res)

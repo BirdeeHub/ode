@@ -43,22 +43,22 @@ fn main() -> io::Result<()> {
     let contents = contents?;
 
     let settings = tokenizer::TokenizerSettings {
-        blockcomstart: "--[",
-        blockcomend: "]--",
-        linecom: "--",
+        blockcomstart: "#^",
+        blockcomend: "#$",
+        linecom: "#",
         ops: &[
-            "=", "+", "-", "/", "%", "||", "&&", "|",
-            ">>", "<<", "!", "!=", "==", "<=", ">=", "=",
-            "\\", "\\:", "|>", "<-", "->", "//",
-            "&", "*", "~",
-            "=>", "!>",
-            "|=", "^=", "#=", "...",
-            "#", "?",
+            "=", "+", "-", "/", "%", "//", "|", ">>=",
+            ">>", "<<", "!", "||", "&&", "!=", "==", "<=", ">=",
+            "=", "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
+            "\\", "\\:", "...", "->", "<-", "|>", "<|", "?",
+            "`", "&", "*", "\\&",
+            "=>", "!>", "~",
+            "_=", "^=", "~=",
             ">>>", ">>|", ">>!",
-            "<@", "@", "@>", "@>>",
-            ":", ",", ";",
+            "<@", "@", "@@", "@>", "@>>",
+            ":", ".", ",", ";",
         ],
-        enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">")],
+        enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#!", "#@")],
         charop: "'",
         templop: "\"",
         interstart: "$[",
@@ -71,13 +71,16 @@ fn main() -> io::Result<()> {
     // then => else !> and match ~ only
     // enum ~= constraint |= impl ^=
     // [[<T>]:`type:] [`]{}
-    // while (pid @~ match) cond {}
     // <@ is value to stream/actor
-    // @ is create/get stream/actor
+    // @ is open/run stream/actor on node
+    // @@ is same but on current node
     // @> is value from stream/actor
     // @>> untilcond, fallback TTL(int)
     // These are also used in message passing
     // >>> while >>| continue >>! break
+
+    // "#!" "#@" <- node config enclosers
+    // doubles as shebang for interpreted mode
 
     let mut tokenizer = tokenizer::Tokenizer::new(&contents, &settings, false);
     let tokens = tokenizer.tokenize();
