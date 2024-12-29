@@ -82,7 +82,7 @@ fn main() -> io::Result<()> {
     }
 
     let parser = parser::Parser::new(&tokens);
-    let ast = parser.parse();
+    let ast = parser.parse_program();
     println!("{:?}", ast);
 
     Ok(())

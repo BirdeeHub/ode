@@ -1,4 +1,5 @@
 use crate::tokenizer::{Token, Coin};
+use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
 #[derive(Debug, PartialEq)]
@@ -70,6 +71,22 @@ pub enum Lexeme {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum ParseError {
+}
+impl Display for ParseError {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+pub type ParseResult<T> = Result<T, ParseError>;
+
+#[derive(Debug, PartialEq)]
+pub struct Program {
+    pub statements: Vec<Arc<Node>>,
+}
+
+#[derive(Debug, PartialEq)]
 pub struct Node {
     pub token: Token,
     pub ttype: Lexeme,
@@ -93,7 +110,10 @@ impl<'a> Parser<'a> {
     fn advance(&self) -> Option<&Token> {
         self.in_tokens.get(self.position)
     }
-    pub fn parse(&self) -> Node {
+    pub fn parse_program(&self) -> ParseResult<Program> {
+        todo!()
+    }
+    pub fn parsePrimary(&self, in_tokens: &[Token]) -> ParseResult<(Node,&[Token])> {
         todo!()
     }
 }
