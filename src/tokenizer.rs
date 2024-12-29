@@ -178,6 +178,7 @@ impl<'a> Tokenizer<'a> {
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
                 {
+                    let pos = self.position;
                     let op = self.consume_op();
                     match op {
                         _ if op == self.ops_struct.blockcomstart => {
@@ -191,14 +192,14 @@ impl<'a> Tokenizer<'a> {
                         _ if Ops::is_literal_left(&op) => {
                             tokens.push(Token::Op(Coin {
                                 val: op.clone(),
-                                pos: self.position,
+                                pos,
                             }));
                             self.consume_literal(&mut tokens, &op)
                         }
                         _ if self.ops_struct.is_other_capturing(&op) => {
                             tokens.push(Token::Op(Coin {
                                 val: op.clone(),
-                                pos: self.position,
+                                pos,
                             }));
                             self.consume_capturing(&mut tokens, &op)
                         }
@@ -212,23 +213,23 @@ impl<'a> Tokenizer<'a> {
                             }
                             Token::Op(Coin {
                                 val: op,
-                                pos: self.position,
+                                pos,
                             })
                         }
                         _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                             level += 1;
                             Token::Op(Coin {
                                 val: op,
-                                pos: self.position,
+                                pos,
                             })
                         }
                         _ if self.ops_struct.is(&op) => Token::Op(Coin {
                             val: op,
-                            pos: self.position,
+                            pos,
                         }),
                         _ => Token::Identifier(Coin {
                             val: op,
-                            pos: self.position,
+                            pos,
                         }),
                     }
                 }
@@ -237,12 +238,12 @@ impl<'a> Tokenizer<'a> {
                     continue; // Skip whitespace
                 }
                 '0'..='9' => Token::Numeric(Coin {
-                    val: self.consume_numeric(),
                     pos: self.position,
+                    val: self.consume_numeric(),
                 }),
                 _ => Token::Identifier(Coin {
-                    val: self.consume_identifier(),
                     pos: self.position,
+                    val: self.consume_identifier(),
                 }),
             };
             tokens.push(token);
