@@ -297,6 +297,7 @@ impl<'a> Tokenizer<'a> {
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
+        let start = self.position;
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];
@@ -320,12 +321,12 @@ impl<'a> Tokenizer<'a> {
                 let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
                 tokens.push(Token::Format(Coin {
                     val: format_tokens,
-                    pos: self.position,
+                    pos: start,
                 }));
             } else {
                 tokens.push(Token::Literal(Coin {
                     val: literal,
-                    pos: self.position,
+                    pos: start,
                 }));
             }
             Token::Op(Coin {
@@ -336,12 +337,12 @@ impl<'a> Tokenizer<'a> {
             let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
             Token::Format(Coin {
                 val: format_tokens,
-                pos: self.position,
+                pos: start,
             })
         } else {
             Token::Literal(Coin {
                 val: literal,
-                pos: self.position,
+                pos: start,
             })
         }
     }
