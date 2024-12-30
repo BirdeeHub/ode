@@ -77,12 +77,14 @@ impl<'a> Parser<'a> {
             Some(Token::Identifier(_)) => self.parse_ident(),
             Some(Token::Numeric(_)) => self.parse_numeric(),
             Some(Token::Op(coin)) if coin.val.as_str() == "(" => {
+                let coin = coin.clone();
                 self.eat();
                 let val = self.parse_expr();
-                if let Some(Token::Op(coin)) = self.eat() {
-                    if coin.val.as_str() != ")" {
-                        return Err(ParseError::UnmatchedEncloser(Token::Op(coin.clone())))
-                    }
+                match self.eat() {
+                    Some(Token::Op(c)) if c.val.as_str() == ")" => {},
+                    _ => {
+                        return Err(ParseError::UnmatchedEncloser(Token::Op(coin)))
+                    },
                 }
                 val
             },
