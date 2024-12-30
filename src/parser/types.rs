@@ -85,6 +85,7 @@ pub enum ParseError {
     Teapot(Token),
     TypeError(Token),
     InvalidNumber(Token),
+    InvalidIdent(Token),
     InvalidExpression(Token),
     UnmatchedEncloser(Token),
     AssignmentError(Token),
