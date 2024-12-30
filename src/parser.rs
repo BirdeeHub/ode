@@ -80,13 +80,13 @@ impl<'a> Parser<'a> {
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
-        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
+        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::Teapot(self.in_tokens.get(self.position-1).unwrap().clone())) };
         Ok(Stmt::Identifier(Identifier{ ttype:Lexeme::Ident,coin:coin.clone()}))
     }
     pub fn parse_numeric(&mut self) -> ParseResult {
         // coin is coin.val (which is a string) and coin.pos
         // check if the string parses to float it or hex
-        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
+        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::Teapot(self.in_tokens.get(self.position-1).unwrap().clone())) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
         if let Ok(val) = value.parse::<i64>() {
             Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
