@@ -71,6 +71,14 @@ pub enum Lexeme {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum Stmt {
+    BinaryExpr(BinaryExpression),
+    NumericLiteral(NumericLiteral),
+    Identifier(Identifier),
+    Module(Module),
+}
+
+#[derive(Debug, PartialEq)]
 pub enum ParseError {
     Teapot(Token),
     TypeError(Token),
@@ -83,28 +91,20 @@ impl Display for ParseError {
     }
 }
 
-pub trait Stmt {
-    fn get_type(&self) -> Lexeme;
-}
 
-pub type ParseResult<T> = Result<T, ParseError>;
+pub type ParseResult = Result<Stmt, ParseError>;
 
 #[derive(Debug, PartialEq)]
-pub struct Program<T: Stmt> {
-    pub statements: Vec<Arc<T>>,
+pub struct Module {
+    pub statements: Vec<Arc<Stmt>>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct BinaryExpression<T: Stmt, V: Stmt> {
+pub struct BinaryExpression {
     pub token: Token,
     pub ttype: Lexeme,
-    pub l: Option<Arc<T>>,
-    pub r: Option<Arc<V>>,
-}
-impl<T: Stmt, V: Stmt> Stmt for BinaryExpression<T,V> {
-    fn get_type(&self) -> Lexeme {
-        self.ttype
-    }
+    pub l: Option<Arc<Stmt>>,
+    pub r: Option<Arc<Stmt>>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -112,19 +112,9 @@ pub struct NumericLiteral {
     pub token: Token,
     pub ttype: Lexeme,
 }
-impl Stmt for NumericLiteral {
-    fn get_type(&self) -> Lexeme {
-        self.ttype
-    }
-}
 
 #[derive(Debug, PartialEq)]
 pub struct Identifier {
     pub token: Token,
     pub ttype: Lexeme,
-}
-impl Stmt for Identifier {
-    fn get_type(&self) -> Lexeme {
-        self.ttype
-    }
 }

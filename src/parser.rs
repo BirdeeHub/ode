@@ -10,16 +10,25 @@ impl<'a> Parser<'a> {
     pub fn new(in_tokens: &'a Vec<Token>) -> Parser {
         Parser{ in_tokens, position: 0, }
     }
-    fn get_token(&self) -> Option<&Token> {
+    fn at(&self) -> Option<&Token> {
         self.in_tokens.get(self.position)
     }
-    fn advance(&self) -> Option<&Token> {
-        self.in_tokens.get(self.position)
+    fn eat(&mut self) -> Option<&Token> {
+        let res = self.in_tokens.get(self.position);
+        self.position += 1;
+        res
     }
-    pub fn parse_program<T: Stmt>(&self) -> ParseResult<Program<T>> {
-        todo!()
+    fn not_eof(&self) -> bool {
+        ! matches!(self.at(), Some(Token::Eof) | None)
     }
-    pub fn parsePrimary(&self, in_tokens: &[Token]) -> ParseResult<(Node,&[Token])> {
+    pub fn parse_program(&self) -> ParseResult {
+        let mut program = Module{statements: Vec::new()};
+        while ! self.not_eof() {
+            program.statements.push(self.parse_stmt()?.into());
+        }
+        Ok(Stmt::Module(program))
+    }
+    pub fn parse_stmt(&self) -> ParseResult {
         todo!()
     }
 }
