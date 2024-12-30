@@ -41,11 +41,14 @@ impl<'a> Parser<'a> {
         let mut left = self.parse_multiplicative_expr()?;
         while let Some(Token::Op(coin)) = self.at() {
             let coin = coin.clone();
-            if coin.val != "+" && coin.val != "-" {
+            if !matches!(coin.val.as_str(), "+" | "-") {
                 break;
             }
             self.eat();
-            let ttype = if coin.val == "+" {Lexeme::Add} else {Lexeme::Sub};
+            let ttype = match coin.val.as_str() {
+                "+" => Lexeme::Add,
+                _ => Lexeme::Sub,
+            };
             let right = self.parse_multiplicative_expr()?;
             left = Stmt::BinaryExpr(BinaryExpression{ ttype,coin,l:left.into(),r:right.into()});
         }
@@ -55,7 +58,7 @@ impl<'a> Parser<'a> {
         let mut left = self.parse_primary()?;
         while let Some(Token::Op(coin)) = self.at() {
             let coin = coin.clone();
-            if coin.val != "*" && coin.val != "/" && coin.val != "%" {
+            if !matches!(coin.val.as_str(), "*" | "/" | "%") {
                 break;
             }
             self.eat();
