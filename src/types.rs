@@ -21,6 +21,7 @@ pub enum Lexeme {
     Add, // +
     Sub, // -
     Star, // *
+    Mult, // *
     Div, // /
     Pow, // ^
     Mod, // %
