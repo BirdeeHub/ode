@@ -21,14 +21,17 @@ impl<'a> Parser<'a> {
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
     }
-    pub fn parse_program(&self) -> ParseResult {
+    pub fn parse_program(&mut self) -> ParseResult {
         let mut program = Module{body: Vec::new()};
         while self.not_eof() {
             program.body.push(self.parse_stmt()?.into());
         }
         Ok(Stmt::Module(program))
     }
-    pub fn parse_stmt(&self) -> ParseResult {
+    pub fn parse_stmt(&mut self) -> ParseResult {
+        return self.parse_expr();
+    }
+    pub fn parse_expr(&mut self) -> ParseResult {
         todo!()
     }
 }
