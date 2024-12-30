@@ -22,9 +22,9 @@ impl<'a> Parser<'a> {
         ! matches!(self.at(), Some(Token::Eof) | None)
     }
     pub fn parse_program(&self) -> ParseResult {
-        let mut program = Module{statements: Vec::new()};
+        let mut program = Module{body: Vec::new()};
         while self.not_eof() {
-            program.statements.push(self.parse_stmt()?.into());
+            program.body.push(self.parse_stmt()?.into());
         }
         Ok(Stmt::Module(program))
     }

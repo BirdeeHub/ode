@@ -96,7 +96,7 @@ pub type ParseResult = Result<Stmt, ParseError>;
 
 #[derive(Debug, PartialEq)]
 pub struct Module {
-    pub statements: Vec<Arc<Stmt>>,
+    pub body: Vec<Arc<Stmt>>,
 }
 
 #[derive(Debug, PartialEq)]
