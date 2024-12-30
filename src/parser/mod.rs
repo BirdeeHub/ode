@@ -1,6 +1,6 @@
 mod tokenizer;
 mod types;
-use crate::parser::tokenizer::{Token, Coin};
+use crate::parser::tokenizer::{Tokenizer,TokenizerSettings,Token,Coin};
 use crate::parser::types::*;
 
 #[derive(Debug, PartialEq)]
@@ -11,7 +11,7 @@ pub struct Parser<'a> {
 }
 impl<'a> Parser<'a> {
     pub fn new(input_string:&'a str) -> Parser<'a> {
-        let settings = tokenizer::TokenizerSettings {
+        let settings = TokenizerSettings {
             blockcomstart: "#^",
             blockcomend: "#$",
             linecom: "#",
@@ -53,7 +53,7 @@ impl<'a> Parser<'a> {
         // "#!" "#@" <- node config enclosers
         // doubles as shebang for interpreted mode
 
-        let mut tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
+        let mut tokenizer = Tokenizer::new(input_string, &settings, false);
         let in_tokens = tokenizer.tokenize();
         Parser{ in_tokens, input_string, position: 0, }
     }
@@ -147,15 +147,15 @@ impl<'a> Parser<'a> {
         // check if the string parses to float it or hex
         let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::Teapot(self.in_tokens.get(self.position-1).unwrap().clone())) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
-        if let Ok(val) = value.parse::<i64>() {
+        if let Ok(val) = value.parse::<u64>() {
             Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
-        } else if let Ok(val) = value.parse::<f32>() {
+        } else if let Ok(val) = value.parse::<f64>() {
             Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
         } else if let Some(stripped) = value.strip_prefix("0x") {
             let Ok(val) = u64::from_str_radix(stripped, 16) else {
                 return Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
             };
-            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val:val as i64}))
+            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
         } else {
             Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
         }

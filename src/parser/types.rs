@@ -116,14 +116,14 @@ pub struct BinaryExpression {
 pub struct FloatLiteral {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
-    pub val: f32,
+    pub val: f64,
 }
 
 #[derive(Debug, PartialEq,Clone)]
 pub struct IntLiteral {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
-    pub val: i64,
+    pub val: u64,
 }
 
 #[derive(Debug, PartialEq,Clone)]
