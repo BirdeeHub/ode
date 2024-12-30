@@ -73,7 +73,8 @@ pub enum Lexeme {
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
     BinaryExpr(BinaryExpression),
-    NumericLiteral(NumericLiteral),
+    FloatLiteral(FloatLiteral),
+    IntLiteral(IntLiteral),
     Identifier(Identifier),
     Module(Module),
 }
@@ -82,6 +83,8 @@ pub enum Stmt {
 pub enum ParseError {
     Teapot(Token),
     TypeError(Token),
+    InvalidNumber(Token),
+    InvalidExpression(Token),
     AssignmentError(Token),
     StatementError(Token),
 }
@@ -108,9 +111,17 @@ pub struct BinaryExpression {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct NumericLiteral {
+pub struct FloatLiteral {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
+    pub val: f32,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct IntLiteral {
+    pub coin: Coin<String>,
+    pub ttype: Lexeme,
+    pub val: i64,
 }
 
 #[derive(Debug, PartialEq)]

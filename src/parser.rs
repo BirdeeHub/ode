@@ -37,10 +37,30 @@ impl<'a> Parser<'a> {
     pub fn parse_primary(&mut self) -> ParseResult {
         match self.at() {
             Some(Token::Identifier(_)) => self.parse_ident(),
+            Some(Token::Numeric(_)) => self.parse_ident(),
+            _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(&Token::Eof).clone())),
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
         let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
         Ok(Stmt::Identifier(Identifier{ ttype:Lexeme::Ident,coin:coin.clone()}))
+    }
+    pub fn parse_numeric(&mut self) -> ParseResult {
+        // coin is coin.val (which is a string) and coin.pos
+        // check if the string parses to float it or hex
+        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
+        let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
+        if let Ok(val) = value.parse::<f32>() {
+            Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
+        } else if let Ok(val) = value.parse::<i64>() {
+            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
+        } else if value.starts_with("0x") {
+            let Ok(val) = u64::from_str_radix(&value[2..], 16) else {
+                return Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
+            };
+            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val:val as i64}))
+        } else {
+            Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
+        }
     }
 }
