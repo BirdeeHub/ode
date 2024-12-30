@@ -5,6 +5,7 @@ pub enum Token {
     Numeric(Coin<String>), // int or float in string form
     Literal(Coin<String>),
     Format(Coin<Vec<Token>>),
+    Eof,
 }
 
 #[derive(Debug)]
@@ -248,6 +249,7 @@ impl<'a> Tokenizer<'a> {
             };
             tokens.push(token);
         }
+        tokens.push(Token::Eof);
         tokens
     }
 

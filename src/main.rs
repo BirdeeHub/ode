@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{self, Read};
 mod parser;
 mod tokenizer;
+mod types;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     // Open the file

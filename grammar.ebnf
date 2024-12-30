@@ -55,20 +55,18 @@ ResponsePattern    = Stream|Actor, "@>", FnArgs, Expression. (* TODO: be more sp
 (* Literals and Identifiers *)
 Literal            = Integer | String | Float | Boolean.
 Identifier         = Letter, { Letter | Digit | "_" }.
-Operator           = "=", "+", "-", "/", "%",
-                     "!", "!=", "==", "<=", ">=",
-                     "=", "<", ">", "||", "&&",
-                     "|", ">>", "<<",
-                     (*above are standard stuff, you should recognize & * ? from below also*)
-                     "\\", "\\:", "|>", "<-", "->", "...",
-                     "~", "?", "&", "*", "`",
-                     "|=", "^=", "~=",
-                     ">>>", ">>|", ">>!", (* while continue break, continue and break can be given values to return matching scope return type *)
-                     "=>", "!>",
-                     "<@", "@", "@>", "@>>",
-                     ":", ",", ";",
-                     "#",
-
+BinaryOperator     = "=", "+", "-", "/", "%", "//", "|",
+                     ">>", "<<", "!", "||", "&&",
+                     "!=", "==", "<=", ">=",
+                     "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
+                     "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
+                     "`", "&", "*", "\\&",
+                     "=>", "!>", "~",
+                     "_=", "^=", "~=",
+                     ">>>", ">>|", ">>!",
+                     "<@", "@", "@@", "@>", "@>>",
+                     ":", ".", ",", ";".
+UnaryOperator      = "!", "-", "+", "~", "&", "`".
 (* Miscellaneous *)
 Comment            = LineComment | BlockComment.
 LineComment        = "//", { AnyChar }.
