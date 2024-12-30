@@ -1,4 +1,4 @@
-use crate::tokenizer::{Token, Coin};
+use crate::parser::tokenizer::{Token, Coin};
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 

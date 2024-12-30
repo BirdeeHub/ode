@@ -1,14 +1,61 @@
-use crate::tokenizer::{Token, Coin};
-use crate::types::*;
+mod tokenizer;
+mod types;
+use crate::parser::tokenizer::{Token, Coin};
+use crate::parser::types::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {
-    in_tokens: &'a Vec<Token>,
+    input_string: &'a str,
+    in_tokens: Vec<Token>,
     position: usize,
 }
 impl<'a> Parser<'a> {
-    pub fn new(in_tokens: &'a Vec<Token>) -> Parser {
-        Parser{ in_tokens, position: 0, }
+    pub fn new(input_string:&'a str) -> Parser {
+        let settings = tokenizer::TokenizerSettings {
+            blockcomstart: "#^",
+            blockcomend: "#$",
+            linecom: "#",
+            ops: &[
+                "=", "+", "-", "/", "%", "//", "|",
+                ">>", "<<", "!", "||", "&&",
+                "!=", "==", "<=", ">=",
+                "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
+                "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
+                "`", "&", "*", "\\&",
+                "=>", "!>", "~",
+                "_=", "^=", "~=",
+                ">>>", ">>|", ">>!",
+                "<@", "@", "@@", "@>", "@>>",
+                ":", ".", ",", ";",
+            ],
+            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#!", "#@")],
+            charop: "'",
+            templop: "\"",
+            interstart: "$[",
+            interend: "]",
+            escape_char: '\\',
+        };
+
+        // ` mutability op (lifetime if needed goes before, & goes after)
+        // \ arg, arg -> {}
+        // left (\: arg, arg -> {}) right
+        // then => else !> and match ~ only
+        // enum ~= constraint |= impl ^=
+        // [[<T>]:`type:] [`]{}
+        // <@ is value to stream/actor
+        // @ is open/run stream/actor on node
+        // @@ is same but on current node
+        // @> is value from stream/actor
+        // @>> untilcond, fallback TTL(int)
+        // These are also used in message passing
+        // >>> while >>| continue >>! break
+
+        // "#!" "#@" <- node config enclosers
+        // doubles as shebang for interpreted mode
+
+        let mut tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
+        let in_tokens = tokenizer.tokenize();
+        Parser{ in_tokens, input_string, position: 0, }
     }
     fn at(&self) -> Option<&Token> {
         self.in_tokens.get(self.position)
@@ -55,7 +102,7 @@ impl<'a> Parser<'a> {
         Ok(left)
     }
     pub fn parse_multiplicative_expr(&mut self) -> ParseResult {
-        let mut left = self.parse_primary()?;
+        let mut left = self.parse_primary_expr()?;
         while let Some(Token::Op(coin)) = self.at() {
             let coin = coin.clone();
             if !matches!(coin.val.as_str(), "*" | "/" | "%") {
@@ -67,12 +114,12 @@ impl<'a> Parser<'a> {
                 "/" => Lexeme::Div,
                 _ => Lexeme::Mod,
             };
-            let right = self.parse_primary()?;
+            let right = self.parse_primary_expr()?;
             left = Stmt::BinaryExpr(BinaryExpression{ ttype,coin,l:left.into(),r:right.into()});
         }
         Ok(left)
     }
-    pub fn parse_primary(&mut self) -> ParseResult {
+    pub fn parse_primary_expr(&mut self) -> ParseResult {
         match self.at() {
             Some(Token::Identifier(_)) => self.parse_ident(),
             Some(Token::Numeric(_)) => self.parse_numeric(),
