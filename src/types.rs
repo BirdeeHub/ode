@@ -86,6 +86,7 @@ pub enum ParseError {
     TypeError(Token),
     InvalidNumber(Token),
     InvalidExpression(Token),
+    UnmatchedEncloser(Token),
     AssignmentError(Token),
     StatementError(Token),
 }

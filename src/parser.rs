@@ -76,6 +76,16 @@ impl<'a> Parser<'a> {
         match self.at() {
             Some(Token::Identifier(_)) => self.parse_ident(),
             Some(Token::Numeric(_)) => self.parse_numeric(),
+            Some(Token::Op(coin)) if coin.val.as_str() == "(" => {
+                self.eat();
+                let val = self.parse_expr();
+                if let Some(Token::Op(coin)) = self.eat() {
+                    if coin.val.as_str() != ")" {
+                        return Err(ParseError::UnmatchedEncloser(Token::Op(coin.clone())))
+                    }
+                }
+                val
+            },
             _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(&Token::Eof).clone())),
         }
     }
