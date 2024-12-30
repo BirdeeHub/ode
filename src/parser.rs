@@ -29,7 +29,7 @@ impl<'a> Parser<'a> {
         Ok(Stmt::Module(program))
     }
     pub fn parse_stmt(&mut self) -> ParseResult {
-        return self.parse_expr();
+        self.parse_expr()
     }
     pub fn parse_expr(&mut self) -> ParseResult {
         self.parse_primary()
@@ -37,7 +37,7 @@ impl<'a> Parser<'a> {
     pub fn parse_primary(&mut self) -> ParseResult {
         match self.at() {
             Some(Token::Identifier(_)) => self.parse_ident(),
-            Some(Token::Numeric(_)) => self.parse_ident(),
+            Some(Token::Numeric(_)) => self.parse_numeric(),
             _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(&Token::Eof).clone())),
         }
     }
@@ -54,8 +54,8 @@ impl<'a> Parser<'a> {
             Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
         } else if let Ok(val) = value.parse::<i64>() {
             Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
-        } else if value.starts_with("0x") {
-            let Ok(val) = u64::from_str_radix(&value[2..], 16) else {
+        } else if let Some(stripped) = value.strip_prefix("0x") {
+            let Ok(val) = u64::from_str_radix(stripped, 16) else {
                 return Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
             };
             Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val:val as i64}))
