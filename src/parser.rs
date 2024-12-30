@@ -50,10 +50,10 @@ impl<'a> Parser<'a> {
         // check if the string parses to float it or hex
         let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
-        if let Ok(val) = value.parse::<f32>() {
-            Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
-        } else if let Ok(val) = value.parse::<i64>() {
+        if let Ok(val) = value.parse::<i64>() {
             Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
+        } else if let Ok(val) = value.parse::<f32>() {
+            Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
         } else if let Some(stripped) = value.strip_prefix("0x") {
             let Ok(val) = u64::from_str_radix(stripped, 16) else {
                 return Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
