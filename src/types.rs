@@ -101,7 +101,7 @@ pub struct Module {
 
 #[derive(Debug, PartialEq)]
 pub struct BinaryExpression {
-    pub token: Token,
+    pub coin: Coin<String>,
     pub ttype: Lexeme,
     pub l: Option<Arc<Stmt>>,
     pub r: Option<Arc<Stmt>>,
@@ -109,12 +109,12 @@ pub struct BinaryExpression {
 
 #[derive(Debug, PartialEq)]
 pub struct NumericLiteral {
-    pub token: Token,
+    pub coin: Coin<String>,
     pub ttype: Lexeme,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Identifier {
-    pub token: Token,
+    pub coin: Coin<String>,
     pub ttype: Lexeme,
 }

@@ -32,6 +32,15 @@ impl<'a> Parser<'a> {
         return self.parse_expr();
     }
     pub fn parse_expr(&mut self) -> ParseResult {
-        todo!()
+        self.parse_primary()
+    }
+    pub fn parse_primary(&mut self) -> ParseResult {
+        match self.at() {
+            Some(Token::Identifier(_)) => self.parse_ident(),
+        }
+    }
+    pub fn parse_ident(&mut self) -> ParseResult {
+        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::Teapot(Token::Eof)) };
+        Ok(Stmt::Identifier(Identifier{ ttype:Lexeme::Ident,coin:coin.clone()}))
     }
 }

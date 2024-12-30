@@ -8,7 +8,7 @@ pub enum Token {
     Eof,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Coin<T> {
     pub val: T,
     pub pos: usize,
