@@ -119,11 +119,11 @@ impl Stmt for NumericLiteral {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Ident {
+pub struct Identifier {
     pub token: Token,
     pub ttype: Lexeme,
 }
-impl Stmt for Ident {
+impl Stmt for Identifier {
     fn get_type(&self) -> Lexeme {
         self.ttype
     }
