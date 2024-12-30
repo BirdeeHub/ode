@@ -23,7 +23,7 @@ impl<'a> Parser<'a> {
     }
     pub fn parse_program(&self) -> ParseResult {
         let mut program = Module{statements: Vec::new()};
-        while ! self.not_eof() {
+        while self.not_eof() {
             program.statements.push(self.parse_stmt()?.into());
         }
         Ok(Stmt::Module(program))
