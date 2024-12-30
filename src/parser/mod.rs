@@ -10,7 +10,7 @@ pub struct Parser<'a> {
     position: usize,
 }
 impl<'a> Parser<'a> {
-    pub fn new(input_string:&'a str) -> Parser {
+    pub fn new(input_string:&'a str) -> Parser<'a> {
         let settings = tokenizer::TokenizerSettings {
             blockcomstart: "#^",
             blockcomend: "#$",
