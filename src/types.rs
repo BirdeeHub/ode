@@ -70,7 +70,7 @@ pub enum Lexeme {
     Pattern,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Stmt {
     BinaryExpr(BinaryExpression),
     FloatLiteral(FloatLiteral),
@@ -97,34 +97,34 @@ impl Display for ParseError {
 
 pub type ParseResult = Result<Stmt, ParseError>;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub struct Module {
     pub body: Vec<Arc<Stmt>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub struct BinaryExpression {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
-    pub l: Option<Arc<Stmt>>,
-    pub r: Option<Arc<Stmt>>,
+    pub l: Arc<Stmt>,
+    pub r: Arc<Stmt>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub struct FloatLiteral {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
     pub val: f32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub struct IntLiteral {
     pub coin: Coin<String>,
     pub ttype: Lexeme,
     pub val: i64,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq,Clone)]
 pub struct Identifier {
     pub coin: Coin<String>,
     pub ttype: Lexeme,

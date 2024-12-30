@@ -32,7 +32,24 @@ impl<'a> Parser<'a> {
         self.parse_expr()
     }
     pub fn parse_expr(&mut self) -> ParseResult {
-        self.parse_primary()
+        self.parse_binary_expr()
+    }
+    pub fn parse_binary_expr(&mut self) -> ParseResult {
+        self.parse_additive_expr()
+    }
+    pub fn parse_additive_expr(&mut self) -> ParseResult {
+        let mut left = self.parse_primary()?;
+        while let Some(Token::Op(coin)) = self.at() {
+            let coin = coin.clone();
+            if coin.val != "+" && coin.val != "-" {
+                break;
+            }
+            self.eat();
+            let ttype = if coin.val == "+" {Lexeme::Add} else {Lexeme::Sub};
+            let right = self.parse_expr()?;
+            left = Stmt::BinaryExpr(BinaryExpression{ ttype,coin,l:left.into(),r:right.into()});
+        }
+        Ok(left)
     }
     pub fn parse_primary(&mut self) -> ParseResult {
         match self.at() {
