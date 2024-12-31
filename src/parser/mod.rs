@@ -1,6 +1,6 @@
 mod tokenizer;
 pub mod types;
-use crate::parser::tokenizer::{Tokenizer,TokenizerSettings,Token,Coin};
+use crate::parser::tokenizer::{Tokenizer,TokenizerSettings};
 use crate::parser::types::*;
 
 #[derive(Debug, PartialEq)]

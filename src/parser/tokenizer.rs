@@ -1,24 +1,4 @@
-#[derive(Debug, PartialEq, Clone)]
-pub enum Token {
-    Identifier(Coin<String>),
-    Op(Coin<String>),
-    Numeric(Coin<String>), // int or float in string form
-    Literal(Coin<String>),
-    Format(Coin<Vec<Token>>),
-    Eof,
-}
-
-#[derive(Debug, Clone)]
-pub struct Coin<T> {
-    pub val: T,
-    pub pos: usize,
-}
-
-impl<T: PartialEq> PartialEq for Coin<T> {
-    fn eq(&self, other: &Coin<T>) -> bool {
-        self.val == other.val
-    }
-}
+use crate::parser::types::{ Coin, Token };
 
 fn is_literal_left_frag(op: &str) -> bool {
     op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')

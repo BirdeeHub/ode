@@ -1,6 +1,27 @@
-use crate::parser::tokenizer::{Token, Coin};
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Token {
+    Identifier(Coin<String>),
+    Op(Coin<String>),
+    Numeric(Coin<String>), // int or float in string form
+    Literal(Coin<String>),
+    Format(Coin<Vec<Token>>),
+    Eof,
+}
+
+#[derive(Debug, Clone)]
+pub struct Coin<T> {
+    pub val: T,
+    pub pos: usize,
+}
+
+impl<T: PartialEq> PartialEq for Coin<T> {
+    fn eq(&self, other: &Coin<T>) -> bool {
+        self.val == other.val
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Lexeme {
