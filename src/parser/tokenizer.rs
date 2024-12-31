@@ -107,25 +107,6 @@ impl<'a> Tokenizer<'a> {
         tokens
     }
 
-    fn consume_comment(&mut self, block: bool) {
-        let endchar = if block {
-            self.ops_struct.blockcomend
-        } else {
-            "\n"
-        };
-        while let Some(_c) = self.get_char() {
-            let remaining = &self.input[self.position..];
-            if remaining.starts_with(endchar) {
-                let mut count = 0;
-                while count < endchar.len() {
-                    self.advance();
-                    count += 1;
-                }
-                break;
-            }
-            self.advance();
-        }
-    }
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
         let end_encloser = Ops::get_literal_end(start_encloser);
         let mut literal = String::new();
@@ -181,19 +162,24 @@ impl<'a> Tokenizer<'a> {
             Token::Literal(Coin::new(literal, start))
         }
     }
-    fn consume_op(&mut self) -> String {
-        let start = self.position;
-        let mut buffer = String::new();
-        while let Some(c) = self.get_char() {
-            buffer.push(c);
-            if !(self.ops_struct.is(buffer.as_str())
-                || self.ops_struct.is_fragment(buffer.as_str()))
-            {
+    fn consume_comment(&mut self, block: bool) {
+        let endchar = if block {
+            self.ops_struct.blockcomend
+        } else {
+            "\n"
+        };
+        while let Some(_c) = self.get_char() {
+            let remaining = &self.input[self.position..];
+            if remaining.starts_with(endchar) {
+                let mut count = 0;
+                while count < endchar.len() {
+                    self.advance();
+                    count += 1;
+                }
                 break;
             }
             self.advance();
         }
-        self.input[start..self.position].to_string()
     }
     fn consume_numeric(&mut self) -> String {
         let start = self.position;
@@ -222,6 +208,20 @@ impl<'a> Tokenizer<'a> {
             if self.ops_struct.is(&c.to_string())
                 || self.ops_struct.is_fragment(&c.to_string())
                 || c.is_whitespace()
+            {
+                break;
+            }
+            self.advance();
+        }
+        self.input[start..self.position].to_string()
+    }
+    fn consume_op(&mut self) -> String {
+        let start = self.position;
+        let mut buffer = String::new();
+        while let Some(c) = self.get_char() {
+            buffer.push(c);
+            if !(self.ops_struct.is(buffer.as_str())
+                || self.ops_struct.is_fragment(buffer.as_str()))
             {
                 break;
             }
