@@ -64,6 +64,9 @@ impl<'a> Parser<'a> {
         self.position += 1;
         res
     }
+    fn skip(&mut self) {
+        self.position += 1;
+    }
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
     }
@@ -90,7 +93,7 @@ impl<'a> Parser<'a> {
             if !matches!(coin.val.as_str(), "+" | "-") {
                 break;
             }
-            self.eat();
+            self.skip();
             let ttype = match coin.val.as_str() {
                 "+" => Lexeme::Add,
                 _ => Lexeme::Sub,
@@ -107,7 +110,7 @@ impl<'a> Parser<'a> {
             if !matches!(coin.val.as_str(), "*" | "/" | "%") {
                 break;
             }
-            self.eat();
+            self.skip();
             let ttype = match coin.val.as_str() {
                 "*" => Lexeme::Mult,
                 "/" => Lexeme::Div,
@@ -124,7 +127,7 @@ impl<'a> Parser<'a> {
             Some(Token::Numeric(_)) => self.parse_numeric(),
             Some(Token::Op(coin)) if coin.val.as_str() == "(" => {
                 let coin = coin.clone();
-                self.eat();
+                self.skip();
                 let val = self.parse_expr();
                 match self.eat() {
                     Some(Token::Op(c)) if c.val.as_str() == ")" => {},
