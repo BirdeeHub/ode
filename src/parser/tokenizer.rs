@@ -1,25 +1,5 @@
 use crate::parser::parser_types::{ Coin, Token };
 
-fn is_literal_left_frag(op: &str) -> bool {
-    op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
-}
-fn is_literal_right_frag(op: &str) -> bool {
-    op == "]" || op.starts_with("]") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
-}
-
-struct Ops<'a> {
-    blockcomstart: &'a str,
-    blockcomend: &'a str,
-    linecom: &'a str,
-    interstart: &'a str,
-    interend: &'a str,
-    enclosers: Vec<(&'a str, &'a str)>,
-    ops: &'a [&'a str],
-    charop: &'a str,
-    templop: &'a str,
-    escape_char: char,
-}
-
 pub struct TokenizerSettings<'a> {
     pub blockcomstart: &'a str,
     pub blockcomend: &'a str,
@@ -31,88 +11,6 @@ pub struct TokenizerSettings<'a> {
     pub interstart: &'a str,
     pub interend: &'a str,
     pub escape_char: char,
-}
-
-impl<'a> Ops<'a> {
-    fn new(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
-        let mut combined_ops = vec![
-            options.blockcomstart,
-            options.blockcomend,
-            options.linecom,
-            options.interstart,
-            options.interend,
-            options.charop,
-            options.templop,
-        ];
-        combined_ops.extend_from_slice(options.ops);
-        for (open, close) in options.enclosers {
-            combined_ops.push(open);
-            combined_ops.push(close);
-        }
-        let filtered_enclosers = options
-            .enclosers
-            .iter()
-            .filter(|(_, close)| *close == options.interend)
-            .cloned()
-            .collect();
-
-        // Convert Vec to slice for the new Ops struct
-        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
-
-        Ops {
-            blockcomstart: options.blockcomstart,
-            blockcomend: options.blockcomend,
-            linecom: options.linecom,
-            ops: combined_ops,
-            charop: options.charop,
-            templop: options.templop,
-            enclosers: filtered_enclosers,
-            interstart: options.interstart,
-            interend: options.interend,
-            escape_char: options.escape_char,
-        }
-    }
-
-    fn is(&self, op: &str) -> bool {
-        self.ops.contains(&op) || Ops::is_literal_left(op) || Ops::is_literal_right(op)
-    }
-    fn is_fragment(&self, op: &str) -> bool {
-        self.ops
-            .iter()
-            .any(|&op_def| op_def != op && op_def.starts_with(op))
-            || is_literal_left_frag(op)
-            || is_literal_right_frag(op)
-    }
-
-    fn is_template_op(&self, op: &str) -> bool {
-        self.templop == op
-    }
-
-    fn is_other_capturing(&self, op: &str) -> bool {
-        self.templop == op || self.charop == op
-    }
-
-    fn is_left_encloser(&self, op: &str) -> bool {
-        self.enclosers.iter().any(|(left, _)| *left == op)
-    }
-
-    fn is_right_encloser(&self, op: &str) -> bool {
-        self.enclosers.iter().any(|(right, _)| *right == op)
-    }
-
-    fn is_literal_left(op: &str) -> bool {
-        op.starts_with("[")
-            && op.len() > 1
-            && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
-    }
-    fn get_literal_end(left_lit_op: &str) -> String {
-        left_lit_op.replace("[", "]")
-    }
-    fn is_literal_right(op: &str) -> bool {
-        op.starts_with("]")
-            && op.len() > 1
-            && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
-    }
 }
 
 pub struct Tokenizer<'a> {
@@ -332,3 +230,106 @@ impl<'a> Tokenizer<'a> {
         self.input[start..self.position].to_string()
     }
 }
+
+struct Ops<'a> {
+    blockcomstart: &'a str,
+    blockcomend: &'a str,
+    linecom: &'a str,
+    interstart: &'a str,
+    interend: &'a str,
+    enclosers: Vec<(&'a str, &'a str)>,
+    ops: &'a [&'a str],
+    charop: &'a str,
+    templop: &'a str,
+    escape_char: char,
+}
+
+impl<'a> Ops<'a> {
+    fn new(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
+        let mut combined_ops = vec![
+            options.blockcomstart,
+            options.blockcomend,
+            options.linecom,
+            options.interstart,
+            options.interend,
+            options.charop,
+            options.templop,
+        ];
+        combined_ops.extend_from_slice(options.ops);
+        for (open, close) in options.enclosers {
+            combined_ops.push(open);
+            combined_ops.push(close);
+        }
+        let filtered_enclosers = options
+            .enclosers
+            .iter()
+            .filter(|(_, close)| *close == options.interend)
+            .cloned()
+            .collect();
+
+        // Convert Vec to slice for the new Ops struct
+        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
+
+        Ops {
+            blockcomstart: options.blockcomstart,
+            blockcomend: options.blockcomend,
+            linecom: options.linecom,
+            ops: combined_ops,
+            charop: options.charop,
+            templop: options.templop,
+            enclosers: filtered_enclosers,
+            interstart: options.interstart,
+            interend: options.interend,
+            escape_char: options.escape_char,
+        }
+    }
+
+    fn is(&self, op: &str) -> bool {
+        self.ops.contains(&op) || Ops::is_literal_left(op) || Ops::is_literal_right(op)
+    }
+    fn is_fragment(&self, op: &str) -> bool {
+        self.ops
+            .iter()
+            .any(|&op_def| op_def != op && op_def.starts_with(op))
+            || is_literal_left_frag(op)
+            || is_literal_right_frag(op)
+    }
+
+    fn is_template_op(&self, op: &str) -> bool {
+        self.templop == op
+    }
+
+    fn is_other_capturing(&self, op: &str) -> bool {
+        self.templop == op || self.charop == op
+    }
+
+    fn is_left_encloser(&self, op: &str) -> bool {
+        self.enclosers.iter().any(|(left, _)| *left == op)
+    }
+
+    fn is_right_encloser(&self, op: &str) -> bool {
+        self.enclosers.iter().any(|(right, _)| *right == op)
+    }
+
+    fn is_literal_left(op: &str) -> bool {
+        op.starts_with("[")
+            && op.len() > 1
+            && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
+    }
+    fn get_literal_end(left_lit_op: &str) -> String {
+        left_lit_op.replace("[", "]")
+    }
+    fn is_literal_right(op: &str) -> bool {
+        op.starts_with("]")
+            && op.len() > 1
+            && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
+    }
+}
+
+fn is_literal_left_frag(op: &str) -> bool {
+    op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
+}
+fn is_literal_right_frag(op: &str) -> bool {
+    op == "]" || op.starts_with("]") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
+}
+
