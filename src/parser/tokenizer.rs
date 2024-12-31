@@ -105,7 +105,7 @@ impl<'a> Ops<'a> {
             && op.len() > 1
             && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
-    fn get_literal_left(left_lit_op: &str) -> String {
+    fn get_literal_end(left_lit_op: &str) -> String {
         left_lit_op.replace("[", "]")
     }
     fn is_literal_right(op: &str) -> bool {
@@ -229,7 +229,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
-        let end_encloser = Ops::get_literal_left(start_encloser);
+        let end_encloser = Ops::get_literal_end(start_encloser);
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];
