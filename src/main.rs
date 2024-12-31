@@ -21,6 +21,7 @@ fn main() -> io::Result<()> {
             "No file path provided",
         ))
     }?;
+    println!("Contents: {:?}", contents);
     let mut parser = parser::Parser::new(&contents);
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
