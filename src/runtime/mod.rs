@@ -7,6 +7,7 @@ fn eval_program(code: &Stmt) -> RuntimeResult {
     let mut last: RuntimeResult = Err(RuntimeError::Teapot);
     for stmt in code.body.iter() {
         last = evaluate(stmt);
+        println!("{:?}", last);
     }
     last
 }
@@ -35,8 +36,8 @@ fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult {
 
 fn eval_binary_expr(code: &Stmt) -> RuntimeResult {
     let Stmt::BinaryExpr(binop) = code else { return Err(RuntimeError::Teapot) };
-    let Ok(lhs) = evaluate(&binop.l) else { return Err(RuntimeError::Teapot) };
-    let Ok(rhs) = evaluate(&binop.r) else { return Err(RuntimeError::Teapot) };
+    let lhs = evaluate(&binop.l)?;
+    let rhs = evaluate(&binop.r)?;
     if let RuntimeVal::Float(l) = lhs {
         if let RuntimeVal::Float(r) = rhs {
             eval_float_binary_expr(l, r, binop.ttype)
