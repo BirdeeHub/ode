@@ -70,6 +70,7 @@ impl<'a> Parser<'a> {
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
     }
+
     pub fn parse_program(&mut self) -> ParseResult {
         let mut program = Module{body: Vec::new()};
         while self.not_eof() {
@@ -77,6 +78,7 @@ impl<'a> Parser<'a> {
         }
         Ok(Stmt::Module(program))
     }
+
     pub fn parse_stmt(&mut self) -> ParseResult {
         self.parse_expr()
     }
