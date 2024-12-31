@@ -105,6 +105,7 @@ pub enum Stmt {
     Module(Module),
 }
 
+pub type ParseResult = Result<Stmt, ParseError>;
 #[derive(Debug, PartialEq)]
 pub enum ParseError {
     Teapot(Token),
@@ -121,9 +122,6 @@ impl Display for ParseError {
         write!(f, "{:?}", self)
     }
 }
-
-
-pub type ParseResult = Result<Stmt, ParseError>;
 
 #[derive(Debug, PartialEq,Clone)]
 pub struct Module {
