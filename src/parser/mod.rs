@@ -1,6 +1,5 @@
 mod tokenizer;
 pub mod types;
-use crate::parser::tokenizer::{Tokenizer,TokenizerSettings};
 use crate::parser::types::*;
 
 #[derive(Debug, PartialEq)]
@@ -11,7 +10,7 @@ pub struct Parser<'a> {
 }
 impl<'a> Parser<'a> {
     pub fn new(input_string:&'a str) -> Parser<'a> {
-        let settings = TokenizerSettings {
+        let settings = tokenizer::TokenizerSettings {
             blockcomstart: "#^",
             blockcomend: "#$",
             linecom: "#",
@@ -53,7 +52,7 @@ impl<'a> Parser<'a> {
         // "#!" "#@" <- node config enclosers
         // doubles as shebang for interpreted mode
 
-        let mut tokenizer = Tokenizer::new(input_string, &settings, false);
+        let mut tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
         let in_tokens = tokenizer.tokenize();
         Parser{ in_tokens, input_string, position: 0, }
     }
