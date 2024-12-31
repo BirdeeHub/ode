@@ -1,5 +1,5 @@
 mod tokenizer;
-mod types;
+pub mod types;
 use crate::parser::tokenizer::{Tokenizer,TokenizerSettings,Token,Coin};
 use crate::parser::types::*;
 

@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, Read};
 mod parser;
+mod runtime;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -21,8 +22,9 @@ fn main() -> io::Result<()> {
         ))
     }?;
     let mut parser = parser::Parser::new(&contents);
-    let ast = parser.parse_program();
-    println!("{:?}", ast);
+    let ast = parser.parse_program().unwrap();
+    let rtvals = runtime::evaluate(&ast);
+    println!("{:?}", rtvals);
 
     Ok(())
 }
