@@ -1,6 +1,6 @@
 mod tokenizer;
-pub mod types;
-use crate::parser::types::*;
+pub mod parser_types;
+use crate::parser::parser_types::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {

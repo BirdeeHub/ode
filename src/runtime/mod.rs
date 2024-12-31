@@ -1,5 +1,5 @@
 mod types;
-use crate::parser::types::*;
+use crate::parser::parser_types::*;
 use crate::runtime::types::*;
 
 fn eval_program(code: &Stmt) -> RuntimeResult {

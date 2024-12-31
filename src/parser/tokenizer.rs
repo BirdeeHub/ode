@@ -1,4 +1,4 @@
-use crate::parser::types::{ Coin, Token };
+use crate::parser::parser_types::{ Coin, Token };
 
 fn is_literal_left_frag(op: &str) -> bool {
     op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
