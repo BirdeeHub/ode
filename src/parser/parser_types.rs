@@ -21,7 +21,6 @@ impl<T> Coin<T> {
         Coin{val,pos}
     }
 }
-
 impl<T: PartialEq> PartialEq for Coin<T> {
     fn eq(&self, other: &Coin<T>) -> bool {
         self.val == other.val
