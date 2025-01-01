@@ -34,23 +34,28 @@ impl<'a> Parser<'a> {
             interend: "]",
             escape_char: '\\',
         };
+        /*
+        ` mutability op (lifetime if needed goes before, & goes after)
+        left (\: arg, arg -> {}) right
+        then => else !> and match ~ only
+        enum ~= constraint |= impl ^=
+        [[<T>]:`type:] [`]{}
+        <@ is value to stream/actor
+        @ is open/run stream/actor on node
+        @@ is same but on current node
+        @> is value from stream/actor
+        @>> untilcond, fallback TTL(int)
+        These are also used in message passing
+        >>> while >>| continue >>! break
 
-        // ` mutability op (lifetime if needed goes before, & goes after)
-        // \ arg, arg -> {}
-        // left (\: arg, arg -> {}) right
-        // then => else !> and match ~ only
-        // enum ~= constraint |= impl ^=
-        // [[<T>]:`type:] [`]{}
-        // <@ is value to stream/actor
-        // @ is open/run stream/actor on node
-        // @@ is same but on current node
-        // @> is value from stream/actor
-        // @>> untilcond, fallback TTL(int)
-        // These are also used in message passing
-        // >>> while >>| continue >>! break
+        :name = 5;
+        `int:name2 = 6;
 
-        // "#!" "#@" <- node config enclosers
-        // doubles as shebang for interpreted mode
+        \ ::arg, ::arg -> {}
+
+        "#!" "#@" <- node config enclosers
+        doubles as shebang for interpreted mode
+        */
 
         let mut tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
         let in_tokens = tokenizer.tokenize();
