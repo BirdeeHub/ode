@@ -98,11 +98,16 @@ pub enum Lexeme {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Stmt {
-    BinaryExpr(BinaryExpression),
-    FloatLiteral(FloatLiteral),
-    IntLiteral(IntLiteral),
-    Identifier(Identifier),
-    Module(Module),
+    FloatLiteral { coin: Coin<String>, ttype: Lexeme, val: f64 },
+    IntLiteral { coin: Coin<String>, ttype: Lexeme, val: u64 },
+    StringLiteral { coin: Coin<String>, ttype: Lexeme, val: Arc<str> },
+    Identifier { coin: Coin<String>, ttype: Lexeme, val: Arc<str> },
+    BinaryExpr { coin: Coin<String>, ttype: Lexeme, l: Arc<Stmt>, r: Arc<Stmt> },
+    PreExpr { coin: Coin<String>, ttype: Lexeme, r: Arc<Stmt> },
+    PostExpr { coin: Coin<String>, ttype: Lexeme, l: Arc<Stmt> },
+    GroupExpr { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Arc<Stmt> },
+    Scope { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Vec<Arc<Stmt>> },
+    Module { body: Vec<Arc<Stmt>> },
 }
 
 pub type ParseResult = Result<Stmt, ParseError>;
@@ -121,37 +126,4 @@ impl Display for ParseError {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
-}
-
-#[derive(Debug, PartialEq,Clone)]
-pub struct Module {
-    pub body: Vec<Arc<Stmt>>,
-}
-
-#[derive(Debug, PartialEq,Clone)]
-pub struct BinaryExpression {
-    pub coin: Coin<String>,
-    pub ttype: Lexeme,
-    pub l: Arc<Stmt>,
-    pub r: Arc<Stmt>,
-}
-
-#[derive(Debug, PartialEq,Clone)]
-pub struct FloatLiteral {
-    pub coin: Coin<String>,
-    pub ttype: Lexeme,
-    pub val: f64,
-}
-
-#[derive(Debug, PartialEq,Clone)]
-pub struct IntLiteral {
-    pub coin: Coin<String>,
-    pub ttype: Lexeme,
-    pub val: u64,
-}
-
-#[derive(Debug, PartialEq,Clone)]
-pub struct Identifier {
-    pub coin: Coin<String>,
-    pub ttype: Lexeme,
 }

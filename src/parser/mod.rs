@@ -80,11 +80,11 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_program(&mut self) -> ParseResult {
-        let mut program = Module{body: Vec::new()};
+        let mut program = Vec::new();
         while self.not_eof() {
-            program.body.push(self.parse_stmt()?.into());
+            program.push(self.parse_stmt()?.into());
         }
-        Ok(Stmt::Module(program))
+        Ok(Stmt::Module { body: program})
     }
 
     pub fn parse_stmt(&mut self) -> ParseResult {
@@ -109,7 +109,7 @@ impl<'a> Parser<'a> {
                 _ => Lexeme::Sub,
             };
             let right = self.parse_multiplicative_expr()?;
-            left = Stmt::BinaryExpr(BinaryExpression{ ttype,coin,l:left.into(),r:right.into()});
+            left = Stmt::BinaryExpr{ ttype,coin,l:left.into(),r:right.into()};
         }
         Ok(left)
     }
@@ -127,7 +127,7 @@ impl<'a> Parser<'a> {
                 _ => Lexeme::Mod,
             };
             let right = self.parse_primary_expr()?;
-            left = Stmt::BinaryExpr(BinaryExpression{ ttype,coin,l:left.into(),r:right.into()});
+            left = Stmt::BinaryExpr{ ttype,coin,l:left.into(),r:right.into()};
         }
         Ok(left)
     }
@@ -152,7 +152,7 @@ impl<'a> Parser<'a> {
     }
     pub fn parse_ident(&mut self) -> ParseResult {
         let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::InvalidIdent(self.prev().unwrap_or(&Token::Eof).clone())) };
-        Ok(Stmt::Identifier(Identifier{ ttype:Lexeme::Ident,coin:coin.clone()}))
+        Ok(Stmt::Identifier{ ttype:Lexeme::Ident,coin:coin.clone(),val:coin.val.clone().into()})
     }
     pub fn parse_numeric(&mut self) -> ParseResult {
         // coin is coin.val (which is a string) and coin.pos
@@ -160,14 +160,14 @@ impl<'a> Parser<'a> {
         let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::InvalidNumber(self.prev().unwrap_or(&Token::Eof).clone())) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
         if let Ok(val) = value.parse::<u64>() {
-            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
+            Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val})
         } else if let Ok(val) = value.parse::<f64>() {
-            Ok(Stmt::FloatLiteral(FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val}))
+            Ok(Stmt::FloatLiteral{ ttype:Lexeme::Float,coin:coin.clone(),val})
         } else if let Some(stripped) = value.strip_prefix("0x") {
             let Ok(val) = u64::from_str_radix(stripped, 16) else {
                 return Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
             };
-            Ok(Stmt::IntLiteral(IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val}))
+            Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val})
         } else {
             Err(ParseError::InvalidNumber(Token::Numeric(coin.clone())))
         }

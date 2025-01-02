@@ -1,11 +1,11 @@
 mod types;
 use crate::parser::parser_types::*;
+use std::sync::Arc;
 use crate::runtime::types::*;
 
-fn eval_program(code: &Stmt) -> RuntimeResult {
-    let Stmt::Module(code) = code else { return Err(RuntimeError::Teapot) };
+fn eval_program(code: &[Arc<Stmt>]) -> RuntimeResult {
     let mut last: RuntimeResult = Err(RuntimeError::Teapot);
-    for stmt in code.body.iter() {
+    for stmt in code.iter() {
         last = evaluate(stmt);
         println!("{:?}", last);
     }
@@ -34,33 +34,32 @@ fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult {
     }
 }
 
-fn eval_binary_expr(code: &Stmt) -> RuntimeResult {
-    let Stmt::BinaryExpr(binop) = code else { return Err(RuntimeError::Teapot) };
-    let lhs = evaluate(&binop.l)?;
-    let rhs = evaluate(&binop.r)?;
-    if let RuntimeVal::Float(l) = lhs {
-        if let RuntimeVal::Float(r) = rhs {
-            eval_float_binary_expr(l, r, binop.ttype)
+fn eval_binary_expr(coin: Coin<String>, ttype: Lexeme, l: &Stmt, r: &Stmt) -> RuntimeResult {
+    let lhs = evaluate(l)?;
+    let rhs = evaluate(r)?;
+    if let RuntimeVal::Float(ls) = lhs {
+        if let RuntimeVal::Float(rs) = rhs {
+            eval_float_binary_expr(ls, rs, ttype)
         } else {
             Err(RuntimeError::TypeError("cannot add a float to another type"))
         }
-    } else if let RuntimeVal::Int(l) = lhs {
-        if let RuntimeVal::Int(r) = rhs {
-            eval_int_binary_expr(l, r, binop.ttype)
+    } else if let RuntimeVal::Int(ls) = lhs {
+        if let RuntimeVal::Int(rs) = rhs {
+            eval_int_binary_expr(ls, rs, ttype)
         } else {
             Err(RuntimeError::TypeError("cannot add an int to another type"))
         }
     } else {
-        Err(RuntimeError::Teapot)
+        Err(RuntimeError::TypeError("math expr on non-number"))
     }
 }
 
 pub fn evaluate(code: &Stmt) -> RuntimeResult {
     match code {
-        Stmt::IntLiteral(val) => Ok(RuntimeVal::Int(val.val as i64)),
-        Stmt::FloatLiteral(val) => Ok(RuntimeVal::Float(val.val)),
-        Stmt::BinaryExpr(expr) => eval_binary_expr(&Stmt::BinaryExpr(expr.clone())),
-        Stmt::Module(expr) => eval_program(&Stmt::Module(expr.clone())),
+        Stmt::IntLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Int(*val as i64)),
+        Stmt::FloatLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Float(*val)),
+        Stmt::BinaryExpr { coin, ttype, l, r } => eval_binary_expr(coin.clone(), *ttype, l, r),
+        Stmt::Module { body } => eval_program(&body[..]),
         _ => todo!(),
     }
 }
