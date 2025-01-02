@@ -4,10 +4,10 @@ pub enum RuntimeVal {
     Int(i64),
 }
 
-pub type RuntimeResult = Result<RuntimeVal, RuntimeError>;
+pub type RuntimeResult<'a> = Result<RuntimeVal, RuntimeError<'a>>;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum RuntimeError {
-    TypeError(&'static str),
+pub enum RuntimeError<'a> {
+    TypeError(&'a str),
     Teapot,
 }

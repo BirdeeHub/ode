@@ -12,7 +12,7 @@ fn eval_program(code: &[Arc<Stmt>]) -> RuntimeResult {
     last
 }
 
-fn eval_float_binary_expr(lhs: f64, rhs: f64, op: Lexeme) -> RuntimeResult {
+fn eval_float_binary_expr(lhs: f64, rhs: f64, op: Lexeme) -> RuntimeResult<'static> {
     match op {
         Lexeme::Add => Ok(RuntimeVal::Float(lhs + rhs)),
         Lexeme::Sub => Ok(RuntimeVal::Float(lhs - rhs)),
@@ -23,7 +23,7 @@ fn eval_float_binary_expr(lhs: f64, rhs: f64, op: Lexeme) -> RuntimeResult {
     }
 }
 
-fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult {
+fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult<'static> {
     match op {
         Lexeme::Add => Ok(RuntimeVal::Int(lhs + rhs)),
         Lexeme::Sub => Ok(RuntimeVal::Int(lhs - rhs)),
@@ -34,7 +34,7 @@ fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult {
     }
 }
 
-fn eval_binary_expr(coin: Coin<String>, ttype: Lexeme, l: &Stmt, r: &Stmt) -> RuntimeResult {
+fn eval_binary_expr<'a>(coin: Coin<String>, ttype: Lexeme, l: &'a Stmt, r: &'a Stmt) -> RuntimeResult<'a> {
     let lhs = evaluate(l)?;
     let rhs = evaluate(r)?;
     if let RuntimeVal::Float(ls) = lhs {
