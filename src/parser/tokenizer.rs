@@ -28,11 +28,13 @@ pub struct Tokenizer<'a> {
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
     fn next(&mut self) -> Option<Token> {
-        if self.outpos >= self.out.len() {
+        if self.outpos + 1 >= self.out.len() {
             self.populate_next();
         }
         let ret = self.out.get(self.outpos).cloned()?;
-        self.outpos += 1;
+        if self.outpos < self.out.len() {
+            self.outpos += 1;
+        }
         Some(ret)
     }
 }
@@ -61,10 +63,9 @@ impl<'a> Tokenizer<'a> {
     }
 
     pub fn skip(&mut self) {
-        self.outpos += 1;
-        if self.outpos >= self.out.len() {
-            self.populate_next();
-        };
+        if self.outpos < self.out.len() || (self.outpos + 1 >= self.out.len() && self.populate_next()) {
+            self.outpos += 1;
+        }
     }
 
     fn get_char(&self) -> Option<char> {
@@ -75,21 +76,29 @@ impl<'a> Tokenizer<'a> {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
 
-    pub fn populate_next(&mut self) {
+    pub fn populate_next(&mut self) -> bool {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
+        let mut is_err = false;
         while let Some(c) = self.get_char() {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
-                    self.consume_capturing(&mut tokens, self.ops_struct.interstart)
+                    let Some(ret) = self.consume_capturing(&mut tokens, self.ops_struct.interstart) else {
+                        is_err = true;
+                        break;
+                    };
+                    ret
                 }
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
                 {
                     let pos = self.position;
-                    let op = self.consume_op();
+                    let Some(op) = self.consume_op() else {
+                        is_err = true;
+                        break;
+                    };
                     match op {
                         _ if op == self.ops_struct.blockcomstart => {
                             self.consume_comment(true);
@@ -101,11 +110,19 @@ impl<'a> Tokenizer<'a> {
                         }
                         _ if Ops::is_literal_left(&op) => {
                             tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                            self.consume_literal(&mut tokens, &op)
+                            let Some(op) = self.consume_literal(&mut tokens, &op) else {
+                                is_err = true;
+                                break;
+                            };
+                            op
                         }
                         _ if self.ops_struct.is_other_capturing(&op) => {
                             tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                            self.consume_capturing(&mut tokens, &op)
+                            let Some(op) = self.consume_literal(&mut tokens, &op) else {
+                                is_err = true;
+                                break;
+                            };
+                            op
                         }
                         _ if self.in_template && self.ops_struct.is_right_encloser(&op)
                             || self.ops_struct.interend == op =>
@@ -140,10 +157,12 @@ impl<'a> Tokenizer<'a> {
         for token in tokens {
             self.out.push(token)
         }
+        is_err
     }
 
-    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
+    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Option<Token> {
         let end_encloser = Ops::get_literal_end(start_encloser);
+        let start = self.position;
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             let remaining = &self.input[self.position..];
@@ -157,11 +176,15 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
             literal.push(c);
+            if self.get_char().is_none() {
+                self.position = start;
+                return None;
+            }
         }
         tokens.push(Token::Literal(Coin::new(literal, self.position)));
-        Token::Op(Coin::new(end_encloser, self.position))
+        Some(Token::Op(Coin::new(end_encloser, self.position)))
     }
-    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
+    fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Option<Token> {
         let mut literal = String::new();
         let start = self.position;
         let mut is_escaped = false;
@@ -181,6 +204,10 @@ impl<'a> Tokenizer<'a> {
             } else {
                 literal.push(c);
             }
+            if self.get_char().is_none() {
+                self.position = start;
+                return None;
+            }
         }
         if !self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
@@ -193,16 +220,16 @@ impl<'a> Tokenizer<'a> {
             } else {
                 tokens.push(Token::Literal(Coin::new(literal, start)));
             }
-            Token::Op(Coin::new(end_encloser.to_string(), self.position))
+            Some(Token::Op(Coin::new(end_encloser.to_string(), self.position)))
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokenizer = Tokenizer::new(&literal, self.options, true);
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
             }
-            Token::Format(Coin::new(format_tokens, start))
+            Some(Token::Format(Coin::new(format_tokens, start)))
         } else {
-            Token::Literal(Coin::new(literal, start))
+            Some(Token::Literal(Coin::new(literal, start)))
         }
     }
     fn consume_comment(&mut self, block: bool) {
@@ -258,7 +285,7 @@ impl<'a> Tokenizer<'a> {
         }
         self.input[start..self.position].to_string()
     }
-    fn consume_op(&mut self) -> String {
+    fn consume_op(&mut self) -> Option<String> {
         let start = self.position;
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
@@ -270,7 +297,11 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
         }
-        self.input[start..self.position].to_string()
+        if !self.ops_struct.is(&self.input[start..self.position]) {
+            self.position = start;
+            return None;
+        }
+        Some(self.input[start..self.position].to_string())
     }
 }
 
