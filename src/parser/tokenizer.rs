@@ -95,51 +95,51 @@ impl<'a> Tokenizer<'a> {
                     || self.ops_struct.is_fragment(&c.to_string()) =>
                 {
                     let pos = self.position;
-                    let Some(op) = self.consume_op() else {
-                        is_err = true;
-                        break;
-                    };
-                    match op {
-                        _ if op == self.ops_struct.blockcomstart => {
-                            self.consume_comment(true);
-                            continue;
-                        }
-                        _ if op == self.ops_struct.linecom => {
-                            self.consume_comment(false);
-                            continue;
-                        }
-                        _ if Ops::is_literal_left(&op) => {
-                            tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                            let Some(op) = self.consume_literal(&mut tokens, &op) else {
-                                is_err = true;
-                                break;
-                            };
-                            op
-                        }
-                        _ if self.ops_struct.is_other_capturing(&op) => {
-                            tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                            let Some(op) = self.consume_literal(&mut tokens, &op) else {
-                                is_err = true;
-                                break;
-                            };
-                            op
-                        }
-                        _ if self.in_template && self.ops_struct.is_right_encloser(&op)
-                            || self.ops_struct.interend == op =>
-                        {
-                            if level == 0 {
-                                is_templ_literal = true;
-                            } else {
-                                level -= 1;
+                    if let Some(op) = self.consume_op() {
+                        match op {
+                            _ if op == self.ops_struct.blockcomstart => {
+                                self.consume_comment(true);
+                                continue;
                             }
-                            Token::Op(Coin::new(op.clone(),pos))
+                            _ if op == self.ops_struct.linecom => {
+                                self.consume_comment(false);
+                                continue;
+                            }
+                            _ if Ops::is_literal_left(&op) => {
+                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                let Some(op) = self.consume_literal(&mut tokens, &op) else {
+                                    is_err = true;
+                                    break;
+                                };
+                                op
+                            }
+                            _ if self.ops_struct.is_other_capturing(&op) => {
+                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                let Some(op) = self.consume_literal(&mut tokens, &op) else {
+                                    is_err = true;
+                                    break;
+                                };
+                                op
+                            }
+                            _ if self.in_template && self.ops_struct.is_right_encloser(&op)
+                                || self.ops_struct.interend == op =>
+                            {
+                                if level == 0 {
+                                    is_templ_literal = true;
+                                } else {
+                                    level -= 1;
+                                }
+                                Token::Op(Coin::new(op.clone(),pos))
+                            }
+                            _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
+                                level += 1;
+                                Token::Op(Coin::new(op.clone(),pos))
+                            }
+                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op.clone(),pos)),
+                            _ => Token::Identifier(Coin::new(op.clone(),pos)),
                         }
-                        _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
-                            level += 1;
-                            Token::Op(Coin::new(op.clone(),pos))
-                        }
-                        _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op.clone(),pos)),
-                        _ => Token::Identifier(Coin::new(op.clone(),pos)),
+                    } else {
+                        Token::Op(Coin::new(self.consume_identifier(),pos))
                     }
                 }
                 _ if c.is_whitespace() => {
@@ -154,8 +154,10 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
         }
-        for token in tokens {
-            self.out.push(token)
+        if ! is_err {
+            for token in tokens {
+                self.out.push(token)
+            }
         }
         is_err
     }
@@ -274,12 +276,17 @@ impl<'a> Tokenizer<'a> {
     }
     fn consume_identifier(&mut self) -> String {
         let start = self.position;
+        let mut buffer = String::new();
         while let Some(c) = self.get_char() {
-            if self.ops_struct.is(&c.to_string())
-                || self.ops_struct.is_fragment(&c.to_string())
+            if self.ops_struct.is_fragment(&c.to_string()) {
+                buffer.push(c);
+            } else if self.ops_struct.is(&c.to_string())
+                || self.ops_struct.is(buffer.as_str())
                 || c.is_whitespace()
             {
                 break;
+            } else {
+                buffer.clear()
             }
             self.advance();
         }

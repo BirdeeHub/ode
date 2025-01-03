@@ -60,6 +60,7 @@ impl<'a> Parser<'a> {
         let tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
         let mut in_tokens = Vec::new();
         for token in tokenizer {
+            println!("{:?}", token);
             in_tokens.push(token);
         }
         Parser{ in_tokens, input_string, position: 0, }
