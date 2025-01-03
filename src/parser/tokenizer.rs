@@ -31,9 +31,9 @@ impl<'a> Iterator for Tokenizer<'a> {
         if self.outpos >= self.out.len() {
             self.populate_next();
         }
-        let ret = self.out.get(self.outpos).cloned();
+        let ret = self.out.get(self.outpos).cloned()?;
         self.outpos += 1;
-        ret
+        Some(ret)
     }
 }
 
