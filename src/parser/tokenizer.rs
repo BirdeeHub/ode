@@ -1,5 +1,6 @@
 use crate::parser::parser_types::{ Coin, Token };
 
+#[derive(Debug)]
 pub struct TokenizerSettings<'a> {
     pub blockcomstart: &'a str,
     pub blockcomend: &'a str,
@@ -13,12 +14,27 @@ pub struct TokenizerSettings<'a> {
     pub escape_char: char,
 }
 
+#[derive(Debug)]
 pub struct Tokenizer<'a> {
     input: &'a str,
     position: usize,
     ops_struct: Ops<'a>,
     in_template: bool,
     options: &'a TokenizerSettings<'a>,
+    out: Vec<Token>,
+    outpos: usize,
+}
+
+impl<'a> Iterator for Tokenizer<'a> {
+    type Item = Token;
+    fn next(&mut self) -> Option<Token> {
+        if self.outpos >= self.out.len() {
+            self.populate_next();
+        }
+        let ret = self.out.get(self.outpos).cloned();
+        self.outpos += 1;
+        ret
+    }
 }
 
 impl<'a> Tokenizer<'a> {
@@ -27,13 +43,28 @@ impl<'a> Tokenizer<'a> {
         options: &'a TokenizerSettings<'a>,
         in_template: bool,
     ) -> Tokenizer<'a> {
-        Tokenizer {
+        let mut ret = Tokenizer {
             input,
             position: 0,
             ops_struct: Ops::new(options),
             in_template,
             options,
-        }
+            out: Vec::new(),
+            outpos: 0,
+        };
+        ret.populate_next();
+        ret
+    }
+
+    pub fn at(&self) -> Option<Token> {
+        self.out.get(self.outpos).cloned()
+    }
+
+    pub fn skip(&mut self) {
+        self.outpos += 1;
+        if self.outpos >= self.out.len() {
+            self.populate_next();
+        };
     }
 
     fn get_char(&self) -> Option<char> {
@@ -44,7 +75,7 @@ impl<'a> Tokenizer<'a> {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
 
-    pub fn tokenize(&mut self) -> Vec<Token> {
+    pub fn populate_next(&mut self) {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
@@ -102,9 +133,13 @@ impl<'a> Tokenizer<'a> {
                 _ => Token::Identifier(Coin::new(self.consume_identifier(), self.position)),
             };
             tokens.push(token);
+            if ! self.in_template {
+                break;
+            }
         }
-        tokens.push(Token::Eof);
-        tokens
+        for token in tokens {
+            self.out.push(token)
+        }
     }
 
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
@@ -149,14 +184,22 @@ impl<'a> Tokenizer<'a> {
         }
         if !self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
+                let format_tokenizer = Tokenizer::new(&literal, self.options, true);
+                let mut format_tokens = Vec::new();
+                for token in format_tokenizer {
+                    format_tokens.push(token);
+                }
                 tokens.push(Token::Format(Coin::new(format_tokens, start)));
             } else {
                 tokens.push(Token::Literal(Coin::new(literal, start)));
             }
             Token::Op(Coin::new(end_encloser.to_string(), self.position))
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokens = Tokenizer::new(&literal, self.options, true).tokenize();
+            let format_tokenizer = Tokenizer::new(&literal, self.options, true);
+            let mut format_tokens = Vec::new();
+            for token in format_tokenizer {
+                format_tokens.push(token);
+            }
             Token::Format(Coin::new(format_tokens, start))
         } else {
             Token::Literal(Coin::new(literal, start))
@@ -231,6 +274,7 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
+#[derive(Debug)]
 struct Ops<'a> {
     blockcomstart: &'a str,
     blockcomend: &'a str,

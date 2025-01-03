@@ -59,7 +59,7 @@ pub fn evaluate(code: &Stmt) -> RuntimeResult {
         Stmt::IntLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Int(*val as i64)),
         Stmt::FloatLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Float(*val)),
         Stmt::BinaryExpr { coin, ttype, l, r } => eval_binary_expr(coin.clone(), *ttype, l, r),
-        Stmt::Module { body } => eval_program(&body[..]),
+        Stmt::Module { body, ttype: _ } => eval_program(&body[..]),
         _ => todo!(),
     }
 }

@@ -94,6 +94,7 @@ pub enum Lexeme {
     Spawn, // @
     Format,
     Pattern,
+    Module,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -107,7 +108,7 @@ pub enum Stmt {
     PostExpr { coin: Coin<String>, ttype: Lexeme, l: Arc<Stmt> },
     GroupExpr { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Arc<Stmt> },
     Scope { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Vec<Arc<Stmt>> },
-    Module { body: Vec<Arc<Stmt>> },
+    Module { body: Vec<Arc<Stmt>>, ttype: Lexeme },
 }
 
 pub type ParseResult = Result<Stmt, ParseError>;

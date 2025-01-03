@@ -57,8 +57,11 @@ impl<'a> Parser<'a> {
         doubles as shebang for interpreted mode
         */
 
-        let mut tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
-        let in_tokens = tokenizer.tokenize();
+        let tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
+        let mut in_tokens = Vec::new();
+        for token in tokenizer {
+            in_tokens.push(token);
+        }
         Parser{ in_tokens, input_string, position: 0, }
     }
     fn at(&self) -> Option<&Token> {
@@ -84,7 +87,7 @@ impl<'a> Parser<'a> {
         while self.not_eof() {
             program.push(self.parse_stmt()?.into());
         }
-        Ok(Stmt::Module { body: program})
+        Ok(Stmt::Module { body: program, ttype: Lexeme::Module})
     }
 
     pub fn parse_stmt(&mut self) -> ParseResult {
