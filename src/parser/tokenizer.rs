@@ -178,6 +178,9 @@ impl<'a> Tokenizer<'a> {
         for token in tokens {
             self.out.push(token)
         }
+        if self.get_char().is_none() && ! self.in_template && self.out.last() != Some(&Token::Eof) {
+            self.out.push(Token::Eof)
+        }
         ret
     }
 
