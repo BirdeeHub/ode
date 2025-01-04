@@ -61,6 +61,11 @@ impl<'a> Parser<'a> {
             [type][:]varname = value;
             <- varname;
         }
+        [type] {
+            [type]:varname2 = varname;
+            <- varname;
+            [type]:varname = value;
+        }
         [type] `{
             [type][:]varname = value;
             varname
@@ -74,7 +79,7 @@ impl<'a> Parser<'a> {
 
         \& makes it so that you can have multiple mutable refs?
         but dereference becomes the function defined and returns an option?
-        You cant read or write to the value except by using this if defined?
+        You cant read or write to the value if you dont own it except by using this if defined?
         Is defined at use site of mutable types?
         Possibly mutable types define a signature for it?
         Will be used instead of unsafe?
