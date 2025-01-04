@@ -125,12 +125,10 @@ impl<'a> Tokenizer<'a> {
                     if let Some(op) = self.consume_op() {
                         match op {
                             _ if op == self.ops_struct.blockcomstart => {
-                                self.consume_comment(true);
-                                continue;
+                                Token::Comment(Coin::new(self.consume_comment(true), pos))
                             }
                             _ if op == self.ops_struct.linecom => {
-                                self.consume_comment(false);
-                                continue;
+                                Token::Comment(Coin::new(self.consume_comment(false), pos))
                             }
                             _ if self.in_template && self.ops_struct.is_right_encloser(&op)
                                 || self.ops_struct.interend == op => {
@@ -188,9 +186,7 @@ impl<'a> Tokenizer<'a> {
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             if self.remaining_starts_with(&end_encloser) {
-                let mut count = 0;
-                while count < end_encloser.len() {
-                    count += 1;
+                for _ in 0..end_encloser.len() {
                     self.advance();
                 }
                 break;
@@ -209,9 +205,7 @@ impl<'a> Tokenizer<'a> {
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
             if self.remaining_starts_with(end_encloser) && !is_escaped {
-                let mut count = 0;
-                while count < end_encloser.len() {
-                    count += 1;
+                for _ in 0..end_encloser.len() {
                     self.advance();
                 }
                 break;
@@ -246,23 +240,23 @@ impl<'a> Tokenizer<'a> {
             Token::Literal(Coin::new(literal, start))
         }
     }
-    fn consume_comment(&mut self, block: bool) {
+    fn consume_comment(&mut self, block: bool) -> String {
         let endchar = if block {
             self.ops_struct.blockcomend
         } else {
             "\n"
         };
+        let start = self.pos();
         while let Some(_c) = self.get_char() {
             if self.remaining_starts_with(endchar) {
-                let mut count = 0;
-                while count < endchar.len() {
+                for _ in 0..endchar.len() {
                     self.advance();
-                    count += 1;
                 }
                 break;
             }
             self.advance();
         }
+        self.get_until_now(start)
     }
     fn consume_numeric(&mut self) -> String {
         let start = self.pos();

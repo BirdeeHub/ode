@@ -7,6 +7,7 @@ pub enum Token {
     Op(Coin<String>),
     Numeric(Coin<String>), // int or float in string form
     Literal(Coin<String>),
+    Comment(Coin<String>),
     Format(Coin<Vec<Token>>),
     Eof,
 }
