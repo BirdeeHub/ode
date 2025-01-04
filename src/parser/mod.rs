@@ -1,6 +1,7 @@
 mod tokenizer;
 pub mod parser_types;
 use crate::parser::parser_types::*;
+use crate::parser::tokenizer::Tokenizer;
 
 #[derive(Debug, PartialEq)]
 pub struct Parser<'a> {
@@ -57,10 +58,10 @@ impl<'a> Parser<'a> {
         doubles as shebang for interpreted mode
         */
 
-        let tokenizer = tokenizer::Tokenizer::new(input_string, &settings);
+        let tokenizer = Tokenizer::new(input_string, &settings);
         let mut in_tokens = Vec::new();
         for token in tokenizer {
-            println!("{:?}", token);
+            println!("{token:?}");
             in_tokens.push(token);
         }
         Parser{ in_tokens, input_string, position: 0, }
