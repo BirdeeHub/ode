@@ -21,38 +21,69 @@ impl<'a> Parser<'a> {
                 "!=", "==", "<=", ">=",
                 "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
                 "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
-                "`", "&", "*", "\\&",
-                "=>", "!>", "~",
-                "_=", "^=", "~=",
+                "'", "&", "*", "\\&",
+                "=>", "!>",
                 ">>>", ">>|", ">>!",
                 "<@", "@", "@@", "@>", "@>>",
                 ":", ".", ",", ";",
             ],
-            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#!", "#@")],
-            charop: "'",
+            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")],
+            charop: "`",
             templop: "\"",
             interstart: "$[",
             interend: "]",
             escape_char: '\\',
         };
         /*
-        ` mutability op (lifetime if needed goes before, & goes after)
-        left (\: arg, arg -> {}) right
-        then => else !> and match ~ only
-        enum ~= constraint |= impl ^=
-        [[<T>]:`type:] [`]{}
+        ` for chars
+        ' mutability op (lifetime if needed goes before, & goes after)
+        left (\: type:default:argname, ::arg2 -> {}) right
+        \ type:default:argname, ::arg -> rettype {}
+        then => else !> and match # only
+
+        struct:name:<T> [`]{
+          name:type:default;
+        }
+        trait:name:[<T>] [`]{
+          name:type;
+        }
+        enum:name:[<T>] [`]{
+          name:type;
+        }
+
+        Impl
+        <T>:[type,names]:structname [`]{
+          name = value;
+        }
+
+        Scope
+        [type] [`]{
+            [type][:]varname = value;
+            <- varname;
+        }
+        [type] {
+            [type][:]varname = value;
+            varname
+        }
+
+        Match
+        val [type] [`]{
+            Pattern[,][cond] -> val+2;
+            !> val-2;
+        }
+
         <@ is value to stream/actor
         @ is open/run stream/actor on node
         @@ is same but on current node
         @> is value from stream/actor
         @>> untilcond, fallback TTL(int)
-        These are also used in message passing
-        >>> while >>| continue >>! break
+        >>> while ->
+        >>| continue
+        >>! break
 
         :name = 5;
         `int:name2 = 6;
 
-        \ ::arg, ::arg -> {}
 
         "#!" "#@" <- node config enclosers
         doubles as shebang for interpreted mode
