@@ -98,14 +98,16 @@ impl<'a> Tokenizer<'a> {
     fn remaining_starts_with(&mut self, pat: &str) -> bool {
         self.input[self.position..].starts_with(pat)
     }
+    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
+        self.position
+    }
+    //TODO: remove these by refactoring to make the above todo possible without
+    // holding onto the entire preceeding input stream
     fn get_until_now(&self, start: usize) -> String {
         self.input[start..self.position].to_string()
     }
     fn backtrack(&mut self, chars: usize) {
         self.position -= chars;
-    }
-    fn pos(&self) -> usize {
-        self.position
     }
 
     fn populate_next(&mut self) -> bool {
