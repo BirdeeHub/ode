@@ -98,14 +98,10 @@ impl<'a> Tokenizer<'a> {
     fn remaining_starts_with(&mut self, pat: &str) -> bool {
         self.input[self.position..].starts_with(pat)
     }
-    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
+    fn pos(&self) -> usize { // <- NOTE: for adding debug info only, currently in terms of bytes, should be in terms of chars
         self.position
     }
-    //TODO: remove these by refactoring to make the above todo possible without
-    // holding onto the entire preceeding input stream
-    fn get_until_now(&self, start: usize) -> String {
-        self.input[start..self.position].to_string()
-    }
+    //TODO: replace with arbitrary length peekahead
     fn backtrack(&mut self, chars: usize) {
         self.position -= chars;
     }
@@ -290,22 +286,23 @@ impl<'a> Tokenizer<'a> {
         buffer.replace("_","")
     }
     fn consume_identifier(&mut self) -> String {
-        let start = self.pos();
         let mut buffer = String::new();
+        let mut opbuffer = String::new();
         while let Some(c) = self.get_char() {
-            buffer.push(c);
+            opbuffer.push(c);
             if c.is_whitespace() || self.ops_struct.is(&c.to_string()) {
                 break;
-            } else if self.ops_struct.is(buffer.as_str()) {
-                self.backtrack(buffer.len());
+            } else if self.ops_struct.is(opbuffer.as_str()) {
+                self.backtrack(opbuffer.len());
                 break;
             }
-            if ! self.ops_struct.is_fragment(buffer.as_str()) {
-                buffer.clear();
+            if ! self.ops_struct.is_fragment(opbuffer.as_str()) {
+                buffer.push_str(opbuffer.as_str());
+                opbuffer.clear();
             }
             self.advance();
         }
-        self.get_until_now(start)
+        buffer
     }
     fn consume_op(&mut self) -> Option<String> {
         let mut buffer = String::new();
