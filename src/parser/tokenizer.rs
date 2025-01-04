@@ -28,9 +28,9 @@ pub struct Tokenizer<'a> {
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
-        let hasnext = self.has_next();
+        self.has_next();
         let ret = self.at();
-        if hasnext { self.skip() };
+        self.skip();
         ret
     }
 }
