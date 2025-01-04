@@ -38,6 +38,16 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
+    pub fn at(&self) -> Option<Token> {
+        self.out.get(self.outpos).cloned()
+    }
+    pub fn has_next(&mut self) -> bool {
+        self.outpos < self.out.len() || (
+            self.outpos + 1 >= self.out.len()
+            && self.populate_next()
+            && self.outpos < self.out.len()
+        )
+    }
     pub fn new(
         input: &'a str,
         options: &'a TokenizerSettings<'a>,
@@ -53,16 +63,6 @@ impl<'a> Tokenizer<'a> {
         };
         ret.populate_next();
         ret
-    }
-    pub fn at(&self) -> Option<Token> {
-        self.out.get(self.outpos).cloned()
-    }
-    pub fn has_next(&mut self) -> bool {
-        self.outpos < self.out.len() || (
-            self.outpos + 1 >= self.out.len()
-            && self.populate_next()
-            && self.outpos < self.out.len()
-        )
     }
 
     fn new_template_tokenizer(
