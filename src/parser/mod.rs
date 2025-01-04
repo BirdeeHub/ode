@@ -60,10 +60,14 @@ impl<'a> Parser<'a> {
 
         let tokenizer = Tokenizer::new(input_string, &settings);
         let mut in_tokens = Vec::new();
+        let mut position = 0;
         for token in tokenizer {
             println!("{token:?}");
             in_tokens.push(token);
+            position += 1;
         }
+        println!("tokens {}", in_tokens.len());
+        println!("position {}", position);
         Parser{ in_tokens, input_string, position: 0, }
     }
     fn at(&self) -> Option<&Token> {
