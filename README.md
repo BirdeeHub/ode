@@ -14,6 +14,8 @@ This is effectively just me drawing in the margins of my notebook for now.
 
 But the idea is cool, I was forced to. An ode to an idea I guess.
 
+Again, the idea is cool, but the experiment as to if it is good is still in progress.
+
 ### Planning notes:
 
 ```hs
