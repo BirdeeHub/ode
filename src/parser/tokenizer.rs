@@ -83,18 +83,18 @@ impl<'a> Tokenizer<'a> {
         self.outpos < self.out.len() || (self.outpos + 1 >= self.out.len() && self.populate_next())
     }
 
+    //TODO: implement these 4 in terms of an iterator over chars or a stream or something
+    // so that you can pass in an input stream rather than a finished entire input
+    // for now though, this is fine.
     fn get_char(&self) -> Option<char> {
         self.input[self.position..].chars().next()
     }
-
     fn advance(&mut self) {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
-
     fn remaining_starts_with(&mut self, pat: &str) -> bool {
         self.input[self.position..].starts_with(pat)
     }
-
     fn get_until_now(&self, start: usize) -> String {
         self.input[start..self.position].to_string()
     }
