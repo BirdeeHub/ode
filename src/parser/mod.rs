@@ -57,7 +57,7 @@ impl<'a> Parser<'a> {
         doubles as shebang for interpreted mode
         */
 
-        let tokenizer = tokenizer::Tokenizer::new(input_string, &settings, false);
+        let tokenizer = tokenizer::Tokenizer::new(input_string, &settings);
         let mut in_tokens = Vec::new();
         for token in tokenizer {
             println!("{:?}", token);

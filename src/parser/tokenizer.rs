@@ -40,16 +40,31 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn new(
+    fn new_template_tokenizer(
         input: &'a str,
         options: &'a TokenizerSettings<'a>,
-        in_template: bool,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             position: 0,
             ops_struct: Ops::new(options),
-            in_template,
+            in_template: true,
+            options,
+            out: Vec::new(),
+            outpos: 0,
+        };
+        ret.populate_next();
+        ret
+    }
+    pub fn new(
+        input: &'a str,
+        options: &'a TokenizerSettings<'a>,
+    ) -> Tokenizer<'a> {
+        let mut ret = Tokenizer {
+            input,
+            position: 0,
+            ops_struct: Ops::new(options),
+            in_template: false,
             options,
             out: Vec::new(),
             outpos: 0,
@@ -209,7 +224,7 @@ impl<'a> Tokenizer<'a> {
         }
         if !self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokenizer = Tokenizer::new(&literal, self.options, true);
+                let format_tokenizer = Tokenizer::new_template_tokenizer(&literal, self.options);
                 let mut format_tokens = Vec::new();
                 for token in format_tokenizer {
                     format_tokens.push(token);
@@ -220,7 +235,7 @@ impl<'a> Tokenizer<'a> {
             }
             Some(Token::Op(Coin::new(end_encloser.to_string(), self.position)))
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokenizer = Tokenizer::new(&literal, self.options, true);
+            let format_tokenizer = Tokenizer::new_template_tokenizer(&literal, self.options);
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
