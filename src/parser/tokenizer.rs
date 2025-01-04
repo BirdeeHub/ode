@@ -38,22 +38,6 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    fn new_template_tokenizer(
-        input: &'a str,
-        options: &'a TokenizerSettings<'a>,
-    ) -> Tokenizer<'a> {
-        let mut ret = Tokenizer {
-            input,
-            position: 0,
-            ops_struct: Ops::new(options),
-            in_template: true,
-            options,
-            out: Vec::new(),
-            outpos: 0,
-        };
-        ret.populate_next();
-        ret
-    }
     pub fn new(
         input: &'a str,
         options: &'a TokenizerSettings<'a>,
@@ -70,11 +54,9 @@ impl<'a> Tokenizer<'a> {
         ret.populate_next();
         ret
     }
-
     pub fn at(&self) -> Option<Token> {
         self.out.get(self.outpos).cloned()
     }
-
     pub fn has_next(&mut self) -> bool {
         self.outpos < self.out.len() || (
             self.outpos + 1 >= self.out.len()
@@ -83,6 +65,22 @@ impl<'a> Tokenizer<'a> {
         )
     }
 
+    fn new_template_tokenizer(
+        input: &'a str,
+        options: &'a TokenizerSettings<'a>,
+    ) -> Tokenizer<'a> {
+        let mut ret = Tokenizer {
+            input,
+            position: 0,
+            ops_struct: Ops::new(options),
+            in_template: true,
+            options,
+            out: Vec::new(),
+            outpos: 0,
+        };
+        ret.populate_next();
+        ret
+    }
     //TODO: implement these 4 in terms of an iterator over chars or a stream or something
     // so that you can pass in an input stream rather than a finished entire input
     // for now though, this is fine.
@@ -99,7 +97,7 @@ impl<'a> Tokenizer<'a> {
         self.input[start..self.position].to_string()
     }
 
-    pub fn populate_next(&mut self) -> bool {
+    fn populate_next(&mut self) -> bool {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
