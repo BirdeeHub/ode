@@ -189,7 +189,7 @@ impl<'a> Tokenizer<'a> {
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
             if self.remaining_starts_with(&end_encloser) {
-                for _ in 0..end_encloser.len() {
+                for _ in end_encloser.chars() {
                     self.advance();
                 }
                 break;
@@ -208,7 +208,7 @@ impl<'a> Tokenizer<'a> {
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
             if self.remaining_starts_with(end_encloser) && !is_escaped {
-                for _ in 0..end_encloser.len() {
+                for _ in end_encloser.chars() {
                     self.advance();
                 }
                 break;
@@ -249,17 +249,20 @@ impl<'a> Tokenizer<'a> {
         } else {
             "\n"
         };
-        let start = self.pos();
-        while let Some(_c) = self.get_char() {
+        let mut buffer = String::new();
+        while let Some(c) = self.get_char() {
+            buffer.push(c);
             if self.remaining_starts_with(endchar) {
-                for _ in 0..endchar.len() {
+                buffer.pop();
+                for c in endchar.chars() {
+                    buffer.push(c);
                     self.advance();
                 }
                 break;
             }
             self.advance();
         }
-        self.get_until_now(start)
+        buffer
     }
     fn consume_numeric(&mut self) -> String {
         let start = self.pos();
@@ -302,22 +305,23 @@ impl<'a> Tokenizer<'a> {
         self.get_until_now(start)
     }
     fn consume_op(&mut self) -> Option<String> {
-        let start = self.pos();
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
             buffer.push(c);
             if !(self.ops_struct.is(buffer.as_str())
                 || self.ops_struct.is_fragment(buffer.as_str()))
             {
+                buffer.pop();
                 break;
             }
             self.advance();
         }
-        if !self.ops_struct.is(&self.get_until_now(start)) {
-            self.backtrack(self.pos() - start);
-            return None;
+        if !self.ops_struct.is(buffer.as_str()) {
+            self.backtrack(buffer.len());
+            None
+        } else {
+            Some(buffer)
         }
-        Some(self.get_until_now(start))
     }
 }
 
