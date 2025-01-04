@@ -60,12 +60,15 @@ impl<'a> Parser<'a> {
 
         let tokenizer = Tokenizer::new(input_string, &settings);
         let mut in_tokens = Vec::new();
+        //TODO: Stop reading them all up front like this
         for token in tokenizer {
             println!("{token:?}");
             in_tokens.push(token);
         }
         Parser{ in_tokens, input_string, position: 0, }
     }
+    //NOTE: only touch self.position and self.in_tokens via these methods
+    // so that they may be redefined in terms of the tokenizer iterator
     fn at(&self) -> Option<&Token> {
         self.in_tokens.get(self.position)
     }

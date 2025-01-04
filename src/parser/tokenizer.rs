@@ -75,8 +75,12 @@ impl<'a> Tokenizer<'a> {
         self.out.get(self.outpos).cloned()
     }
 
-    fn has_next(&mut self) -> bool {
-        self.outpos < self.out.len() || (self.outpos + 1 >= self.out.len() && self.populate_next())
+    pub fn has_next(&mut self) -> bool {
+        self.outpos < self.out.len() || (
+            self.outpos + 1 >= self.out.len()
+            && self.populate_next()
+            && self.outpos < self.out.len()
+        )
     }
 
     //TODO: implement these 4 in terms of an iterator over chars or a stream or something
