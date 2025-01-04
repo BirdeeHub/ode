@@ -104,6 +104,9 @@ impl<'a> Tokenizer<'a> {
     fn backtrack(&mut self, chars: usize) {
         self.position -= chars;
     }
+    fn pos(&self) -> usize {
+        self.position
+    }
 
     fn populate_next(&mut self) -> bool {
         let mut tokens = Vec::new();
@@ -118,7 +121,7 @@ impl<'a> Tokenizer<'a> {
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
                 {
-                    let pos = self.position;
+                    let pos = self.pos();
                     if let Some(op) = self.consume_op() {
                         match op {
                             _ if op == self.ops_struct.blockcomstart => {
@@ -165,8 +168,8 @@ impl<'a> Tokenizer<'a> {
                     self.advance();
                     continue; // Skip whitespace
                 }
-                '0'..='9' => Token::Numeric(Coin::new(self.consume_numeric(), self.position)),
-                _ => Token::Identifier(Coin::new(self.consume_identifier(), self.position)),
+                '0'..='9' => Token::Numeric(Coin::new(self.consume_numeric(), self.pos())),
+                _ => Token::Identifier(Coin::new(self.consume_identifier(), self.pos())),
             };
             tokens.push(token);
             if ! self.in_template {
@@ -195,14 +198,14 @@ impl<'a> Tokenizer<'a> {
             self.advance();
             literal.push(c);
         }
-        tokens.push(Token::Literal(Coin::new(literal, self.position)));
+        tokens.push(Token::Literal(Coin::new(literal, self.pos())));
         if self.get_char().is_some() {
-            Some(Token::Op(Coin::new(end_encloser, self.position)))
+            Some(Token::Op(Coin::new(end_encloser, self.pos())))
         } else {None}
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
-        let start = self.position;
+        let start = self.pos();
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
             if self.remaining_starts_with(end_encloser) && !is_escaped {
@@ -231,7 +234,7 @@ impl<'a> Tokenizer<'a> {
             } else {
                 tokens.push(Token::Literal(Coin::new(literal, start)));
             }
-            Token::Op(Coin::new(end_encloser.to_string(), self.position))
+            Token::Op(Coin::new(end_encloser.to_string(), self.pos()))
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokenizer = Tokenizer::new_template_tokenizer(&literal, self.options);
             let mut format_tokens = Vec::new();
@@ -262,7 +265,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
     fn consume_numeric(&mut self) -> String {
-        let start = self.position;
+        let start = self.pos();
         let mut is_float = false;
         let mut is_hex = false;
         let mut count = 0;
@@ -284,7 +287,7 @@ impl<'a> Tokenizer<'a> {
         self.get_until_now(start).replace("_","")
     }
     fn consume_identifier(&mut self) -> String {
-        let start = self.position;
+        let start = self.pos();
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
             buffer.push(c);
@@ -302,7 +305,7 @@ impl<'a> Tokenizer<'a> {
         self.get_until_now(start)
     }
     fn consume_op(&mut self) -> Option<String> {
-        let start = self.position;
+        let start = self.pos();
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
             buffer.push(c);
@@ -314,7 +317,7 @@ impl<'a> Tokenizer<'a> {
             self.advance();
         }
         if !self.ops_struct.is(&self.get_until_now(start)) {
-            self.backtrack(self.position - start);
+            self.backtrack(self.pos() - start);
             return None;
         }
         Some(self.get_until_now(start))
