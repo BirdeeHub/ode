@@ -91,6 +91,10 @@ impl<'a> Tokenizer<'a> {
         self.position += self.get_char().unwrap_or_default().len_utf8();
     }
 
+    fn remaining_starts_with(&mut self, pat: &str) -> bool {
+        self.input[self.position..].starts_with(pat)
+    }
+
     pub fn populate_next(&mut self) -> bool {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
@@ -171,8 +175,7 @@ impl<'a> Tokenizer<'a> {
         let start = self.position;
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
-            let remaining = &self.input[self.position..];
-            if remaining.starts_with(&end_encloser) {
+            if self.remaining_starts_with(&end_encloser) {
                 let mut count = 0;
                 while count < end_encloser.len() {
                     count += 1;
@@ -195,8 +198,7 @@ impl<'a> Tokenizer<'a> {
         let start = self.position;
         let mut is_escaped = false;
         while let Some(c) = self.get_char() {
-            let remaining = &self.input[self.position..];
-            if remaining.starts_with(end_encloser) && !is_escaped {
+            if self.remaining_starts_with(end_encloser) && !is_escaped {
                 let mut count = 0;
                 while count < end_encloser.len() {
                     count += 1;
@@ -206,7 +208,7 @@ impl<'a> Tokenizer<'a> {
             }
             self.advance();
             is_escaped = c == self.ops_struct.escape_char;
-            if is_escaped && self.input[self.position..].starts_with(end_encloser) {
+            if is_escaped && self.remaining_starts_with(end_encloser) {
             } else {
                 literal.push(c);
             }
@@ -241,8 +243,7 @@ impl<'a> Tokenizer<'a> {
             "\n"
         };
         while let Some(_c) = self.get_char() {
-            let remaining = &self.input[self.position..];
-            if remaining.starts_with(endchar) {
+            if self.remaining_starts_with(endchar) {
                 let mut count = 0;
                 while count < endchar.len() {
                     self.advance();
