@@ -30,7 +30,9 @@ impl<'a> Iterator for Tokenizer<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         self.has_next();
         let ret = self.at();
-        self.skip();
+        if self.has_next() {
+            self.outpos += 1;
+        }
         ret
     }
 }
@@ -71,12 +73,6 @@ impl<'a> Tokenizer<'a> {
 
     pub fn at(&self) -> Option<Token> {
         self.out.get(self.outpos).cloned()
-    }
-
-    fn skip(&mut self) {
-        if self.has_next() {
-            self.outpos += 1;
-        }
     }
 
     fn has_next(&mut self) -> bool {
