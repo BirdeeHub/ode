@@ -105,25 +105,8 @@ impl<'a> Tokenizer<'a> {
                                 self.consume_comment(false);
                                 continue;
                             }
-                            _ if Ops::is_literal_left(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                                let Some(op) = self.consume_literal(&mut tokens, &op) else {
-                                    is_err = true;
-                                    break;
-                                };
-                                op
-                            }
-                            _ if self.ops_struct.is_other_capturing(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                                let Some(op) = self.consume_literal(&mut tokens, &op) else {
-                                    is_err = true;
-                                    break;
-                                };
-                                op
-                            }
                             _ if self.in_template && self.ops_struct.is_right_encloser(&op)
-                                || self.ops_struct.interend == op =>
-                            {
+                                || self.ops_struct.interend == op => {
                                 if level == 0 {
                                     is_templ_literal = true;
                                 } else {
@@ -131,9 +114,26 @@ impl<'a> Tokenizer<'a> {
                                 }
                                 Token::Op(Coin::new(op.clone(),pos))
                             }
-                            _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
+                            _ if self.in_template && self.ops_struct.is_left_encloser(&op)
+                                || self.ops_struct.interstart == op => {
                                 level += 1;
                                 Token::Op(Coin::new(op.clone(),pos))
+                            }
+                            _ if self.ops_struct.is_template_op(&op) => {
+                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                let Some(op) = self.consume_capturing(&mut tokens, &op) else {
+                                    is_err = true;
+                                    break;
+                                };
+                                op
+                            }
+                            _ if self.ops_struct.is_literal_left(&op) => {
+                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                let Some(op) = self.consume_literal(&mut tokens, &op) else {
+                                    is_err = true;
+                                    break;
+                                };
+                                op
                             }
                             _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op.clone(),pos)),
                             _ => Token::Identifier(Coin::new(op.clone(),pos)),
@@ -206,10 +206,6 @@ impl<'a> Tokenizer<'a> {
             } else {
                 literal.push(c);
             }
-            if self.get_char().is_none() {
-                self.position = start;
-                return None;
-            }
         }
         if !self.in_template || self.get_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
@@ -278,15 +274,15 @@ impl<'a> Tokenizer<'a> {
         let start = self.position;
         let mut buffer = String::new();
         while let Some(c) = self.get_char() {
-            if self.ops_struct.is_fragment(&c.to_string()) {
-                buffer.push(c);
-            } else if self.ops_struct.is(&c.to_string())
-                || self.ops_struct.is(buffer.as_str())
-                || c.is_whitespace()
-            {
+            buffer.push(c);
+            if c.is_whitespace() || self.ops_struct.is(&c.to_string()) {
                 break;
-            } else {
-                buffer.clear()
+            } else if self.ops_struct.is(buffer.as_str()) {
+                self.position -= buffer.len();
+                break;
+            }
+            if self.ops_struct.is_fragment(buffer.as_str()) {
+                buffer.clear();
             }
             self.advance();
         }
@@ -342,6 +338,13 @@ impl<'a> Ops<'a> {
             combined_ops.push(open);
             combined_ops.push(close);
         }
+        combined_ops.push(options.interstart);
+        combined_ops.push(options.interend);
+        combined_ops.push(options.templop);
+        combined_ops.push(options.charop);
+        combined_ops.push(options.linecom);
+        combined_ops.push(options.blockcomstart);
+        combined_ops.push(options.blockcomend);
         let filtered_enclosers = options
             .enclosers
             .iter()
@@ -367,7 +370,7 @@ impl<'a> Ops<'a> {
     }
 
     fn is(&self, op: &str) -> bool {
-        self.ops.contains(&op) || Ops::is_literal_left(op) || Ops::is_literal_right(op)
+        self.ops.contains(&op) || self.is_literal_left(op) || self.is_literal_right(op)
     }
     fn is_fragment(&self, op: &str) -> bool {
         self.ops
@@ -381,10 +384,6 @@ impl<'a> Ops<'a> {
         self.templop == op
     }
 
-    fn is_other_capturing(&self, op: &str) -> bool {
-        self.templop == op || self.charop == op
-    }
-
     fn is_left_encloser(&self, op: &str) -> bool {
         self.enclosers.iter().any(|(left, _)| *left == op)
     }
@@ -393,16 +392,16 @@ impl<'a> Ops<'a> {
         self.enclosers.iter().any(|(right, _)| *right == op)
     }
 
-    fn is_literal_left(op: &str) -> bool {
-        op.starts_with("[")
+    fn is_literal_left(&self, op: &str) -> bool {
+        self.charop == op || op.starts_with("[")
             && op.len() > 1
             && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
     fn get_literal_end(left_lit_op: &str) -> String {
         left_lit_op.replace("[", "]")
     }
-    fn is_literal_right(op: &str) -> bool {
-        op.starts_with("]")
+    fn is_literal_right(&self, op: &str) -> bool {
+        self.charop == op || op.starts_with("]")
             && op.len() > 1
             && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
