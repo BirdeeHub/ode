@@ -77,6 +77,12 @@ impl<'a> Parser<'a> {
         You cant read or write to the value except by using this if defined?
         Is defined at use site of mutable types?
         Possibly mutable types define a signature for it?
+        Will be used instead of unsafe?
+
+        I want to have raw pointer writing for embedded (the other part of unsafe)
+        and IO and whatnot passed in via the node definition
+        and then you can define mutable and monadic pure IO and pass them in.
+        But im not sure how this is going to work completely
 
         <@ is value to stream/actor
         @ is open/run stream/actor on node
