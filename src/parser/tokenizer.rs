@@ -125,10 +125,10 @@ impl<'a> Tokenizer<'a> {
                     if let Some(op) = self.consume_op() {
                         match op {
                             _ if op == self.ops_struct.blockcomstart => {
-                                Token::Comment(Coin::new(self.consume_comment(true), pos))
+                                Token::Comment(Coin::new(op + &self.consume_comment(true), pos))
                             }
                             _ if op == self.ops_struct.linecom => {
-                                Token::Comment(Coin::new(self.consume_comment(false), pos))
+                                Token::Comment(Coin::new(op + &self.consume_comment(false), pos))
                             }
                             _ if self.in_template && self.ops_struct.is_right_encloser(&op)
                                 || self.ops_struct.interend == op => {
