@@ -81,7 +81,7 @@ impl<'a> Parser<'a> {
         but dereference becomes the function defined and returns an option?
         You cant read or write to the value if you dont own it except by using this if defined?
         Is defined at use site of mutable types?
-        Possibly mutable types define a signature for it?
+        Possibly mutable structs define a signature for it?
         Will be used instead of unsafe?
 
         I want to have raw pointer writing for embedded (the other part of unsafe)
