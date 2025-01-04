@@ -265,7 +265,7 @@ impl<'a> Tokenizer<'a> {
         buffer
     }
     fn consume_numeric(&mut self) -> String {
-        let start = self.pos();
+        let mut buffer = String::new();
         let mut is_float = false;
         let mut is_hex = false;
         let mut count = 0;
@@ -277,6 +277,7 @@ impl<'a> Tokenizer<'a> {
             {
                 break;
             }
+            buffer.push(c);
             if count == 1 && c == 'x' {
                 is_hex = true;
             }
@@ -284,7 +285,7 @@ impl<'a> Tokenizer<'a> {
             is_float = c == '.' || is_float;
             self.advance();
         }
-        self.get_until_now(start).replace("_","")
+        buffer.replace("_","")
     }
     fn consume_identifier(&mut self) -> String {
         let start = self.pos();
