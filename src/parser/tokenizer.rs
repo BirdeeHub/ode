@@ -143,7 +143,10 @@ impl<'a> Tokenizer<'a> {
                             }
                             _ if self.ops_struct.is_literal_left(&op) => {
                                 tokens.push(Token::Op(Coin::new(op.clone(),pos)));
-                                self.consume_literal(&mut tokens, &op)
+                                let Some(token) = self.consume_literal(&mut tokens, &op) else {
+                                    break;
+                                };
+                                token
                             }
                             _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op.clone(),pos)),
                             _ => Token::Identifier(Coin::new(op.clone(),pos)),
@@ -171,7 +174,7 @@ impl<'a> Tokenizer<'a> {
         ret
     }
 
-    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Token {
+    fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Option<Token> {
         let end_encloser = Ops::get_literal_end(start_encloser);
         let mut literal = String::new();
         while let Some(c) = self.get_char() {
@@ -187,7 +190,9 @@ impl<'a> Tokenizer<'a> {
             literal.push(c);
         }
         tokens.push(Token::Literal(Coin::new(literal, self.position)));
-        Token::Op(Coin::new(end_encloser, self.position))
+        if self.get_char().is_some() {
+            Some(Token::Op(Coin::new(end_encloser, self.position)))
+        } else {None}
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
