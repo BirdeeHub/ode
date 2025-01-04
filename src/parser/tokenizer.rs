@@ -264,9 +264,10 @@ impl<'a> Tokenizer<'a> {
         let mut is_hex = false;
         let mut count = 0;
         while let Some(c) = self.get_char() {
-            if (is_float && !c.is_ascii_digit()) || (is_hex && !c.is_ascii_hexdigit())
-                || ((c == '.' || c == 'x') && (is_float || is_hex))
-                || !(is_float || is_hex || c.is_ascii_digit() || (c == 'x' && count == 1) || c == '.')
+            if (is_float && !(c.is_ascii_digit() || c == '_'))
+                || (is_hex && !(c.is_ascii_hexdigit() || c == '_'))
+                || ((c == '.' && is_float) || ( c == 'x' && is_hex))
+                || !(is_float || is_hex || c.is_ascii_digit() || c == '_' || (c == 'x' && count == 1) || c == '.')
             {
                 break;
             }
@@ -277,7 +278,7 @@ impl<'a> Tokenizer<'a> {
             is_float = c == '.' || is_float;
             self.advance();
         }
-        self.get_until_now(start)
+        self.get_until_now(start).replace("_","")
     }
     fn consume_identifier(&mut self) -> String {
         let start = self.position;

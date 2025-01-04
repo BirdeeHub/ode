@@ -77,6 +77,10 @@ impl<'a> Parser<'a> {
             !> val-2;
         }
 
+        Sets { val1, val2, val3 }
+        Hashmap { key1: val1, key2: val2, key3: val3 }
+        Arrays [val1, val2, val3]
+
         \& makes it so that you can have multiple mutable refs?
         but dereference becomes the function defined and returns an option?
         You cant read or write to the value if you dont own it except by using this if defined?
