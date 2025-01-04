@@ -281,7 +281,7 @@ impl<'a> Tokenizer<'a> {
                 self.position -= buffer.len();
                 break;
             }
-            if self.ops_struct.is_fragment(buffer.as_str()) {
+            if ! self.ops_struct.is_fragment(buffer.as_str()) {
                 buffer.clear();
             }
             self.advance();
