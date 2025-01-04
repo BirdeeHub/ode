@@ -45,8 +45,13 @@ impl<'a> Tokenizer<'a> {
         self.outpos < self.out.len() || (
             self.outpos + 1 >= self.out.len()
             && self.populate_next()
-            && self.outpos < self.out.len()
+            && self.outpos + 1 < self.out.len()
         )
+    }
+    pub fn skip(&mut self) {
+        if self.has_next() {
+            self.outpos += 1;
+        }
     }
     pub fn new(
         input: &'a str,
