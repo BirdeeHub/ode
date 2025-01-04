@@ -101,6 +101,9 @@ impl<'a> Tokenizer<'a> {
     fn get_until_now(&self, start: usize) -> String {
         self.input[start..self.position].to_string()
     }
+    fn backtrack(&mut self, chars: usize) {
+        self.position -= chars;
+    }
 
     fn populate_next(&mut self) -> bool {
         let mut tokens = Vec::new();
@@ -288,7 +291,7 @@ impl<'a> Tokenizer<'a> {
             if c.is_whitespace() || self.ops_struct.is(&c.to_string()) {
                 break;
             } else if self.ops_struct.is(buffer.as_str()) {
-                self.position -= buffer.len();
+                self.backtrack(buffer.len());
                 break;
             }
             if ! self.ops_struct.is_fragment(buffer.as_str()) {
@@ -311,7 +314,7 @@ impl<'a> Tokenizer<'a> {
             self.advance();
         }
         if !self.ops_struct.is(&self.get_until_now(start)) {
-            self.position = start;
+            self.backtrack(self.position - start);
             return None;
         }
         Some(self.get_until_now(start))
