@@ -41,23 +41,23 @@ impl<'a> Parser<'a> {
         \ type:default:argname, ::arg -> rettype {}
         then => else !> and match # only
 
-        struct:name:<T> [`]{
+        struct:name:<T> [']{
           name:type:default;
         }
-        trait:name:[<T>] [`]{
+        trait:name:[<T>] [']{
           name:type;
         }
-        enum:name:[<T>] [`]{
+        enum:name:[<T>] [']{
           name:type;
         }
 
         Impl
-        <T>:[type,names]:structname [`]{
+        <T>:[type,names]:structname [']{
           name = value;
         }
 
         Scope
-        [type] [`]{
+        [type] [']{
             [type][:]varname = value;
             <- varname;
         }
@@ -66,20 +66,20 @@ impl<'a> Parser<'a> {
             <- varname;
             [type]:varname = value;
         }
-        [type] `{
+        [type] '{
             [type][:]varname = value;
             varname
         }
 
         Match
-        val [type] [`]{
+        val [type] [']{
             Pattern[,][cond] -> val+2;
             !> val-2;
         }
 
-        Sets { val1, val2, val3 }
-        Hashmap { key1: val1, key2: val2, key3: val3 }
-        Arrays [val1, val2, val3]
+        Sets [']{ val1, val2, val3 }
+        Hashmap [']{ key1: val1, key2: val2, key3: val3 }
+        Arrays ['][val1, val2, val3]
 
         \& makes it so that you can have multiple mutable refs?
         but dereference becomes the function defined and returns an option?
