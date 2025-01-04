@@ -72,6 +72,12 @@ impl<'a> Parser<'a> {
             !> val-2;
         }
 
+        \& makes it so that you can have multiple mutable refs?
+        but dereference becomes the function defined and returns an option?
+        You cant read or write to the value except by using this if defined?
+        Is defined at use site of mutable types?
+        Possibly mutable types define a signature for it?
+
         <@ is value to stream/actor
         @ is open/run stream/actor on node
         @@ is same but on current node
