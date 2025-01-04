@@ -64,5 +64,7 @@ greeting = amyGreet "How are you?";
     println greeting;
 }
 
+[[hello this is a literal]]
+[=[hello this is another literal]=]
 charval = `\n`
-#^ testcom #$s
+#^ testcom #$I am outside of the block comment
