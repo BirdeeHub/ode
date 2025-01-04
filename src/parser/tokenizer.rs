@@ -73,13 +73,13 @@ impl<'a> Tokenizer<'a> {
         self.out.get(self.outpos).cloned()
     }
 
-    pub fn skip(&mut self) {
+    fn skip(&mut self) {
         if self.has_next() {
             self.outpos += 1;
         }
     }
 
-    pub fn has_next(&mut self) -> bool {
+    fn has_next(&mut self) -> bool {
         self.outpos < self.out.len() || (self.outpos + 1 >= self.out.len() && self.populate_next())
     }
 
