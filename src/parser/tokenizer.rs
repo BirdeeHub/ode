@@ -99,7 +99,6 @@ impl<'a> Tokenizer<'a> {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
-        let mut is_err = false;
         while let Some(c) = self.get_char() {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
@@ -141,7 +140,6 @@ impl<'a> Tokenizer<'a> {
                             _ if self.ops_struct.is_literal_left(&op) => {
                                 tokens.push(Token::Op(Coin::new(op.clone(),pos)));
                                 let Some(op) = self.consume_literal(&mut tokens, &op) else {
-                                    is_err = true;
                                     break;
                                 };
                                 op
@@ -165,12 +163,11 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
         }
-        if ! is_err {
-            for token in tokens {
-                self.out.push(token)
-            }
+        let ret = ! tokens.is_empty();
+        for token in tokens {
+            self.out.push(token)
         }
-        is_err
+        ret
     }
 
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Option<Token> {
