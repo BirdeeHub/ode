@@ -61,7 +61,7 @@ impl<'a> Parser<'a> {
             [type][:]varname = value;
             <- varname;
         }
-        [type] {
+        [type] `{
             [type][:]varname = value;
             varname
         }
