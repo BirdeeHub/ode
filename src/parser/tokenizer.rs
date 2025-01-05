@@ -87,12 +87,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
     fn remaining_starts_with(&mut self, pat: Vec<char>) -> bool {
-        pat == self.peek_next_n(pat.len())
-    }
-    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
-        self.position
-    }
-    fn peek_next_n(&mut self, chars: usize) -> Vec<char> {
+        let chars = pat.len();
         if self.peeked.len() < chars {
             while chars > self.peeked.len() {
                 let Some(c) = self.input.next() else {
@@ -105,7 +100,10 @@ impl<'a> Tokenizer<'a> {
         while ret.len() < chars && ret.len() < self.peeked.len() {
             ret.push(self.peeked[ret.len()]);
         }
-        ret
+        pat == ret
+    }
+    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
+        self.position
     }
     fn peek_ahead_n(&mut self, chars: usize) -> Option<char> {
         if self.peeked.len() <= chars {
