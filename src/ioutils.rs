@@ -20,11 +20,11 @@ impl<T> CharIterator<T>
 where
     T: std::io::Read,
 {
-    pub fn new(reader: T) -> io::Result<CharIterator<T>> {
-        Ok(CharIterator {
+    pub fn new(reader: T) -> CharIterator<T> {
+        CharIterator {
             reader: reader.bytes(),
             buf: Vec::new(),
-        })
+        }
     }
 }
 impl<T> Iterator for CharIterator<T>

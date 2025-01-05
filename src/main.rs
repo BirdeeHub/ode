@@ -13,12 +13,12 @@ fn main() -> io::Result<()> {
     let reader = BufReader::new(File::open(filepath)?);
     let reader2 = BufReader::new(File::open(filepath)?);
     // extra tokenizer print for debug purposes
-    let tokenizer = Parser::new_tokenizer(CharIterator::new(reader)?);
+    let tokenizer = Parser::new_tokenizer(CharIterator::new(reader));
     for t in tokenizer {
         println!("{:?}", t);
     }
 
-    let mut parser = Parser::new(CharIterator::new(reader2)?);
+    let mut parser = Parser::new(CharIterator::new(reader2));
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
