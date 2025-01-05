@@ -393,8 +393,8 @@ impl<'a> Ops<'a> {
         self.ops
             .iter()
             .any(|&op_def| op_def != op && op_def.starts_with(op))
-            || is_literal_left_frag(op)
-            || is_literal_right_frag(op)
+            || Self::is_literal_left_frag(op)
+            || Self::is_literal_right_frag(op)
     }
 
     fn is_template_op(&self, op: &str) -> bool {
@@ -422,11 +422,11 @@ impl<'a> Ops<'a> {
             && op.len() > 1
             && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
-}
 
-fn is_literal_left_frag(op: &str) -> bool {
-    op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
-}
-fn is_literal_right_frag(op: &str) -> bool {
-    op == "]" || op.starts_with("]") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
+    fn is_literal_left_frag(op: &str) -> bool {
+        op == "[" || op.starts_with("[") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
+    }
+    fn is_literal_right_frag(op: &str) -> bool {
+        op == "]" || op.starts_with("]") && op.len() > 1 && op[1..].chars().all(|c| c == '=')
+    }
 }
