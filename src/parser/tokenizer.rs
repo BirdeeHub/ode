@@ -30,7 +30,7 @@ impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
         self.has_next();
-        let ret = self.at();
+        let ret = self.peek();
         if ret.is_some() {
             self.outpos += 1;
         }
@@ -39,7 +39,7 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn at(&self) -> Option<Token> {
+    pub fn peek(&self) -> Option<Token> {
         self.out.get(self.outpos).cloned()
     }
     pub fn has_next(&mut self) -> bool {
@@ -89,7 +89,7 @@ impl<'a> Tokenizer<'a> {
         ret.populate_next();
         ret
     }
-    fn get_next_char(&mut self) -> Option<char> {
+    fn at(&mut self) -> Option<char> {
         self.peek_ahead_n(0)
     }
     fn eat(&mut self) -> Option<char> {
@@ -146,7 +146,7 @@ impl<'a> Tokenizer<'a> {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
-        while let Some(c) = self.get_next_char() {
+        while let Some(c) = self.at() {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
@@ -216,7 +216,7 @@ impl<'a> Tokenizer<'a> {
         for token in tokens {
             self.out.push(token)
         }
-        if self.get_next_char().is_none() && ! self.in_template && self.out.last() != Some(&Token::Eof) {
+        if self.at().is_none() && ! self.in_template && self.out.last() != Some(&Token::Eof) {
             self.out.push(Token::Eof)
         }
         ret
@@ -227,7 +227,7 @@ impl<'a> Tokenizer<'a> {
         let mut literal = String::new();
         let start = self.pos();
         let mut retval:Option<Token> = None;
-        while let Some(c) = self.get_next_char() {
+        while let Some(c) = self.at() {
             if self.remaining_starts_with(end_encloser.chars().collect()) {
                 retval = Some(Token::Op(Coin::new(end_encloser.clone(), self.pos())));
                 for _ in end_encloser.chars() {
@@ -245,7 +245,7 @@ impl<'a> Tokenizer<'a> {
         let mut literal = String::new();
         let start = self.pos();
         let mut is_escaped = false;
-        while let Some(c) = self.get_next_char() {
+        while let Some(c) = self.at() {
             if self.remaining_starts_with(end_encloser.chars().collect()) && !is_escaped {
                 break;
             }
@@ -259,7 +259,7 @@ impl<'a> Tokenizer<'a> {
         for _ in end_encloser.chars() {
             self.eat();
         }
-        if !self.in_template || self.get_next_char().is_some() {
+        if !self.in_template || self.at().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
                 let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options);
                 let mut format_tokens = Vec::new();
@@ -289,7 +289,7 @@ impl<'a> Tokenizer<'a> {
             "\n"
         };
         let mut buffer = String::new();
-        while let Some(c) = self.get_next_char() {
+        while let Some(c) = self.at() {
             buffer.push(c);
             if self.remaining_starts_with(endchar.chars().collect()) {
                 buffer.pop();
@@ -308,7 +308,7 @@ impl<'a> Tokenizer<'a> {
         let mut is_float = false;
         let mut is_hex = false;
         let mut count = 0;
-        while let Some(c) = self.get_next_char() {
+        while let Some(c) = self.at() {
             if (is_float && !(c.is_ascii_digit() || c == '_'))
                 || (is_hex && !(c.is_ascii_hexdigit() || c == '_'))
                 || ((c == '.' && is_float) || ( c == 'x' && is_hex))
