@@ -168,8 +168,7 @@ impl<'a> Tokenizer<'a> {
                             _ if op == self.ops_struct.linecom => {
                                 Token::Comment(Coin::new(op + &self.consume_comment(false), pos))
                             }
-                            _ if self.in_template && self.ops_struct.is_right_encloser(&op)
-                                || self.ops_struct.interend == op => {
+                            _ if self.in_template && self.ops_struct.is_right_encloser(&op) => {
                                 if level == 0 {
                                     is_templ_literal = true;
                                 } else {
@@ -454,7 +453,7 @@ impl<'a> Ops<'a> {
     }
 
     fn is_right_encloser(&self, op: &str) -> bool {
-        self.enclosers.iter().any(|(right, _)| *right == op)
+        self.enclosers.iter().any(|(_, right)| *right == op)
     }
 
     fn is_literal_left(&self, op: &str) -> bool {
