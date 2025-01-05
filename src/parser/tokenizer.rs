@@ -338,7 +338,7 @@ impl<'a> Tokenizer<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub struct Ops<'a> {
+struct Ops<'a> {
     blockcomstart: &'a str,
     blockcomend: &'a str,
     linecom: &'a str,
