@@ -88,9 +88,9 @@ impl<'a> Parser<'a> {
         Possibly mutable structs define a signature for it?
         Will be used instead of unsafe?
 
-        I want to have raw pointer writing for embedded (the other part of unsafe)
+        I want to have raw pointer writing for embedded
         and IO and whatnot passed in via the node definition
-        and then you can define mutable and monadic pure IO and pass them in.
+        and then you can define mutable IO and monadic pure IO and pass them in.
         But im not sure how this is going to work completely
 
         <@ is value to stream/actor

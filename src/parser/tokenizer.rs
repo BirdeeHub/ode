@@ -17,6 +17,7 @@ pub struct TokenizerSettings<'a> {
 #[derive(Debug)]
 pub struct Tokenizer<'a> {
     input: &'a str,
+    peeked: Vec<char>,
     position: usize,
     ops_struct: Ops<'a>,
     in_template: bool,
@@ -59,6 +60,7 @@ impl<'a> Tokenizer<'a> {
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
+            peeked: Vec::new(),
             position: 0,
             ops_struct: Ops::new(options),
             in_template: false,
@@ -76,6 +78,7 @@ impl<'a> Tokenizer<'a> {
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
+            peeked: Vec::new(),
             position: 0,
             ops_struct: Ops::new(options),
             in_template: true,
@@ -104,6 +107,10 @@ impl<'a> Tokenizer<'a> {
     //TODO: replace with arbitrary length peekahead
     fn backtrack(&mut self, chars: usize) {
         self.position -= chars;
+    }
+    fn peek_next_n(&mut self, chars: usize) -> Vec<char> {
+        if peeked.is_empty() {
+        }
     }
 
     fn populate_next(&mut self) -> bool {
