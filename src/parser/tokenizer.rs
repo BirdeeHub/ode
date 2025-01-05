@@ -151,11 +151,11 @@ impl<'a> Tokenizer<'a> {
                                 } else {
                                     level -= 1;
                                 }
-                                Token::Op(Coin::new(op.clone(),pos))
+                                Token::Op(Coin::new(op,pos))
                             }
                             _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                                 level += 1;
-                                Token::Op(Coin::new(op.clone(),pos))
+                                Token::Op(Coin::new(op,pos))
                             }
                             _ if self.ops_struct.is_template_op(&op) => {
                                 tokens.push(Token::Op(Coin::new(op.clone(),pos)));
@@ -168,8 +168,8 @@ impl<'a> Tokenizer<'a> {
                                 };
                                 token
                             }
-                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op.clone(),pos)),
-                            _ => Token::Identifier(Coin::new(op.clone(),pos)),
+                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op,pos)),
+                            _ => Token::Identifier(Coin::new(op,pos)),
                         }
                     } else {
                         Token::Op(Coin::new(self.consume_identifier(),pos))
