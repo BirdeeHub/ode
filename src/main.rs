@@ -22,7 +22,7 @@ fn main() -> io::Result<()> {
         ))
     }?;
     println!("Contents: {:?}", contents);
-    let mut parser = parser::Parser::new(&contents);
+    let mut parser = parser::Parser::new(contents.chars());
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
