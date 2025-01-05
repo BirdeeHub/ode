@@ -7,6 +7,7 @@ use crate::parser::tokenizer::Tokenizer;
 pub struct Parser<'a> {
     tokenizer: Tokenizer<'a>,
     current: Option<Token>,
+    prev: Option<Token>,
 }
 impl<'a> Parser<'a> {
     /*
@@ -109,7 +110,7 @@ impl<'a> Parser<'a> {
             escape_char: '\\',
         };
         let tokenizer = Tokenizer::new(input_string.chars(), settings);
-        let mut p = Parser{ tokenizer, current: None};
+        let mut p = Parser{ tokenizer, current: None, prev: None};
         p.eat();
         p
     }
@@ -120,11 +121,15 @@ impl<'a> Parser<'a> {
     }
     fn eat(&mut self) -> Option<Token> {
         let out = self.current.clone();
+        self.prev = out.clone();
         self.current = self.tokenizer.next();
         out
     }
     fn skip(&mut self) {
         self.eat();
+    }
+    fn prev(&self) -> Option<Token> {
+        self.prev.clone()
     }
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
@@ -202,13 +207,13 @@ impl<'a> Parser<'a> {
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
-        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::InvalidIdent(Token::Eof)) };
+        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::InvalidIdent(self.prev().unwrap_or(Token::Eof))) };
         Ok(Stmt::Identifier{ ttype:Lexeme::Ident,coin:coin.clone(),val:coin.val.clone().into()})
     }
     pub fn parse_numeric(&mut self) -> ParseResult {
         // coin is coin.val (which is a string) and coin.pos
         // check if the string parses to float it or hex
-        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::InvalidNumber(Token::Eof)) };
+        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::InvalidNumber(self.prev().unwrap_or(Token::Eof))) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
         if let Ok(val) = value.parse::<u64>() {
             Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val})
