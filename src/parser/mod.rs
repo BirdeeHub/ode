@@ -3,11 +3,10 @@ pub mod parser_types;
 use crate::parser::parser_types::*;
 use crate::parser::tokenizer::Tokenizer;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Parser<'a> {
-    input_string: &'a str,
-    in_tokens: Vec<Token>,
-    position: usize,
+    tokenizer: Tokenizer<'a>,
+    current: Option<Token>,
 }
 impl<'a> Parser<'a> {
     /*
@@ -87,10 +86,10 @@ impl<'a> Parser<'a> {
     */
     pub fn new(input_string:&'a str) -> Parser<'a> {
         let settings = tokenizer::TokenizerSettings {
-            blockcomstart: "#^",
-            blockcomend: "#$",
-            linecom: "#",
-            ops: &[
+            blockcomstart: "#^".to_string(),
+            blockcomend: "#$".to_string(),
+            linecom: "#".to_string(),
+            ops: vec![
                 "=", "+", "-", "/", "%", "//", "|",
                 ">>", "<<", "!", "||", "&&",
                 "!=", "==", "<=", ">=",
@@ -101,38 +100,31 @@ impl<'a> Parser<'a> {
                 ">>>", ">>|", ">>!",
                 "<@", "@", "@@", "@>", "@>>",
                 ":", ".", ",", ";",
-            ],
-            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")],
-            charop: "`",
-            templop: "\"",
-            interstart: "$[",
-            interend: "]",
+            ].iter().map(|v| v.to_string()).collect(),
+            enclosers: [("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")].iter().map(|(a,b)| (a.to_string(), b.to_string())).collect(),
+            charop: "`".to_string(),
+            templop: "\"".to_string(),
+            interstart: "$[".to_string(),
+            interend: "]".to_string(),
             escape_char: '\\',
         };
-        let tokenizer = Tokenizer::new(input_string.chars(), &settings);
-        let mut in_tokens = Vec::new();
-        //TODO: Stop reading them all up front like this
-        for token in tokenizer {
-            println!("{token:?}");
-            in_tokens.push(token);
-        }
-        Parser{ in_tokens, input_string, position: 0, }
+        let tokenizer = Tokenizer::new(input_string.chars(), settings);
+        let mut p = Parser{ tokenizer, current: None};
+        p.eat();
+        p
     }
     //NOTE: only touch self.position and self.in_tokens via these methods
     // so that they may be redefined in terms of the tokenizer iterator
-    fn at(&self) -> Option<&Token> {
-        self.in_tokens.get(self.position)
+    fn at(&self) -> Option<Token> {
+        self.current.clone()
     }
-    fn eat(&mut self) -> Option<&Token> {
-        let res = self.in_tokens.get(self.position);
-        self.position += 1;
-        res
+    fn eat(&mut self) -> Option<Token> {
+        let out = self.current.clone();
+        self.current = self.tokenizer.next();
+        out
     }
     fn skip(&mut self) {
-        self.position += 1;
-    }
-    fn prev(&self) -> Option<&Token> {
-        self.in_tokens.get(self.position-1)
+        self.eat();
     }
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
@@ -206,17 +198,17 @@ impl<'a> Parser<'a> {
                 }
                 val
             },
-            _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(&Token::Eof).clone())),
+            _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(Token::Eof).clone())),
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
-        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::InvalidIdent(self.prev().unwrap_or(&Token::Eof).clone())) };
+        let Some(Token::Identifier(coin)) = self.eat() else { return Err(ParseError::InvalidIdent(Token::Eof)) };
         Ok(Stmt::Identifier{ ttype:Lexeme::Ident,coin:coin.clone(),val:coin.val.clone().into()})
     }
     pub fn parse_numeric(&mut self) -> ParseResult {
         // coin is coin.val (which is a string) and coin.pos
         // check if the string parses to float it or hex
-        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::InvalidNumber(self.prev().unwrap_or(&Token::Eof).clone())) };
+        let Some(Token::Numeric(coin)) = self.eat() else { return Err(ParseError::InvalidNumber(Token::Eof)) };
         let value = &coin.val; // Assuming `coin.val` is the string representation of the number.
         if let Ok(val) = value.parse::<u64>() {
             Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,coin:coin.clone(),val})

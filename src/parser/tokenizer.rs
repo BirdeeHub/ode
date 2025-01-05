@@ -1,16 +1,16 @@
 use crate::parser::parser_types::{ Coin, Token };
 
-#[derive(Debug)]
-pub struct TokenizerSettings<'a> {
-    pub blockcomstart: &'a str,
-    pub blockcomend: &'a str,
-    pub linecom: &'a str,
-    pub ops: &'a [&'a str],
-    pub charop: &'a str,
-    pub templop: &'a str,
-    pub enclosers: &'a [(&'a str, &'a str)],
-    pub interstart: &'a str,
-    pub interend: &'a str,
+#[derive(Debug, Clone)]
+pub struct TokenizerSettings {
+    pub blockcomstart: String,
+    pub blockcomend: String,
+    pub linecom: String,
+    pub ops: Vec<String>,
+    pub charop: String,
+    pub templop: String,
+    pub enclosers: Vec<(String, String)>,
+    pub interstart: String,
+    pub interend: String,
     pub escape_char: char,
 }
 
@@ -19,9 +19,9 @@ pub struct Tokenizer<'a> {
     input: core::str::Chars<'a>,
     peeked: Vec<char>,
     position: usize,
-    ops_struct: Ops<'a>,
+    ops_struct: Ops,
     in_template: bool,
-    options: &'a TokenizerSettings<'a>,
+    options: TokenizerSettings,
     out: Vec<Token>,
     outpos: usize,
 }
@@ -29,8 +29,10 @@ pub struct Tokenizer<'a> {
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
-        self.has_next();
-        let ret = self.peek();
+        if self.outpos + 1 >= self.out.len() {
+            self.populate_next();
+        };
+        let ret = self.out.get(self.outpos).cloned();
         if ret.is_some() {
             self.outpos += 1;
         }
@@ -39,30 +41,15 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn peek(&self) -> Option<Token> {
-        self.out.get(self.outpos).cloned()
-    }
-    pub fn has_next(&mut self) -> bool {
-        self.outpos < self.out.len() || (
-            self.outpos + 1 >= self.out.len()
-            && self.populate_next()
-            && self.outpos + 1 < self.out.len()
-        )
-    }
-    pub fn skip(&mut self) {
-        if self.has_next() {
-            self.outpos += 1;
-        }
-    }
     pub fn new(
         input: core::str::Chars<'a>,
-        options: &'a TokenizerSettings<'a>,
+        options: TokenizerSettings,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: Ops::new(options),
+            ops_struct: Ops::new(options.clone()),
             in_template: false,
             options,
             out: Vec::new(),
@@ -74,13 +61,13 @@ impl<'a> Tokenizer<'a> {
 
     fn new_template_tokenizer(
         input: core::str::Chars<'a>,
-        options: &'a TokenizerSettings<'a>,
+        options: TokenizerSettings,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: Ops::new(options),
+            ops_struct: Ops::new(options.clone()),
             in_template: true,
             options,
             out: Vec::new(),
@@ -150,7 +137,7 @@ impl<'a> Tokenizer<'a> {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
-                    self.consume_capturing(&mut tokens, self.ops_struct.interstart)
+                    self.consume_capturing(&mut tokens, &self.ops_struct.interstart.clone())
                 }
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
@@ -261,7 +248,7 @@ impl<'a> Tokenizer<'a> {
         }
         if !self.in_template || self.at().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options);
+                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options.clone());
                 let mut format_tokens = Vec::new();
                 for token in format_tokenizer {
                     format_tokens.push(token);
@@ -272,7 +259,7 @@ impl<'a> Tokenizer<'a> {
             }
             Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options);
+            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options.clone());
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
@@ -284,7 +271,7 @@ impl<'a> Tokenizer<'a> {
     }
     fn consume_comment(&mut self, block: bool) -> String {
         let endchar = if block {
-            self.ops_struct.blockcomend
+            &self.ops_struct.blockcomend.clone()
         } else {
             "\n"
         };
@@ -373,47 +360,40 @@ impl<'a> Tokenizer<'a> {
 }
 
 #[derive(Debug)]
-struct Ops<'a> {
-    blockcomstart: &'a str,
-    blockcomend: &'a str,
-    linecom: &'a str,
-    interstart: &'a str,
-    enclosers: Vec<(&'a str, &'a str)>,
-    ops: &'a [&'a str],
-    charop: &'a str,
-    templop: &'a str,
+struct Ops {
+    blockcomstart: String,
+    blockcomend: String,
+    linecom: String,
+    interstart: String,
+    enclosers: Vec<(String, String)>,
+    ops: Vec<String>,
+    charop: String,
+    templop: String,
     escape_char: char,
 }
 
-impl<'a> Ops<'a> {
-    fn new(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
+impl Ops {
+    fn new(options: TokenizerSettings) -> Ops {
         let mut combined_ops = vec![
-            options.blockcomstart,
-            options.blockcomend,
-            options.linecom,
-            options.interstart,
-            options.interend,
-            options.charop,
-            options.templop,
+            options.blockcomstart.clone(),
+            options.blockcomend.clone(),
+            options.linecom.clone(),
+            options.interstart.clone(),
+            options.interend.clone(),
+            options.charop.clone(),
+            options.templop.clone(),
         ];
-        combined_ops.extend_from_slice(options.ops);
-        for (open, close) in options.enclosers {
-            combined_ops.push(open);
-            combined_ops.push(close);
+        combined_ops.extend_from_slice(&options.ops);
+        for (open, close) in &options.enclosers {
+            combined_ops.push(open.to_string());
+            combined_ops.push(close.to_string());
         }
-        combined_ops.push(options.templop);
-        combined_ops.push(options.linecom);
-        combined_ops.push(options.blockcomstart);
-        combined_ops.push(options.blockcomend);
         let filtered_enclosers = options
             .enclosers
             .iter()
             .filter(|(_, close)| *close == options.interend)
             .cloned()
             .collect();
-
-        // Convert Vec to slice for the new Ops struct
-        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
 
         Ops {
             blockcomstart: options.blockcomstart,
@@ -429,12 +409,12 @@ impl<'a> Ops<'a> {
     }
 
     fn is(&self, op: &str) -> bool {
-        self.ops.contains(&op) || self.is_literal_left(op) || self.is_literal_right(op)
+        self.ops.contains(&op.to_string()) || self.is_literal_left(op) || self.is_literal_right(op)
     }
     fn is_fragment(&self, op: &str) -> bool {
         self.ops
             .iter()
-            .any(|&op_def| op_def != op && op_def.starts_with(op))
+            .any(|op_def| op_def != op && op_def.starts_with(op))
             || is_literal_left_frag(op)
             || is_literal_right_frag(op)
     }
