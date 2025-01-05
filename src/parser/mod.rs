@@ -1,7 +1,7 @@
 mod tokenizer;
 pub mod parser_types;
 use crate::parser::parser_types::*;
-use crate::parser::tokenizer::Tokenizer;
+use crate::parser::tokenizer::{Tokenizer,Ops};
 
 #[derive(Debug)]
 pub struct Parser<'a> {
@@ -10,106 +10,12 @@ pub struct Parser<'a> {
     prev: Option<Token>,
 }
 impl<'a> Parser<'a> {
-    /*
-    ` for chars
-    ' mutability op (lifetime if needed goes before, & goes after)
-    left (\: type:default:argname, ::arg2 -> {}) right
-    \ type:default:argname, ::arg -> rettype {}
-    then => else !> and match # only
-
-    struct:name:<T> [']{
-      name:type:default;
+    pub fn get_ops(settings: &'a TokenizerSettings<'a>) -> Ops<'a> {
+        Tokenizer::get_ops(settings)
     }
-    trait:name:[<T>] [']{
-      name:type;
-    }
-    enum:name:[<T>] [']{
-      name:type;
-    }
-
-    Impl
-    <T>:[type,names]:structname [']{
-      name = value;
-    }
-
-    Scope
-    [type] [']{
-        [type][:]varname = value;
-        <- varname;
-    }
-    [type] {
-        [type]:varname2 = varname;
-        <- varname;
-        [type]:varname = value;
-    }
-    [type] '{
-        [type][:]varname = value;
-        varname
-    }
-
-    Match
-    val [type] [']{
-        Pattern[,][cond] -> val+2;
-        !> val-2;
-    }
-
-    Sets [']{ val1, val2, val3 }
-    Hashmap [']{ key1: val1, key2: val2, key3: val3 }
-    Arrays ['][val1, val2, val3]
-
-    \& makes it so that you can have multiple mutable refs?
-    but dereference becomes the function defined and returns an option?
-    You cant read or write to the value if you dont own it except by using this if defined?
-    Is defined at use site of mutable types?
-    Possibly mutable structs define a signature for it?
-    Will be used instead of unsafe?
-
-    I want to have raw pointer writing for embedded
-    and IO and whatnot passed in via the node definition
-    and then you can define mutable IO and monadic pure IO and pass them in.
-    But im not sure how this is going to work completely
-
-    <@ is value to stream/actor
-    @ is open/run stream/actor on node
-    @@ is same but on current node
-    @> is value from stream/actor
-    @>> untilcond, fallback TTL(int)
-    >>> while ->
-    >>| continue
-    >>! break
-
-    :name = 5;
-    `int:name2 = 6;
-
-    "#!" "#@" <- node config enclosers
-    doubles as shebang for interpreted mode
-    */
-    pub fn new(input:core::str::Chars<'a>) -> Parser<'a> {
-        let settings = tokenizer::TokenizerSettings {
-            blockcomstart: "#^".to_string(),
-            blockcomend: "#$".to_string(),
-            linecom: "#".to_string(),
-            ops: [
-                "=", "+", "-", "/", "%", "//", "|", "^", "++",
-                ">>", "<<", "!", "||", "&&", "..",
-                "!=", "==", "<=", ">=",
-                "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=", "^=", "++=",
-                "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
-                "'", "&", "*", "\\&",
-                "=>", "!>",
-                ">>>", ">>|", ">>!",
-                "<@", "@", "@@", "@>", "@>>",
-                ":", ".", ",", ";",
-            ].iter().map(|v| v.to_string()).collect(),
-            enclosers: [("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")].iter().map(|(a,b)| (a.to_string(), b.to_string())).collect(),
-            charop: "`".to_string(),
-            templop: "\"".to_string(),
-            interstart: "$[".to_string(),
-            interend: "]".to_string(),
-            escape_char: '\\',
-        };
+    pub fn new(ops: &'a Ops<'a>, input:core::str::Chars<'a>) -> Parser<'a> {
         let mut p = Parser {
-            tokenizer:Tokenizer::new(input, settings),
+            tokenizer:Tokenizer::new(input, ops),
             current: None,
             prev: None,
         };

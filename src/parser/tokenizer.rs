@@ -1,25 +1,11 @@
-use crate::parser::parser_types::{ Coin, Token };
-
-#[derive(Debug, Clone)]
-pub struct TokenizerSettings {
-    pub blockcomstart: String,
-    pub blockcomend: String,
-    pub linecom: String,
-    pub ops: Vec<String>,
-    pub charop: String,
-    pub templop: String,
-    pub enclosers: Vec<(String, String)>,
-    pub interstart: String,
-    pub interend: String,
-    pub escape_char: char,
-}
+use crate::parser::parser_types::{ Coin, Token, TokenizerSettings };
 
 #[derive(Debug)]
 pub struct Tokenizer<'a> {
     input: core::str::Chars<'a>,
     peeked: Vec<char>,
     position: usize,
-    ops_struct: Ops,
+    ops_struct: &'a Ops<'a>,
     in_template: bool,
     out: Vec<Token>,
 }
@@ -39,15 +25,18 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
+    pub fn get_ops(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
+        Ops::new(options)
+    }
     pub fn new(
         input: core::str::Chars<'a>,
-        options: TokenizerSettings,
+        ops: &'a Ops<'a>,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: Ops::new(options),
+            ops_struct: ops,
             in_template: false,
             out: Vec::new(),
         };
@@ -57,7 +46,7 @@ impl<'a> Tokenizer<'a> {
 
     fn new_template_tokenizer(
         input: core::str::Chars<'a>,
-        ops: Ops,
+        ops: &'a Ops<'a>,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
@@ -125,7 +114,7 @@ impl<'a> Tokenizer<'a> {
             let token = match c {
                 _ if self.in_template && is_templ_literal => {
                     is_templ_literal = false;
-                    self.consume_capturing(&mut tokens, &self.ops_struct.interstart.clone())
+                    self.consume_capturing(&mut tokens, self.ops_struct.interstart)
                 }
                 _ if self.ops_struct.is(&c.to_string())
                     || self.ops_struct.is_fragment(&c.to_string()) =>
@@ -231,7 +220,7 @@ impl<'a> Tokenizer<'a> {
         }
         if !self.in_template || self.at().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct.clone());
+                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
                 let mut format_tokens = Vec::new();
                 for token in format_tokenizer {
                     format_tokens.push(token);
@@ -249,7 +238,7 @@ impl<'a> Tokenizer<'a> {
                 Token::Literal(Coin::new(literal, start))
             }
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct.clone());
+            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
@@ -261,7 +250,7 @@ impl<'a> Tokenizer<'a> {
     }
     fn consume_comment(&mut self, block: bool) -> String {
         let endchar = if block {
-            &self.ops_struct.blockcomend.clone()
+            self.ops_struct.blockcomend
         } else {
             "\n"
         };
@@ -352,39 +341,43 @@ impl<'a> Tokenizer<'a> {
 }
 
 #[derive(Debug, Clone)]
-struct Ops {
-    blockcomstart: String,
-    blockcomend: String,
-    linecom: String,
-    interstart: String,
-    enclosers: Vec<(String, String)>,
-    ops: Vec<String>,
-    charop: String,
-    templop: String,
+pub struct Ops<'a> {
+    blockcomstart: &'a str,
+    blockcomend: &'a str,
+    linecom: &'a str,
+    interstart: &'a str,
+    enclosers: &'a [(&'a str, &'a str)],
+    ops: &'a [&'a str],
+    charop: &'a str,
+    templop: &'a str,
     escape_char: char,
 }
 
-impl Ops {
-    fn new(options: TokenizerSettings) -> Ops {
+impl<'a> Ops<'a> {
+    fn new(options: &'a TokenizerSettings<'a>) -> Ops {
         let mut combined_ops = vec![
-            options.blockcomstart.clone(),
-            options.blockcomend.clone(),
-            options.linecom.clone(),
-            options.interstart.clone(),
-            options.interend.clone(),
-            options.templop.clone(),
+            options.blockcomstart,
+            options.blockcomend,
+            options.linecom,
+            options.interstart,
+            options.interend,
+            options.templop,
         ];
-        combined_ops.extend_from_slice(&options.ops);
-        for (open, close) in &options.enclosers {
-            combined_ops.push(open.to_string());
-            combined_ops.push(close.to_string());
+        combined_ops.extend_from_slice(options.ops);
+        for (open, close) in options.enclosers {
+            combined_ops.push(open);
+            combined_ops.push(close);
         }
-        let filtered_enclosers = options
+        let filtered_enclosers: Box<[(&'a str, &'a str)]> = options
             .enclosers
             .iter()
             .filter(|(_, close)| *close == options.interend)
             .cloned()
-            .collect();
+            .collect::<Vec<_>>()
+            .into_boxed_slice();
+
+        let filtered_enclosers: &'a [(&'a str, &'a str)] = Box::leak(filtered_enclosers);
+        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
 
         Ops {
             blockcomstart: options.blockcomstart,
@@ -400,12 +393,12 @@ impl Ops {
     }
 
     fn is(&self, op: &str) -> bool {
-        self.ops.contains(&op.to_string()) || self.is_literal_left(op) || self.is_literal_right(op)
+        self.ops.contains(&op) || self.is_literal_left(op) || self.is_literal_right(op)
     }
     fn is_fragment(&self, op: &str) -> bool {
         self.ops
             .iter()
-            .any(|op_def| op_def != op && op_def.starts_with(op))
+            .any(|&op_def| op_def != op && op_def.starts_with(op))
             || is_literal_left_frag(op)
             || is_literal_right_frag(op)
     }

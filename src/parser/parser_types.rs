@@ -1,6 +1,20 @@
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
+#[derive(Debug, Clone)]
+pub struct TokenizerSettings<'a> {
+    pub blockcomstart: &'a str,
+    pub blockcomend: &'a str,
+    pub linecom: &'a str,
+    pub ops: &'a [&'a str],
+    pub charop: &'a str,
+    pub templop: &'a str,
+    pub enclosers: &'a [(&'a str, &'a str)],
+    pub interstart: &'a str,
+    pub interend: &'a str,
+    pub escape_char: char,
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Identifier(Coin<String>),
