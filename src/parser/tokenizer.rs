@@ -108,9 +108,8 @@ impl<'a> Tokenizer<'a> {
             Some(self.peeked.remove(0))
         }
     }
-    fn remaining_starts_with(&mut self, pat: &str) -> bool {
-        let patvec = pat.chars().collect::<Vec<char>>();
-        patvec == self.peek_next_n(patvec.len())
+    fn remaining_starts_with(&mut self, pat: Vec<char>) -> bool {
+        pat == self.peek_next_n(pat.len())
     }
     fn pos(&self) -> usize { // <- NOTE: for adding debug info only, currently in terms of bytes, should be in terms of chars
         self.position
@@ -232,7 +231,7 @@ impl<'a> Tokenizer<'a> {
         let start = self.pos();
         let mut retval:Option<Token> = None;
         while let Some(c) = self.get_next_char() {
-            if self.remaining_starts_with(&end_encloser) {
+            if self.remaining_starts_with(end_encloser.chars().collect()) {
                 retval = Some(Token::Op(Coin::new(end_encloser.clone(), self.pos())));
                 for _ in end_encloser.chars() {
                     self.eat();
@@ -250,12 +249,12 @@ impl<'a> Tokenizer<'a> {
         let start = self.pos();
         let mut is_escaped = false;
         while let Some(c) = self.get_next_char() {
-            if self.remaining_starts_with(end_encloser) && !is_escaped {
+            if self.remaining_starts_with(end_encloser.chars().collect()) && !is_escaped {
                 break;
             }
             self.eat();
             is_escaped = c == self.ops_struct.escape_char;
-            if !(is_escaped && self.remaining_starts_with(end_encloser)) {
+            if !(is_escaped && self.remaining_starts_with(end_encloser.chars().collect())) {
                 literal.push(c);
             }
         }
@@ -295,7 +294,7 @@ impl<'a> Tokenizer<'a> {
         let mut buffer = String::new();
         while let Some(c) = self.get_next_char() {
             buffer.push(c);
-            if self.remaining_starts_with(endchar) {
+            if self.remaining_starts_with(endchar.chars().collect()) {
                 buffer.pop();
                 for c in endchar.chars() {
                     buffer.push(c);
