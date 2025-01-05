@@ -29,14 +29,14 @@ pub struct Tokenizer<'a> {
 impl<'a> Iterator for Tokenizer<'a> {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.outpos + 1 >= self.out.len() {
+        if self.out.is_empty() {
             self.populate_next();
         };
-        let ret = self.out.get(self.outpos).cloned();
-        if ret.is_some() {
-            self.outpos += 1;
+        if ! self.out.is_empty() {
+            Some(self.out.remove(0))
+        } else {
+            None
         }
-        ret
     }
 }
 
