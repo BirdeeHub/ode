@@ -90,7 +90,7 @@ impl<'a> Parser<'a> {
             blockcomstart: "#^".to_string(),
             blockcomend: "#$".to_string(),
             linecom: "#".to_string(),
-            ops: vec![
+            ops: [
                 "=", "+", "-", "/", "%", "//", "|",
                 ">>", "<<", "!", "||", "&&",
                 "!=", "==", "<=", ">=",
