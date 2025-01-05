@@ -259,8 +259,7 @@ impl<'a> Tokenizer<'a> {
             }
             self.eat();
             is_escaped = c == self.ops_struct.escape_char;
-            if is_escaped && self.remaining_starts_with(end_encloser) {
-            } else {
+            if !(is_escaped && self.remaining_starts_with(end_encloser)) {
                 literal.push(c);
             }
         }
