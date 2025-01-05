@@ -320,9 +320,11 @@ impl<'a> Tokenizer<'a> {
             }
             count += 1;
         }
-        let ret = self.peek_next_n(count).iter().collect::<String>();
+        let mut ret = String::new();
         for _ in 0..count {
-            self.eat();
+            if let Some(c) = self.eat() {
+                ret.push(c);
+            }
         }
         ret
     }
