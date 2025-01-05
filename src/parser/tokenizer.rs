@@ -111,7 +111,7 @@ impl<'a> Tokenizer<'a> {
     fn remaining_starts_with(&mut self, pat: Vec<char>) -> bool {
         pat == self.peek_next_n(pat.len())
     }
-    fn pos(&self) -> usize { // <- NOTE: for adding debug info only, currently in terms of bytes, should be in terms of chars
+    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
         self.position
     }
     fn peek_next_n(&mut self, chars: usize) -> Vec<char> {
