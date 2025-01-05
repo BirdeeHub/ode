@@ -113,8 +113,6 @@ impl<'a> Parser<'a> {
         p.eat();
         p
     }
-    //NOTE: only touch self.position and self.in_tokens via these methods
-    // so that they may be redefined in terms of the tokenizer iterator
     fn at(&self) -> Option<Token> {
         self.current.clone()
     }
