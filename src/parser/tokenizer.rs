@@ -177,8 +177,7 @@ impl<'a> Tokenizer<'a> {
                                 }
                                 Token::Op(Coin::new(op.clone(),pos))
                             }
-                            _ if self.in_template && self.ops_struct.is_left_encloser(&op)
-                                || self.ops_struct.interstart == op => {
+                            _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                                 level += 1;
                                 Token::Op(Coin::new(op.clone(),pos))
                             }
