@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, Read, BufReader};
+use std::io::{self, Read};
 mod parser;
 mod runtime;
 
