@@ -278,22 +278,31 @@ where
         } else {
             "\n"
         };
-        let mut buffer = String::new();
-        while let Some(c) = self.at() {
-            buffer.push(c);
-            if self.remaining_starts_with(endchar.chars().collect()) {
-                buffer.pop();
-                for c in endchar.chars() {
-                    buffer.push(c);
-                    self.eat();
-                }
-                break;
-            }
-            self.eat();
-        }
         if self.ops_struct.capture_comments {
+            let mut buffer = String::new();
+            while let Some(c) = self.at() {
+                buffer.push(c);
+                if self.remaining_starts_with(endchar.chars().collect()) {
+                    buffer.pop();
+                    for c in endchar.chars() {
+                        buffer.push(c);
+                        self.eat();
+                    }
+                    break;
+                }
+                self.eat();
+            }
             Some(Token::Comment(Coin::new(op + &buffer,pos)))
         } else {
+            while self.at().is_some() {
+                if self.remaining_starts_with(endchar.chars().collect()) {
+                    for _ in endchar.chars() {
+                        self.eat();
+                    }
+                    break;
+                }
+                self.eat();
+            }
             None
         }
     }
