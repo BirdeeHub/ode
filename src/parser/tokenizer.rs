@@ -47,7 +47,7 @@ impl<'a> Tokenizer<'a> {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: Ops::new(options.clone()),
+            ops_struct: Ops::new(options),
             in_template: false,
             out: Vec::new(),
         };
