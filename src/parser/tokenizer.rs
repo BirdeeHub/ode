@@ -137,10 +137,20 @@ where
                     if let Some(op) = self.consume_op() {
                         match op {
                             _ if op == self.ops_struct.blockcomstart => {
-                                Token::Comment(Coin::new(op + &self.consume_comment(true), pos))
+                                if self.ops_struct.capture_comments {
+                                    Token::Comment(Coin::new(op + &self.consume_comment(true), pos))
+                                } else {
+                                    self.consume_comment(true);
+                                    continue;
+                                }
                             }
                             _ if op == self.ops_struct.linecom => {
-                                Token::Comment(Coin::new(op + &self.consume_comment(false), pos))
+                                if self.ops_struct.capture_comments {
+                                    Token::Comment(Coin::new(op + &self.consume_comment(false), pos))
+                                } else {
+                                    self.consume_comment(false);
+                                    continue;
+                                }
                             }
                             _ if self.in_template && self.ops_struct.is_right_encloser(&op) => {
                                 if level == 0 {
@@ -368,6 +378,7 @@ struct Ops<'a> {
     charop: &'a str,
     templop: &'a str,
     escape_char: char,
+    capture_comments: bool,
 }
 
 impl<'a> Ops<'a> {
@@ -403,6 +414,7 @@ impl<'a> Ops<'a> {
             enclosers: Box::leak(filtered_enclosers),
             interstart: options.interstart,
             escape_char: options.escape_char,
+            capture_comments: options.capture_comments,
         }
     }
 

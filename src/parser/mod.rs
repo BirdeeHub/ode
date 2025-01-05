@@ -111,6 +111,7 @@ where I: Iterator<Item = char>,
             interstart: "$[",
             interend: "]",
             escape_char: '\\',
+            capture_comments: false,
         });
         Tokenizer::new(input, Box::leak(settings))
     }

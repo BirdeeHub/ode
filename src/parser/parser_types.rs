@@ -13,6 +13,7 @@ pub struct TokenizerSettings<'a> {
     pub interstart: &'a str,
     pub interend: &'a str,
     pub escape_char: char,
+    pub capture_comments: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
