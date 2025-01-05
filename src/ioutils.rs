@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, Bytes, Read, BufReader};
+use std::io::{self, Bytes, Read};
 
 pub fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -9,18 +9,28 @@ pub fn read_file(file_path: &str) -> io::Result<String> {
 }
 
 #[derive(Debug)]
-pub struct CharIterator {
-    reader: Bytes<BufReader<File>>,
+pub struct CharIterator<T>
+where
+    T: std::io::Read,
+{
+    reader: Bytes<T>,
     buf: Vec<u8>,
 }
-impl CharIterator {
-    pub fn new(filepath: &str) -> io::Result<CharIterator> {
-        let file = File::open(filepath)?;
-        let reader = BufReader::new(file).bytes();
-        Ok(CharIterator { reader, buf: Vec::new() })
+impl<T> CharIterator<T>
+where
+    T: std::io::Read,
+{
+    pub fn new(reader: T) -> io::Result<CharIterator<T>> {
+        Ok(CharIterator {
+            reader: reader.bytes(),
+            buf: Vec::new(),
+        })
     }
 }
-impl Iterator for CharIterator {
+impl<T> Iterator for CharIterator<T>
+where
+    T: std::io::Read,
+{
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
@@ -28,7 +38,7 @@ impl Iterator for CharIterator {
                 match self.reader.next() {
                     Some(Ok(b)) => {
                         self.buf.push(b);
-                    },
+                    }
                     _ => break,
                 }
             }
@@ -44,4 +54,3 @@ impl Iterator for CharIterator {
         charval
     }
 }
-
