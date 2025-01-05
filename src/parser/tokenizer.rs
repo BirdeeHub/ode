@@ -373,17 +373,14 @@ impl<'a> Ops<'a> {
             .collect::<Vec<_>>()
             .into_boxed_slice();
 
-        let filtered_enclosers: &'a [(&'a str, &'a str)] = Box::leak(filtered_enclosers);
-        let combined_ops: &'a [&'a str] = Box::leak(combined_ops.into_boxed_slice());
-
         Ops {
             blockcomstart: options.blockcomstart,
             blockcomend: options.blockcomend,
             linecom: options.linecom,
-            ops: combined_ops,
+            ops: Box::leak(combined_ops.into_boxed_slice()),
             charop: options.charop,
             templop: options.templop,
-            enclosers: filtered_enclosers,
+            enclosers: Box::leak(filtered_enclosers),
             interstart: options.interstart,
             escape_char: options.escape_char,
         }
