@@ -87,8 +87,8 @@ where
         }
         true
     }
+    // NOTE: self.pos() is for adding debug info only
     fn pos(&self) -> usize {
-        // <- NOTE: for adding debug info only
         self.position
     }
     fn peek_ahead_n(&mut self, chars: usize) -> Option<char> {
