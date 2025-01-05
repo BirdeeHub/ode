@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{self, Read};
 mod parser;
 mod runtime;
-use crate::parser::parser_types::TokenizerSettings;
+use crate::parser::{Parser,parser_types::TokenizerSettings};
 
 fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -114,8 +114,8 @@ fn main() -> io::Result<()> {
     doubles as shebang for interpreted mode
     */
 
-    let ops = parser::Parser::get_ops(&settings);
-    let mut parser = parser::Parser::new(&ops,contents.chars());
+    let ops = Parser::get_ops(&settings);
+    let mut parser = Parser::new(&ops,contents.chars());
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
