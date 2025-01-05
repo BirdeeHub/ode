@@ -381,7 +381,6 @@ struct Ops<'a> {
     blockcomend: &'a str,
     linecom: &'a str,
     interstart: &'a str,
-    interend: &'a str,
     enclosers: Vec<(&'a str, &'a str)>,
     ops: &'a [&'a str],
     charop: &'a str,
@@ -428,7 +427,6 @@ impl<'a> Ops<'a> {
             templop: options.templop,
             enclosers: filtered_enclosers,
             interstart: options.interstart,
-            interend: options.interend,
             escape_char: options.escape_char,
         }
     }
