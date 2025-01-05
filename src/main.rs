@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::time::Instant;
 use std::io::{self, Read};
 mod parser;
 mod runtime;
@@ -12,6 +13,7 @@ fn read_file(file_path: &str) -> io::Result<String> {
 }
 
 fn main() -> io::Result<()> {
+    let start = Instant::now();
     let args: Vec<String> = std::env::args().collect();
     println!("Arguments: {:?}", args);
     let inputvar = args.get(1).expect("No input file provided!");
@@ -118,6 +120,7 @@ fn main() -> io::Result<()> {
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
+    println!("Time: {:?}", start.elapsed());
 
     Ok(())
 }
