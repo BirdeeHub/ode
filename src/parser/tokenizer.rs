@@ -372,7 +372,6 @@ impl Ops {
             options.linecom.clone(),
             options.interstart.clone(),
             options.interend.clone(),
-            options.charop.clone(),
             options.templop.clone(),
         ];
         combined_ops.extend_from_slice(&options.ops);
