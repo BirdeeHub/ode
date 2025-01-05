@@ -354,7 +354,7 @@ pub struct Ops<'a> {
 }
 
 impl<'a> Ops<'a> {
-    fn new(options: &'a TokenizerSettings<'a>) -> Ops {
+    fn new(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
         let mut combined_ops = vec![
             options.blockcomstart,
             options.blockcomend,
