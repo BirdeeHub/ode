@@ -113,6 +113,7 @@ impl<'a> Parser<'a> {
             current: None,
             prev: None,
         };
+        // NOTE: populate first value before returning new parser
         p.eat();
         p
     }
