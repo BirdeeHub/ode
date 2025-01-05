@@ -238,11 +238,18 @@ impl<'a> Tokenizer<'a> {
                 for token in format_tokenizer {
                     format_tokens.push(token);
                 }
-                tokens.push(Token::Format(Coin::new(format_tokens, start)));
-            } else {
+                if self.at().is_some() {
+                    tokens.push(Token::Format(Coin::new(format_tokens, start)));
+                    Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
+                } else {
+                    Token::Format(Coin::new(format_tokens, start))
+                }
+            } else if self.at().is_some() {
                 tokens.push(Token::Literal(Coin::new(literal, start)));
+                Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
+            } else {
+                Token::Literal(Coin::new(literal, start))
             }
-            Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct.clone());
             let mut format_tokens = Vec::new();
