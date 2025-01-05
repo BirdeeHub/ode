@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::{self, Read, BufReader};
 mod parser;
 mod runtime;
 
@@ -13,15 +13,8 @@ fn read_file(file_path: &str) -> io::Result<String> {
 fn main() -> io::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     println!("Arguments: {:?}", args);
-    let contents = if args.len() > 1 {
-        read_file(&args[1])
-    } else {
-        Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "No file path provided",
-        ))
-    }?;
-    println!("Contents: {:?}", contents);
+    let inputvar = args.get(1).expect("No input file provided!");
+    let contents = read_file(inputvar)?;
     let mut parser = parser::Parser::new(contents.chars());
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
