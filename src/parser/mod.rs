@@ -10,30 +10,6 @@ pub struct Parser<'a> {
     position: usize,
 }
 impl<'a> Parser<'a> {
-    pub fn new(input_string:&'a str) -> Parser<'a> {
-        let settings = tokenizer::TokenizerSettings {
-            blockcomstart: "#^",
-            blockcomend: "#$",
-            linecom: "#",
-            ops: &[
-                "=", "+", "-", "/", "%", "//", "|",
-                ">>", "<<", "!", "||", "&&",
-                "!=", "==", "<=", ">=",
-                "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
-                "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
-                "'", "&", "*", "\\&",
-                "=>", "!>",
-                ">>>", ">>|", ">>!",
-                "<@", "@", "@@", "@>", "@>>",
-                ":", ".", ",", ";",
-            ],
-            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")],
-            charop: "`",
-            templop: "\"",
-            interstart: "$[",
-            interend: "]",
-            escape_char: '\\',
-        };
         /*
         ` for chars
         ' mutability op (lifetime if needed goes before, & goes after)
@@ -110,6 +86,30 @@ impl<'a> Parser<'a> {
         doubles as shebang for interpreted mode
         */
 
+    pub fn new(input_string:&'a str) -> Parser<'a> {
+        let settings = tokenizer::TokenizerSettings {
+            blockcomstart: "#^",
+            blockcomend: "#$",
+            linecom: "#",
+            ops: &[
+                "=", "+", "-", "/", "%", "//", "|",
+                ">>", "<<", "!", "||", "&&",
+                "!=", "==", "<=", ">=",
+                "-=", "+=", "*=", "/=", "&=", "|=", "%=", "//=",
+                "\\", "\\:", "...", "->", "<-", ">>=", "|>", "<|", "?",
+                "'", "&", "*", "\\&",
+                "=>", "!>",
+                ">>>", ">>|", ">>!",
+                "<@", "@", "@@", "@>", "@>>",
+                ":", ".", ",", ";",
+            ],
+            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")],
+            charop: "`",
+            templop: "\"",
+            interstart: "$[",
+            interend: "]",
+            escape_char: '\\',
+        };
         let tokenizer = Tokenizer::new(input_string.chars(), &settings);
         let mut in_tokens = Vec::new();
         //TODO: Stop reading them all up front like this
