@@ -88,7 +88,7 @@ doubles as shebang for interpreted mode
 impl<'a,I> Parser<'a,I>
 where I: Iterator<Item = char>,
 {
-    pub fn new(input:I) -> Parser<'a,I> {
+    pub fn new_tokenizer(input:I) -> Tokenizer<'a,I> {
         let settings  = Box::new(TokenizerSettings {
             blockcomstart: "#^",
             blockcomend: "#$",
@@ -112,8 +112,11 @@ where I: Iterator<Item = char>,
             interend: "]",
             escape_char: '\\',
         });
+        Tokenizer::new(input, Box::leak(settings))
+    }
+    pub fn new(input:I) -> Parser<'a,I> {
         let mut p = Parser {
-            tokenizer:Tokenizer::new(input, Box::leak(settings)),
+            tokenizer:Self::new_tokenizer(input),
             current: None,
             prev: None,
         };
