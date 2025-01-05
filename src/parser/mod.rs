@@ -1,7 +1,7 @@
 mod tokenizer;
 pub mod parser_types;
 use crate::parser::parser_types::*;
-use crate::parser::tokenizer::{Tokenizer,Ops};
+use crate::parser::tokenizer::Tokenizer;
 
 #[derive(Debug)]
 pub struct Parser<'a> {
@@ -10,12 +10,9 @@ pub struct Parser<'a> {
     prev: Option<Token>,
 }
 impl<'a> Parser<'a> {
-    pub fn get_ops(settings: &'a TokenizerSettings<'a>) -> Ops<'a> {
-        Tokenizer::get_ops(settings)
-    }
-    pub fn new(ops: &'a Ops<'a>, input:core::str::Chars<'a>) -> Parser<'a> {
+    pub fn new(settings: &'a TokenizerSettings<'a>, input:core::str::Chars<'a>) -> Parser<'a> {
         let mut p = Parser {
-            tokenizer:Tokenizer::new(input, ops),
+            tokenizer:Tokenizer::new(input, settings),
             current: None,
             prev: None,
         };

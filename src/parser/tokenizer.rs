@@ -25,18 +25,15 @@ impl<'a> Iterator for Tokenizer<'a> {
 }
 
 impl<'a> Tokenizer<'a> {
-    pub fn get_ops(options: &'a TokenizerSettings<'a>) -> Ops<'a> {
-        Ops::new(options)
-    }
     pub fn new(
         input: core::str::Chars<'a>,
-        ops: &'a Ops<'a>,
+        options: &'a TokenizerSettings<'a>,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: ops,
+            ops_struct: Box::leak(Box::new(Ops::new(options))),
             in_template: false,
             out: Vec::new(),
         };

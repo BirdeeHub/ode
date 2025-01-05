@@ -114,8 +114,7 @@ fn main() -> io::Result<()> {
     doubles as shebang for interpreted mode
     */
 
-    let ops = Parser::get_ops(&settings);
-    let mut parser = Parser::new(&ops,contents.chars());
+    let mut parser = Parser::new(&settings,contents.chars());
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
