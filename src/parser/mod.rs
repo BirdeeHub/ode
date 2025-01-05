@@ -108,8 +108,11 @@ impl<'a> Parser<'a> {
             interend: "]".to_string(),
             escape_char: '\\',
         };
-        let tokenizer = Tokenizer::new(input_string.chars(), settings);
-        let mut p = Parser{ tokenizer, current: None, prev: None};
+        let mut p = Parser {
+            tokenizer:Tokenizer::new(input_string.chars(), settings),
+            current: None,
+            prev: None,
+        };
         p.eat();
         p
     }
