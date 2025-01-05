@@ -292,7 +292,7 @@ where
                 }
                 self.eat();
             }
-            Some(Token::Comment(Coin::new(op + &buffer,pos)))
+            Some(Token::Comment(Coin::new(op + &buffer, pos)))
         } else {
             while self.at().is_some() {
                 if self.remaining_starts_with(endchar.chars().collect()) {
