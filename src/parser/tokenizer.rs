@@ -23,7 +23,6 @@ pub struct Tokenizer<'a> {
     in_template: bool,
     options: TokenizerSettings,
     out: Vec<Token>,
-    outpos: usize,
 }
 
 impl<'a> Iterator for Tokenizer<'a> {
@@ -53,7 +52,6 @@ impl<'a> Tokenizer<'a> {
             in_template: false,
             options,
             out: Vec::new(),
-            outpos: 0,
         };
         ret.populate_next();
         ret
@@ -71,7 +69,6 @@ impl<'a> Tokenizer<'a> {
             in_template: true,
             options,
             out: Vec::new(),
-            outpos: 0,
         };
         ret.populate_next();
         ret
