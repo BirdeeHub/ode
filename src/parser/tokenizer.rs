@@ -1,6 +1,5 @@
 use crate::parser::parser_types::{Coin, Token, TokenizerSettings};
 
-#[derive(Debug)]
 pub struct Tokenizer<'a, I>
 where
     I: Iterator<Item = char>,
@@ -11,6 +10,23 @@ where
     ops_struct: &'a Ops<'a>,
     in_template: bool,
     out: Vec<Token>,
+}
+impl<'a, I> std::fmt::Debug for Tokenizer<'a, I>
+where
+    I: Iterator<Item = char>,  // Keep the constraint for `I` to ensure it works generically
+    Ops<'a>: std::fmt::Debug,       // Ensure `Ops` implements `Debug`
+    Token: std::fmt::Debug,         // Ensure `Token` implements `Debug`
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Write out each field manually, excluding `input`
+        f.debug_struct("Tokenizer")
+            .field("peeked", &self.peeked)
+            .field("position", &self.position)
+            .field("ops_struct", &self.ops_struct)
+            .field("in_template", &self.in_template)
+            .field("out", &self.out)
+            .finish()
+    }
 }
 
 impl<'a, I> Iterator for Tokenizer<'a, I>
