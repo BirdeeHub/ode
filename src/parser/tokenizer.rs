@@ -43,13 +43,13 @@ impl<'a> Tokenizer<'a> {
 
     fn new_template_tokenizer(
         input: core::str::Chars<'a>,
-        ops: &'a Ops<'a>,
+        ops_struct: &'a Ops<'a>,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: ops,
+            ops_struct,
             in_template: true,
             out: Vec::new(),
         };
