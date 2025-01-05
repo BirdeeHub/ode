@@ -84,7 +84,7 @@ impl<'a> Parser<'a> {
     "#!" "#@" <- node config enclosers
     doubles as shebang for interpreted mode
     */
-    pub fn new(input_string:core::str::Chars<'a>) -> Parser<'a> {
+    pub fn new(input:core::str::Chars<'a>) -> Parser<'a> {
         let settings = tokenizer::TokenizerSettings {
             blockcomstart: "#^".to_string(),
             blockcomend: "#$".to_string(),
@@ -109,7 +109,7 @@ impl<'a> Parser<'a> {
             escape_char: '\\',
         };
         let mut p = Parser {
-            tokenizer:Tokenizer::new(input_string, settings),
+            tokenizer:Tokenizer::new(input, settings),
             current: None,
             prev: None,
         };
