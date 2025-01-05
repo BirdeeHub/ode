@@ -251,9 +251,6 @@ impl<'a> Tokenizer<'a> {
         let mut is_escaped = false;
         while let Some(c) = self.get_next_char() {
             if self.remaining_starts_with(end_encloser) && !is_escaped {
-                for _ in end_encloser.chars() {
-                    self.eat();
-                }
                 break;
             }
             self.eat();
@@ -261,6 +258,10 @@ impl<'a> Tokenizer<'a> {
             if !(is_escaped && self.remaining_starts_with(end_encloser)) {
                 literal.push(c);
             }
+        }
+        let end_enc_pos = self.pos();
+        for _ in end_encloser.chars() {
+            self.eat();
         }
         if !self.in_template || self.get_next_char().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
@@ -273,7 +274,7 @@ impl<'a> Tokenizer<'a> {
             } else {
                 tokens.push(Token::Literal(Coin::new(literal, start)));
             }
-            Token::Op(Coin::new(end_encloser.to_string(), self.pos()))
+            Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options);
             let mut format_tokens = Vec::new();
