@@ -117,7 +117,7 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn populate_next(&mut self) -> bool {
+    fn populate_next(&mut self) {
         let mut tokens = Vec::new();
         let mut is_templ_literal = self.in_template;
         let mut level = 0;
@@ -187,11 +187,9 @@ impl<'a> Tokenizer<'a> {
                 break;
             }
         }
-        let ret = ! tokens.is_empty();
         for token in tokens {
             self.out.push(token)
         }
-        ret
     }
 
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Option<Token> {
