@@ -231,8 +231,11 @@ impl<'a> Tokenizer<'a> {
     fn consume_literal(&mut self, tokens: &mut Vec<Token>, start_encloser: &str) -> Option<Token> {
         let end_encloser = Ops::get_literal_end(start_encloser);
         let mut literal = String::new();
+        let start = self.pos();
+        let mut retval:Option<Token> = None;
         while let Some(c) = self.get_next_char() {
             if self.remaining_starts_with(&end_encloser) {
+                retval = Some(Token::Op(Coin::new(end_encloser.clone(), self.pos())));
                 for _ in end_encloser.chars() {
                     self.eat();
                 }
@@ -241,10 +244,8 @@ impl<'a> Tokenizer<'a> {
             self.eat();
             literal.push(c);
         }
-        tokens.push(Token::Literal(Coin::new(literal, self.pos())));
-        if self.get_next_char().is_some() {
-            Some(Token::Op(Coin::new(end_encloser, self.pos())))
-        } else {None}
+        tokens.push(Token::Literal(Coin::new(literal, start)));
+        retval
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
         let mut literal = String::new();
