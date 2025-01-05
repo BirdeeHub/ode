@@ -89,9 +89,6 @@ impl<'a> Tokenizer<'a> {
         ret.populate_next();
         ret
     }
-    //TODO: implement these in terms of an iterator over chars or a stream or something
-    // so that you can pass in an input stream rather than a finished entire input
-    // for now though, this is fine.
     fn get_next_char(&mut self) -> Option<char> {
         self.peek_ahead_n(0)
     }
