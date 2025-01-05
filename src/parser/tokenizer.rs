@@ -407,8 +407,6 @@ impl<'a> Ops<'a> {
             combined_ops.push(open);
             combined_ops.push(close);
         }
-        combined_ops.push(options.interstart);
-        combined_ops.push(options.interend);
         combined_ops.push(options.templop);
         combined_ops.push(options.linecom);
         combined_ops.push(options.blockcomstart);
