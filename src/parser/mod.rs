@@ -81,7 +81,6 @@ impl<'a> Parser<'a> {
     :name = 5;
     `int:name2 = 6;
 
-
     "#!" "#@" <- node config enclosers
     doubles as shebang for interpreted mode
     */
