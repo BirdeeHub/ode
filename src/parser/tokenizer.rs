@@ -21,7 +21,6 @@ pub struct Tokenizer<'a> {
     position: usize,
     ops_struct: Ops,
     in_template: bool,
-    options: TokenizerSettings,
     out: Vec<Token>,
 }
 
@@ -50,7 +49,6 @@ impl<'a> Tokenizer<'a> {
             position: 0,
             ops_struct: Ops::new(options.clone()),
             in_template: false,
-            options,
             out: Vec::new(),
         };
         ret.populate_next();
@@ -59,15 +57,14 @@ impl<'a> Tokenizer<'a> {
 
     fn new_template_tokenizer(
         input: core::str::Chars<'a>,
-        options: TokenizerSettings,
+        ops: Ops,
     ) -> Tokenizer<'a> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
             position: 0,
-            ops_struct: Ops::new(options.clone()),
+            ops_struct: ops,
             in_template: true,
-            options,
             out: Vec::new(),
         };
         ret.populate_next();
@@ -245,7 +242,7 @@ impl<'a> Tokenizer<'a> {
         }
         if !self.in_template || self.at().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options.clone());
+                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct.clone());
                 let mut format_tokens = Vec::new();
                 for token in format_tokenizer {
                     format_tokens.push(token);
@@ -256,7 +253,7 @@ impl<'a> Tokenizer<'a> {
             }
             Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.options.clone());
+            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct.clone());
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
@@ -356,7 +353,7 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Ops {
     blockcomstart: String,
     blockcomend: String,
