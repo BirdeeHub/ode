@@ -4,13 +4,17 @@ use crate::parser::parser_types::*;
 use crate::parser::tokenizer::Tokenizer;
 
 #[derive(Debug)]
-pub struct Parser<'a> {
-    tokenizer: Tokenizer<'a>,
+pub struct Parser<'a,I>
+where I: Iterator<Item = char>,
+{
+    tokenizer: Tokenizer<'a,I>,
     current: Option<Token>,
     prev: Option<Token>,
 }
-impl<'a> Parser<'a> {
-    pub fn new(settings: &'a TokenizerSettings<'a>, input:core::str::Chars<'a>) -> Parser<'a> {
+impl<'a,I> Parser<'a,I>
+where I: Iterator<Item = char>,
+{
+    pub fn new(settings: &'a TokenizerSettings<'a>, input:I) -> Parser<'a,I> {
         let mut p = Parser {
             tokenizer:Tokenizer::new(input, settings),
             current: None,

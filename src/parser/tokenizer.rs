@@ -1,8 +1,10 @@
 use crate::parser::parser_types::{ Coin, Token, TokenizerSettings };
 
 #[derive(Debug)]
-pub struct Tokenizer<'a> {
-    input: core::str::Chars<'a>,
+pub struct Tokenizer<'a,I>
+where I: Iterator<Item = char>,
+{
+    input: I,
     peeked: Vec<char>,
     position: usize,
     ops_struct: &'a Ops<'a>,
@@ -10,7 +12,9 @@ pub struct Tokenizer<'a> {
     out: Vec<Token>,
 }
 
-impl<'a> Iterator for Tokenizer<'a> {
+impl<'a,I> Iterator for Tokenizer<'a,I>
+where I: Iterator<Item = char>,
+{
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
         if self.out.is_empty() {
@@ -24,11 +28,13 @@ impl<'a> Iterator for Tokenizer<'a> {
     }
 }
 
-impl<'a> Tokenizer<'a> {
+impl<'a,I> Tokenizer<'a,I>
+where I: Iterator<Item = char>,
+{
     pub fn new(
-        input: core::str::Chars<'a>,
+        input: I,
         options: &'a TokenizerSettings<'a>,
-    ) -> Tokenizer<'a> {
+    ) -> Tokenizer<'a,I> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
@@ -42,9 +48,9 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn new_template_tokenizer(
-        input: core::str::Chars<'a>,
+        input: I,
         ops_struct: &'a Ops<'a>,
-    ) -> Tokenizer<'a> {
+    ) -> Tokenizer<'a,I> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
