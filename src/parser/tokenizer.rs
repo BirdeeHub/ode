@@ -1,8 +1,9 @@
-use crate::parser::parser_types::{ Coin, Token, TokenizerSettings };
+use crate::parser::parser_types::{Coin, Token, TokenizerSettings};
 
 #[derive(Debug)]
-pub struct Tokenizer<'a,I>
-where I: Iterator<Item = char>,
+pub struct Tokenizer<'a, I>
+where
+    I: Iterator<Item = char>,
 {
     input: I,
     peeked: Vec<char>,
@@ -12,15 +13,16 @@ where I: Iterator<Item = char>,
     out: Vec<Token>,
 }
 
-impl<'a,I> Iterator for Tokenizer<'a,I>
-where I: Iterator<Item = char>,
+impl<'a, I> Iterator for Tokenizer<'a, I>
+where
+    I: Iterator<Item = char>,
 {
     type Item = Token;
     fn next(&mut self) -> Option<Self::Item> {
         if self.out.is_empty() {
             self.populate_next();
         };
-        if ! self.out.is_empty() {
+        if !self.out.is_empty() {
             Some(self.out.remove(0))
         } else {
             None
@@ -28,13 +30,11 @@ where I: Iterator<Item = char>,
     }
 }
 
-impl<'a,I> Tokenizer<'a,I>
-where I: Iterator<Item = char>,
+impl<'a, I> Tokenizer<'a, I>
+where
+    I: Iterator<Item = char>,
 {
-    pub fn new(
-        input: I,
-        options: &'a TokenizerSettings<'a>,
-    ) -> Tokenizer<'a,I> {
+    pub fn new(input: I, options: &'a TokenizerSettings<'a>) -> Tokenizer<'a, I> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
@@ -47,10 +47,7 @@ where I: Iterator<Item = char>,
         ret
     }
 
-    fn new_template_tokenizer(
-        input: I,
-        ops_struct: &'a Ops<'a>,
-    ) -> Tokenizer<'a,I> {
+    fn new_template_tokenizer(input: I, ops_struct: &'a Ops<'a>) -> Tokenizer<'a, I> {
         let mut ret = Tokenizer {
             input,
             peeked: Vec::new(),
@@ -79,7 +76,7 @@ where I: Iterator<Item = char>,
         }
     }
     fn remaining_starts_with(&mut self, pat: Vec<char>) -> bool {
-        for (i,c) in pat.iter().enumerate() {
+        for (i, c) in pat.iter().enumerate() {
             if let Some(cn) = self.peek_ahead_n(i) {
                 if cn != *c {
                     return false;
@@ -90,7 +87,8 @@ where I: Iterator<Item = char>,
         }
         true
     }
-    fn pos(&self) -> usize { // <- NOTE: for adding debug info only
+    fn pos(&self) -> usize {
+        // <- NOTE: for adding debug info only
         self.position
     }
     fn peek_ahead_n(&mut self, chars: usize) -> Option<char> {
@@ -137,28 +135,28 @@ where I: Iterator<Item = char>,
                                 } else {
                                     level -= 1;
                                 }
-                                Token::Op(Coin::new(op,pos))
+                                Token::Op(Coin::new(op, pos))
                             }
                             _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                                 level += 1;
-                                Token::Op(Coin::new(op,pos))
+                                Token::Op(Coin::new(op, pos))
                             }
                             _ if self.ops_struct.is_template_op(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                tokens.push(Token::Op(Coin::new(op.clone(), pos)));
                                 self.consume_capturing(&mut tokens, &op)
                             }
                             _ if self.ops_struct.is_literal_left(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(),pos)));
+                                tokens.push(Token::Op(Coin::new(op.clone(), pos)));
                                 let Some(token) = self.consume_literal(&mut tokens, &op) else {
                                     break;
                                 };
                                 token
                             }
-                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op,pos)),
-                            _ => Token::Identifier(Coin::new(op,pos)),
+                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op, pos)),
+                            _ => Token::Identifier(Coin::new(op, pos)),
                         }
                     } else {
-                        Token::Op(Coin::new(self.consume_identifier(),pos))
+                        Token::Op(Coin::new(self.consume_identifier(), pos))
                     }
                 }
                 _ if c.is_whitespace() => {
@@ -168,14 +166,14 @@ where I: Iterator<Item = char>,
                 '0'..='9' => {
                     let pos = self.pos();
                     Token::Numeric(Coin::new(self.consume_numeric(), pos))
-                },
+                }
                 _ => {
                     let pos = self.pos();
                     Token::Identifier(Coin::new(self.consume_identifier(), pos))
-                },
+                }
             };
             tokens.push(token);
-            if ! self.in_template {
+            if !self.in_template {
                 break;
             }
         }
@@ -188,7 +186,7 @@ where I: Iterator<Item = char>,
         let end_encloser = Ops::get_literal_end(start_encloser);
         let mut literal = String::new();
         let start = self.pos();
-        let mut retval:Option<Token> = None;
+        let mut retval: Option<Token> = None;
         while let Some(c) = self.at() {
             if self.remaining_starts_with(end_encloser.chars().collect()) {
                 retval = Some(Token::Op(Coin::new(end_encloser.clone(), self.pos())));
@@ -223,7 +221,8 @@ where I: Iterator<Item = char>,
         }
         if !self.in_template || self.at().is_some() {
             if self.ops_struct.is_template_op(end_encloser) {
-                let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
+                let format_tokenizer =
+                    Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
                 let mut format_tokens = Vec::new();
                 for token in format_tokenizer {
                     format_tokens.push(token);
@@ -241,7 +240,8 @@ where I: Iterator<Item = char>,
                 Token::Literal(Coin::new(literal, start))
             }
         } else if self.ops_struct.is_template_op(end_encloser) {
-            let format_tokenizer = Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
+            let format_tokenizer =
+                Tokenizer::new_template_tokenizer(literal.chars(), self.ops_struct);
             let mut format_tokens = Vec::new();
             for token in format_tokenizer {
                 format_tokens.push(token);
@@ -280,8 +280,9 @@ where I: Iterator<Item = char>,
         while let Some(c) = self.at() {
             if (is_float && !(c.is_ascii_digit() || c == '_'))
                 || (is_hex && !(c.is_ascii_hexdigit() || c == '_'))
-                || ((c == '.' && is_float) || ( c == 'x' && is_hex))
-                || !(is_float || is_hex || c.is_ascii_digit() || c == '_' || (c == 'x' && count == 1) || c == '.')
+                || ((c == '.' && is_float) || (c == 'x' && is_hex))
+                || !(is_float || is_hex || c.is_ascii_digit()
+                    || c == '_' || (c == 'x' && count == 1) || c == '.')
             {
                 break;
             }
@@ -293,7 +294,7 @@ where I: Iterator<Item = char>,
             is_float = c == '.' || is_float;
             self.eat();
         }
-        buffer.replace("_","")
+        buffer.replace("_", "")
     }
     fn consume_identifier(&mut self) -> String {
         let mut opbuffer = String::new();
@@ -306,7 +307,7 @@ where I: Iterator<Item = char>,
                 count -= opbuffer.len();
                 break;
             }
-            if ! self.ops_struct.is_fragment(opbuffer.as_str()) {
+            if !self.ops_struct.is_fragment(opbuffer.as_str()) {
                 opbuffer.clear();
             }
             count += 1;
@@ -416,17 +417,19 @@ impl<'a> Ops<'a> {
     }
 
     fn is_literal_left(&self, op: &str) -> bool {
-        self.charop == op || op.starts_with("[")
-            && op.len() > 1
-            && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
+        self.charop == op
+            || op.starts_with("[")
+                && op.len() > 1
+                && (op.ends_with("[") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
     fn get_literal_end(left_lit_op: &str) -> String {
         left_lit_op.replace("[", "]")
     }
     fn is_literal_right(&self, op: &str) -> bool {
-        self.charop == op || op.starts_with("]")
-            && op.len() > 1
-            && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
+        self.charop == op
+            || op.starts_with("]")
+                && op.len() > 1
+                && (op.ends_with("]") && op[1..op.len() - 1].chars().all(|c| c == '='))
     }
 
     fn is_literal_left_frag(op: &str) -> bool {
