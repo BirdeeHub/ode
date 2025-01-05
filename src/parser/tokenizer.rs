@@ -13,12 +13,9 @@ where
 }
 impl<'a, I> std::fmt::Debug for Tokenizer<'a, I>
 where
-    I: Iterator<Item = char>,  // Keep the constraint for `I` to ensure it works generically
-    Ops<'a>: std::fmt::Debug,       // Ensure `Ops` implements `Debug`
-    Token: std::fmt::Debug,         // Ensure `Token` implements `Debug`
+    I: Iterator<Item = char>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Write out each field manually, excluding `input`
         f.debug_struct("Tokenizer")
             .field("peeked", &self.peeked)
             .field("position", &self.position)
