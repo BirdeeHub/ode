@@ -34,7 +34,7 @@ fn eval_int_binary_expr(lhs: i64, rhs: i64, op: Lexeme) -> RuntimeResult<'static
     }
 }
 
-fn eval_binary_expr<'a>(coin: Coin<String>, ttype: Lexeme, l: &'a Stmt, r: &'a Stmt) -> RuntimeResult<'a> {
+fn eval_binary_expr<'a>(pos: usize, ttype: Lexeme, l: &'a Stmt, r: &'a Stmt) -> RuntimeResult<'a> {
     let lhs = evaluate(l)?;
     let rhs = evaluate(r)?;
     if let RuntimeVal::Float(ls) = lhs {
@@ -56,9 +56,9 @@ fn eval_binary_expr<'a>(coin: Coin<String>, ttype: Lexeme, l: &'a Stmt, r: &'a S
 
 pub fn evaluate(code: &Stmt) -> RuntimeResult {
     match code {
-        Stmt::IntLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Int(*val as i64)),
-        Stmt::FloatLiteral { coin: _, ttype: _, val } => Ok(RuntimeVal::Float(*val)),
-        Stmt::BinaryExpr { coin, ttype, l, r } => eval_binary_expr(coin.clone(), *ttype, l, r),
+        Stmt::IntLiteral { pos: _, ttype: _, val } => Ok(RuntimeVal::Int(*val as i64)),
+        Stmt::FloatLiteral { pos: _, ttype: _, val } => Ok(RuntimeVal::Float(*val)),
+        Stmt::BinaryExpr { pos, ttype, l, r } => eval_binary_expr(*pos, *ttype, l, r),
         Stmt::Module { body, ttype: _ } => eval_program(&body[..]),
         _ => todo!(),
     }

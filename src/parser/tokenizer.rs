@@ -156,27 +156,27 @@ where
                                 } else {
                                     level -= 1;
                                 }
-                                Token::Op(Coin::new(op, pos))
+                                Token::Op(op, pos)
                             }
                             _ if self.in_template && self.ops_struct.is_left_encloser(&op) => {
                                 level += 1;
-                                Token::Op(Coin::new(op, pos))
+                                Token::Op(op, pos)
                             }
                             _ if self.ops_struct.is_template_op(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(), pos)));
+                                tokens.push(Token::Op(op.clone(), pos));
                                 self.consume_capturing(&mut tokens, &op)
                             }
                             _ if self.ops_struct.is_literal_left(&op) => {
-                                tokens.push(Token::Op(Coin::new(op.clone(), pos)));
+                                tokens.push(Token::Op(op.clone(), pos));
                                 let Some(token) = self.consume_literal(&mut tokens, &op) else {
                                     break;
                                 };
                                 token
                             }
-                            _ => Token::Op(Coin::new(op, pos)),
+                            _ => Token::Op(op, pos),
                         }
                     } else {
-                        Token::Identifier(Coin::new(self.consume_identifier(), pos))
+                        Token::Identifier(self.consume_identifier(), pos)
                     }
                 }
                 _ if c.is_whitespace() => {
@@ -185,11 +185,11 @@ where
                 }
                 '0'..='9' => {
                     let pos = self.pos();
-                    Token::Numeric(Coin::new(self.consume_numeric(), pos))
+                    Token::Numeric(self.consume_numeric(), pos)
                 }
                 _ => {
                     let pos = self.pos();
-                    Token::Identifier(Coin::new(self.consume_identifier(), pos))
+                    Token::Identifier(self.consume_identifier(), pos)
                 }
             };
             tokens.push(token);
@@ -209,7 +209,7 @@ where
         let mut retval: Option<Token> = None;
         while let Some(c) = self.at() {
             if self.remaining_starts_with(end_encloser.chars().collect()) {
-                retval = Some(Token::Op(Coin::new(end_encloser.clone(), self.pos())));
+                retval = Some(Token::Op(end_encloser.clone(), self.pos()));
                 for _ in end_encloser.chars() {
                     self.eat();
                 }
@@ -218,7 +218,7 @@ where
             self.eat();
             literal.push(c);
         }
-        tokens.push(Token::Literal(Coin::new(literal, start)));
+        tokens.push(Token::Literal(literal, start));
         retval
     }
     fn consume_capturing(&mut self, tokens: &mut Vec<Token>, end_encloser: &str) -> Token {
@@ -248,16 +248,16 @@ where
                     format_tokens.push(token);
                 }
                 if self.at().is_some() {
-                    tokens.push(Token::Format(Coin::new(format_tokens, start)));
-                    Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
+                    tokens.push(Token::Format(format_tokens, start));
+                    Token::Op(end_encloser.to_string(), end_enc_pos)
                 } else {
-                    Token::Format(Coin::new(format_tokens, start))
+                    Token::Format(format_tokens, start)
                 }
             } else if self.at().is_some() {
-                tokens.push(Token::Literal(Coin::new(literal, start)));
-                Token::Op(Coin::new(end_encloser.to_string(), end_enc_pos))
+                tokens.push(Token::Literal(literal, start));
+                Token::Op(end_encloser.to_string(), end_enc_pos)
             } else {
-                Token::Literal(Coin::new(literal, start))
+                Token::Literal(literal, start)
             }
         } else if self.ops_struct.is_template_op(end_encloser) {
             let format_tokenizer =
@@ -266,9 +266,9 @@ where
             for token in format_tokenizer {
                 format_tokens.push(token);
             }
-            Token::Format(Coin::new(format_tokens, start))
+            Token::Format(format_tokens, start)
         } else {
-            Token::Literal(Coin::new(literal, start))
+            Token::Literal(literal, start)
         }
     }
     fn consume_comment(&mut self, op: String, pos:usize, block: bool) -> Option<Token> {
@@ -291,7 +291,7 @@ where
                 }
                 self.eat();
             }
-            Some(Token::Comment(Coin::new(op + &buffer, pos)))
+            Some(Token::Comment(op + &buffer, pos))
         } else {
             while self.at().is_some() {
                 if self.remaining_starts_with(endchar.chars().collect()) {

@@ -18,12 +18,12 @@ pub struct TokenizerSettings<'a> {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-    Identifier(Coin<String>),
-    Op(Coin<String>),
-    Numeric(Coin<String>), // int or float in string form
-    Literal(Coin<String>),
-    Comment(Coin<String>),
-    Format(Coin<Vec<Token>>),
+    Identifier(String,usize),
+    Op(String,usize),
+    Numeric(String,usize), // int or float in string form
+    Literal(String,usize),
+    Comment(String,usize),
+    Format(Vec<Token>,usize),
     Eof,
 }
 
@@ -115,15 +115,15 @@ pub enum Lexeme {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Stmt {
-    FloatLiteral { coin: Coin<String>, ttype: Lexeme, val: f64 },
-    IntLiteral { coin: Coin<String>, ttype: Lexeme, val: u64 },
-    StringLiteral { coin: Coin<String>, ttype: Lexeme, val: Arc<str> },
-    Identifier { coin: Coin<String>, ttype: Lexeme, val: Arc<str> },
-    BinaryExpr { coin: Coin<String>, ttype: Lexeme, l: Arc<Stmt>, r: Arc<Stmt> },
-    PreExpr { coin: Coin<String>, ttype: Lexeme, r: Arc<Stmt> },
-    PostExpr { coin: Coin<String>, ttype: Lexeme, l: Arc<Stmt> },
-    GroupExpr { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Arc<Stmt> },
-    Scope { start: Coin<String>, end: Coin<String>, ttype: Lexeme, body: Vec<Arc<Stmt>> },
+    FloatLiteral { pos: usize, ttype: Lexeme, val: f64 },
+    IntLiteral { pos: usize, ttype: Lexeme, val: u64 },
+    StringLiteral { pos: usize, ttype: Lexeme, val: Arc<str> },
+    Identifier { pos: usize, ttype: Lexeme, val: Arc<str> },
+    BinaryExpr { pos: usize, ttype: Lexeme, l: Arc<Stmt>, r: Arc<Stmt> },
+    PreExpr { pos: usize, ttype: Lexeme, r: Arc<Stmt> },
+    PostExpr { pos: usize, ttype: Lexeme, l: Arc<Stmt> },
+    GroupExpr { start: usize, end: usize, ttype: Lexeme, body: Arc<Stmt> },
+    Scope { start: usize, end: usize, ttype: Lexeme, body: Vec<Arc<Stmt>> },
     Module { body: Vec<Arc<Stmt>>, ttype: Lexeme },
 }
 
