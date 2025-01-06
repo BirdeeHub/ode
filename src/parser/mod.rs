@@ -1,6 +1,6 @@
 mod tokenizer;
-pub mod parser_types;
-use crate::parser::parser_types::*;
+pub mod ast;
+use crate::parser::ast::*;
 use crate::parser::tokenizer::Tokenizer;
 
 #[derive(Debug)]

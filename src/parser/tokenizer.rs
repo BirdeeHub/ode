@@ -1,4 +1,4 @@
-use crate::parser::parser_types::{Token, TokenizerSettings};
+use crate::parser::ast::{Token, TokenizerSettings};
 
 pub struct Tokenizer<'a, I>
 where
