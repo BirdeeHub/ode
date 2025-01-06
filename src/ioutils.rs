@@ -16,7 +16,7 @@ pub struct CharIterator<T>
 where
     T: std::io::Read,
 {
-    reader: Bytes<T>,
+    reader: T,
     buf: Vec<u8>,
     buf_len: usize,
 }
@@ -26,7 +26,7 @@ where
 {
     pub fn new(buf_len: usize, reader: T) -> CharIterator<T> {
         CharIterator {
-            reader: reader.bytes(),
+            reader,
             buf: Vec::new(),
             buf_len,
         }
@@ -39,14 +39,11 @@ where
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
-            while self.buf.len() < self.buf_len {
-                match self.reader.next() {
-                    Some(Ok(b)) => {
-                        self.buf.push(b);
-                    }
-                    _ => break,
-                }
-            }
+            let mut buf = vec![0; self.buf_len];
+            let Ok(bytes_read) = self.reader.read(&mut buf) else {
+                return None;
+            };
+            self.buf.extend_from_slice(&buf[..bytes_read]);
         }
         let Ok(charval1) = std::str::from_utf8(&self.buf) else {
             return None;
