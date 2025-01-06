@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, Bytes, Read, BufReader};
+use std::io::{self, Read, BufReader};
 
 pub fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
