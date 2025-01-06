@@ -24,12 +24,9 @@ impl<T: Read> Iterator for CharIterator<T> {
         }
         for i in 0..4 {
             if i >= self.buf.len() { break; };
-            if let Ok(s) = std::str::from_utf8(&self.buf[0..i]) {
-                if let Some(c) = s.chars().next() {
-                    let char_len = c.len_utf8();
-                    self.buf.drain(0..char_len);
-                    return Some(c);
-                }
+            if let Some(c) = std::str::from_utf8(&self.buf[0..i]).ok().and_then(|s|s.chars().next()) {
+                self.buf.drain(0..c.len_utf8());
+                return Some(c);
             }
         }
         None
