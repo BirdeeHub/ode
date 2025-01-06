@@ -7,6 +7,7 @@ pub fn read_file(file_path: &str) -> io::Result<String> {
     file.read_to_string(&mut contents)?;
     Ok(contents)
 }
+
 pub fn mk_buf_reader(filepath: &str) -> io::Result<BufReader<File>> {
     Ok(BufReader::new(File::open(filepath)?))
 }
