@@ -1,9 +1,8 @@
-use std::io::Read;
-pub struct CharIterator<T: Read> {
+pub struct CharIterator<T: std::io::Read> {
     reader: T,
     buf: Vec<u8>,
 }
-impl<T: Read> CharIterator<T> {
+impl<T: std::io::Read> CharIterator<T> {
     pub fn new(reader: T) -> CharIterator<T> {
         CharIterator {
             reader,
@@ -11,7 +10,7 @@ impl<T: Read> CharIterator<T> {
         }
     }
 }
-impl<T: Read> Iterator for CharIterator<T> {
+impl<T: std::io::Read> Iterator for CharIterator<T> {
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
