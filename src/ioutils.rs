@@ -18,17 +18,15 @@ where
 {
     reader: T,
     buf: Vec<u8>,
-    buf_len: usize,
 }
 impl<T> CharIterator<T>
 where
     T: std::io::Read,
 {
-    pub fn new(buf_len: usize, reader: T) -> CharIterator<T> {
+    pub fn new(reader: T) -> CharIterator<T> {
         CharIterator {
             reader,
             buf: Vec::new(),
-            buf_len,
         }
     }
 }
@@ -39,7 +37,7 @@ where
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
-            let mut buf = vec![0; self.buf_len];
+            let mut buf = [0; 2044];
             let Ok(bytes_read) = self.reader.read(&mut buf) else {
                 return None;
             };
