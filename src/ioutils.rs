@@ -37,7 +37,7 @@ where
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
-            while self.buf.len() < 4 {
+            while self.buf.len() < 32 {
                 match self.reader.next() {
                     Some(Ok(b)) => {
                         self.buf.push(b);
