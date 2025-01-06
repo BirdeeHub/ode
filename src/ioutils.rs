@@ -1,6 +1,5 @@
 use std::io::Read;
-pub struct CharIterator<T: Read>
-{
+pub struct CharIterator<T: Read> {
     reader: T,
     buf: Vec<u8>,
 }
