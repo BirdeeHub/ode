@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TokenizerSettings<'a> {
     pub blockcomstart: &'a str,
     pub blockcomend: &'a str,
