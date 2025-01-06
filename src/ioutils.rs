@@ -1,28 +1,10 @@
-use std::fs::File;
-use std::io::{self, Read, BufReader};
-
-pub fn read_file(file_path: &str) -> io::Result<String> {
-    let mut file = File::open(file_path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
-
-pub fn mk_buf_reader(filepath: &str) -> io::Result<BufReader<File>> {
-    Ok(BufReader::new(File::open(filepath)?))
-}
-
-pub struct CharIterator<T>
-where
-    T: std::io::Read,
+use std::io::Read;
+pub struct CharIterator<T: Read>
 {
     reader: T,
     buf: Vec<u8>,
 }
-impl<T> CharIterator<T>
-where
-    T: std::io::Read,
-{
+impl<T: Read> CharIterator<T> {
     pub fn new(reader: T) -> CharIterator<T> {
         CharIterator {
             reader,
@@ -30,10 +12,7 @@ where
         }
     }
 }
-impl<T> Iterator for CharIterator<T>
-where
-    T: std::io::Read,
-{
+impl<T: Read> Iterator for CharIterator<T> {
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.is_empty() {

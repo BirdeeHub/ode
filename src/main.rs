@@ -2,6 +2,7 @@ mod parser;
 mod runtime;
 mod ioutils;
 use std::time::Instant;
+use std::fs::File;
 use crate::ioutils::CharIterator;
 use crate::parser::Parser;
 
@@ -12,13 +13,13 @@ fn main() -> std::io::Result<()> {
 
     let start = Instant::now();
     // extra tokenizer print for debug purposes
-    let tokenizer = Parser::new_tokenizer(CharIterator::new(ioutils::mk_buf_reader(filepath)?));
+    let tokenizer = Parser::new_tokenizer(CharIterator::new(File::open(filepath)?));
     for t in tokenizer {
         println!("{:?}", t);
     }
     println!("Tokenizer took: {:?}", start.elapsed());
 
-    let mut parser = Parser::new(CharIterator::new(ioutils::mk_buf_reader(filepath)?));
+    let mut parser = Parser::new(CharIterator::new(File::open(filepath)?));
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
