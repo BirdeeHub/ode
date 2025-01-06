@@ -37,7 +37,7 @@ where
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.is_empty() {
-            let mut buf = [0; 2048];
+            let mut buf = [0; 4096];
             let Ok(bytes_read) = self.reader.read(&mut buf) else {
                 return None;
             };
