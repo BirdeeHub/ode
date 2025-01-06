@@ -21,7 +21,7 @@ impl<T: Read> Iterator for CharIterator<T> {
             };
             self.buf.extend_from_slice(&buf[..bytes_read]);
         }
-        for i in 0..4 {
+        for i in 1..5 {
             if i >= self.buf.len() { break; };
             if let Some(c) = std::str::from_utf8(&self.buf[0..i]).ok().and_then(|s|s.chars().next()) {
                 self.buf.drain(0..c.len_utf8());
