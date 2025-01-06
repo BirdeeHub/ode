@@ -15,8 +15,8 @@ impl<T: Read> CharIterator<T> {
 impl<T: Read> Iterator for CharIterator<T> {
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf.is_empty() {
-            let mut buf = [0; 4096];
+        if self.buf.len() < 4 {
+            let mut buf = [0; 4092];
             let Ok(bytes_read) = self.reader.read(&mut buf) else {
                 return None;
             };
