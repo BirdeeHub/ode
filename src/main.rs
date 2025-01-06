@@ -12,13 +12,13 @@ fn main() -> std::io::Result<()> {
 
     let start = Instant::now();
     // extra tokenizer print for debug purposes
-    let tokenizer = Parser::new_tokenizer(CharIterator::new(32,ioutils::mk_buf_reader(filepath)?));
+    let tokenizer = Parser::new_tokenizer(CharIterator::new(64,ioutils::mk_buf_reader(filepath)?));
     for t in tokenizer {
         println!("{:?}", t);
     }
     println!("Tokenizer took: {:?}", start.elapsed());
 
-    let mut parser = Parser::new(CharIterator::new(32,ioutils::mk_buf_reader(filepath)?));
+    let mut parser = Parser::new(CharIterator::new(64,ioutils::mk_buf_reader(filepath)?));
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
     println!("{:?}", rtvals);
