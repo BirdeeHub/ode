@@ -12,7 +12,6 @@ pub fn mk_buf_reader(filepath: &str) -> io::Result<BufReader<File>> {
     Ok(BufReader::new(File::open(filepath)?))
 }
 
-#[derive(Debug)]
 pub struct CharIterator<T>
 where
     T: std::io::Read,
