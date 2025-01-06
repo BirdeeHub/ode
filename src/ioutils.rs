@@ -46,11 +46,14 @@ where
             };
             self.buf.extend_from_slice(&buf[..bytes_read]);
         }
-        if let Ok(s) = std::str::from_utf8(&self.buf[0..min(4,self.buf.len())]) {
-            if let Some(c) = s.chars().next() {
-                let char_len = c.len_utf8();
-                self.buf.drain(0..char_len);
-                return Some(c);
+        for i in 0..4 {
+            if i >= self.buf.len() { break; };
+            if let Ok(s) = std::str::from_utf8(&self.buf[0..i]) {
+                if let Some(c) = s.chars().next() {
+                    let char_len = c.len_utf8();
+                    self.buf.drain(0..char_len);
+                    return Some(c);
+                }
             }
         }
         None
