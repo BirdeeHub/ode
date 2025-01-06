@@ -46,14 +46,13 @@ where
             };
             self.buf.extend_from_slice(&buf[..bytes_read]);
         }
-        let Ok(charval1) = std::str::from_utf8(&self.buf[0..min(4, self.buf.len())]) else {
-            return None;
-        };
-        let charval = charval1.chars().next();
-        match charval {
-            Some(c) => self.buf.drain(0..c.len_utf8()),
-            _ => return None,
-        };
-        charval
+        if let Ok(s) = std::str::from_utf8(&self.buf[0..min(4,self.buf.len())]) {
+            if let Some(c) = s.chars().next() {
+                let char_len = c.len_utf8();
+                self.buf.drain(0..char_len);
+                return Some(c);
+            }
+        }
+        None
     }
 }
