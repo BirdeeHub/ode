@@ -18,15 +18,17 @@ where
 {
     reader: Bytes<T>,
     buf: Vec<u8>,
+    buf_len: usize,
 }
 impl<T> CharIterator<T>
 where
     T: std::io::Read,
 {
-    pub fn new(reader: T) -> CharIterator<T> {
+    pub fn new(buf_len: usize, reader: T) -> CharIterator<T> {
         CharIterator {
             reader: reader.bytes(),
             buf: Vec::new(),
+            buf_len,
         }
     }
 }
@@ -37,7 +39,7 @@ where
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf.len() < 4 {
-            while self.buf.len() < 32 {
+            while self.buf.len() < self.buf_len {
                 match self.reader.next() {
                     Some(Ok(b)) => {
                         self.buf.push(b);
