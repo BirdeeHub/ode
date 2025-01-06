@@ -173,8 +173,7 @@ where
                                 };
                                 token
                             }
-                            _ if self.ops_struct.is(&op) => Token::Op(Coin::new(op, pos)),
-                            _ => Token::Identifier(Coin::new(op, pos)),
+                            _ => Token::Op(Coin::new(op, pos)),
                         }
                     } else {
                         Token::Identifier(Coin::new(self.consume_identifier(), pos))
