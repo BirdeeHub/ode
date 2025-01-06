@@ -4,10 +4,7 @@ pub struct CharIterator<T: std::io::Read> {
 }
 impl<T: std::io::Read> CharIterator<T> {
     pub fn new(reader: T) -> CharIterator<T> {
-        CharIterator {
-            reader,
-            buf: Vec::new(),
-        }
+        CharIterator { reader, buf: Vec::new(), }
     }
 }
 impl<T: std::io::Read> Iterator for CharIterator<T> {
