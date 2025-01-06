@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{self, Read, BufReader};
-use std::cmp::min;
 
 pub fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
