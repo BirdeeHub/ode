@@ -27,22 +27,6 @@ pub enum Token {
     Eof,
 }
 
-#[derive(Debug, Clone)]
-pub struct Coin<T> {
-    pub val: T,
-    pub pos: usize,
-}
-impl<T> Coin<T> {
-    pub fn new(val: T, pos: usize) -> Coin<T> {
-        Coin{val,pos}
-    }
-}
-impl<T: PartialEq> PartialEq for Coin<T> {
-    fn eq(&self, other: &Coin<T>) -> bool {
-        self.val == other.val
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Lexeme {
     ParenB, // (
