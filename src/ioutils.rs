@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, Read, BufReader};
+use std::cmp::min;
 
 pub fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -45,7 +46,7 @@ where
             };
             self.buf.extend_from_slice(&buf[..bytes_read]);
         }
-        let Ok(charval1) = std::str::from_utf8(&self.buf) else {
+        let Ok(charval1) = std::str::from_utf8(&self.buf[0..min(4, self.buf.len())]) else {
             return None;
         };
         let charval = charval1.chars().next();
