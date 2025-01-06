@@ -177,7 +177,7 @@ where
                             _ => Token::Identifier(Coin::new(op, pos)),
                         }
                     } else {
-                        Token::Op(Coin::new(self.consume_identifier(), pos))
+                        Token::Identifier(Coin::new(self.consume_identifier(), pos))
                     }
                 }
                 _ if c.is_whitespace() => {
