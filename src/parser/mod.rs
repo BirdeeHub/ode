@@ -14,8 +14,8 @@ where I: Iterator<Item = char>,
 /*
 ` for chars
 ' mutability op (lifetime if needed goes before, & goes after)
-left (\: type:default:argname, ::arg2 -> {}) right
-\ type:default:argname, ::arg -> rettype {}
+left (\: name:type:default, arg2:: -> {}) right
+\ name:type:default, arg:: -> rettype {}
 then => else !> and match # only
 
 struct:name:<T> [']{
