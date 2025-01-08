@@ -9,7 +9,6 @@ where I: Iterator<Item = char>,
 {
     tokenizer: Tokenizer<'a,I>,
     current: Option<Token>,
-    prev: Option<Token>,
 }
 /*
 ` for chars
@@ -119,7 +118,6 @@ where I: Iterator<Item = char>,
         let mut p = Parser {
             tokenizer:Self::new_tokenizer(input),
             current: None,
-            prev: None,
         };
         // NOTE: populate first value before returning new parser
         p.eat();
@@ -130,15 +128,11 @@ where I: Iterator<Item = char>,
     }
     fn eat(&mut self) -> Option<Token> {
         let out = self.current.clone();
-        self.prev = out.clone();
         self.current = self.tokenizer.next();
         out
     }
     fn skip(&mut self) {
         self.eat();
-    }
-    fn prev(&self) -> Option<Token> {
-        self.prev.clone()
     }
     fn not_eof(&self) -> bool {
         ! matches!(self.at(), Some(Token::Eof) | None)
@@ -197,7 +191,9 @@ where I: Iterator<Item = char>,
     pub fn parse_primary_expr(&mut self) -> ParseResult {
         match self.at() {
             Some(Token::Identifier(..)) => self.parse_ident(),
-            Some(Token::Numeric(..)) => self.parse_numeric(),
+            Some(Token::IntLit(..)) => self.parse_int(),
+            Some(Token::FloatLit(..)) => self.parse_float(),
+            Some(Token::HexLit(..)) => self.parse_hex(),
             Some(Token::Op(lit,pos)) if lit.as_str() == "(" => {
                 self.skip();
                 let val = self.parse_expr();
@@ -213,24 +209,38 @@ where I: Iterator<Item = char>,
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
-        let Some(Token::Identifier(val,pos)) = self.eat() else { return Err(ParseError::InvalidIdent(self.prev().unwrap_or(Token::Eof))) };
+        let current = self.eat().unwrap_or(Token::Eof);
+        let Token::Identifier(val,pos) = current else { return Err(ParseError::InvalidIdent(current)) };
         Ok(Stmt::Identifier{ ttype:Lexeme::Ident,pos,val: val.into()})
     }
-    pub fn parse_numeric(&mut self) -> ParseResult {
-        // coin is coin.val (which is a string) and coin.pos
-        // check if the string parses to float it or hex
-        let Some(Token::Numeric(lit,pos)) = self.eat() else { return Err(ParseError::InvalidNumber(self.prev().unwrap_or(Token::Eof))) };
-        if let Ok(val) = lit.parse::<u64>() {
-            Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,pos,val})
-        } else if let Ok(val) = lit.parse::<f64>() {
+    pub fn parse_float(&mut self) -> ParseResult {
+        let current = self.eat().unwrap_or(Token::Eof);
+        let Token::FloatLit(ref lit,pos) = current else { return Err(ParseError::InvalidNumber(current)) };
+        if let Ok(val) = lit.parse::<f64>() {
             Ok(Stmt::FloatLiteral{ ttype:Lexeme::Float,pos,val})
-        } else if let Some(stripped) = lit.strip_prefix("0x") {
+        } else {
+            Err(ParseError::InvalidNumber(current))
+        }
+    }
+    pub fn parse_hex(&mut self) -> ParseResult {
+        let current = self.eat().unwrap_or(Token::Eof);
+        let Token::HexLit(ref lit,pos) = current else { return Err(ParseError::InvalidNumber(current)) };
+        if let Some(stripped) = lit.strip_prefix("0x") {
             let Ok(val) = u64::from_str_radix(stripped, 16) else {
-                return Err(ParseError::InvalidNumber(Token::Numeric(lit,pos)))
+                return Err(ParseError::InvalidNumber(current))
             };
             Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,pos,val})
         } else {
-            Err(ParseError::InvalidNumber(Token::Numeric(lit,pos)))
+            Err(ParseError::InvalidNumber(current))
+        }
+    }
+    pub fn parse_int(&mut self) -> ParseResult {
+        let current = self.eat().unwrap_or(Token::Eof);
+        let Token::IntLit(ref lit,pos) = current else { return Err(ParseError::InvalidNumber(current)) };
+        if let Ok(val) = lit.parse::<u64>() {
+            Ok(Stmt::IntLiteral{ ttype:Lexeme::Int,pos,val})
+        } else {
+            Err(ParseError::InvalidNumber(current))
         }
     }
 }

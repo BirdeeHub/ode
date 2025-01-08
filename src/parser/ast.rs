@@ -20,7 +20,9 @@ pub struct TokenizerSettings<'a> {
 pub enum Token {
     Identifier(String,usize),
     Op(String,usize),
-    Numeric(String,usize), // int or float in string form
+    IntLit(String,usize),
+    HexLit(String,usize),
+    FloatLit(String,usize),
     Literal(String,usize),
     Comment(String,usize),
     Format(Vec<Token>,usize),

@@ -185,7 +185,7 @@ where
                 }
                 '0'..='9' => {
                     let pos = self.pos();
-                    Token::Numeric(self.consume_numeric(), pos)
+                    self.consume_numeric(pos)
                 }
                 _ => {
                     let pos = self.pos();
@@ -305,7 +305,7 @@ where
             None
         }
     }
-    fn consume_numeric(&mut self) -> String {
+    fn consume_numeric(&mut self, pos:usize) -> Token {
         let mut buffer = String::new();
         let mut is_float = false;
         let mut is_hex = false;
@@ -327,7 +327,13 @@ where
             is_float = c == '.' || is_float;
             self.eat();
         }
-        buffer.replace("_", "")
+        if is_float {
+            Token::FloatLit(buffer.replace("_", ""), pos)
+        } else if is_hex {
+            Token::HexLit(buffer.replace("_", ""), pos)
+        } else {
+            Token::IntLit(buffer.replace("_", ""), pos)
+        }
     }
     fn consume_identifier(&mut self) -> String {
         let mut opbuffer = String::new();
