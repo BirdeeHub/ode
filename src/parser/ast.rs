@@ -16,7 +16,7 @@ pub struct TokenizerSettings<'a> {
     pub capture_comments: bool,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub enum Token {
     Identifier(String,usize),
     Op(String,usize),
@@ -27,6 +27,23 @@ pub enum Token {
     Comment(String,usize),
     Format(Vec<Token>,usize),
     Eof,
+}
+
+impl PartialEq for Token {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Token::Identifier(s1, _), Token::Identifier(s2, _)) => s1 == s2,
+            (Token::Op(s1, _), Token::Op(s2, _)) => s1 == s2,
+            (Token::IntLit(s1, _), Token::IntLit(s2, _)) => s1 == s2,
+            (Token::HexLit(s1, _), Token::HexLit(s2, _)) => s1 == s2,
+            (Token::FloatLit(s1, _), Token::FloatLit(s2, _)) => s1 == s2,
+            (Token::Literal(s1, _), Token::Literal(s2, _)) => s1 == s2,
+            (Token::Comment(s1, _), Token::Comment(s2, _)) => s1 == s2,
+            (Token::Format(v1, _), Token::Format(v2, _)) => v1 == v2, // Delegates to Vec's PartialEq
+            (Token::Eof, Token::Eof) => true,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]

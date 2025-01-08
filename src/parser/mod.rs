@@ -131,6 +131,15 @@ where I: Iterator<Item = char>,
         self.current = self.tokenizer.next();
         out
     }
+    // TODO: this
+    fn expect(&mut self, expected: Token) -> Option<Token> {
+        let Some(current) = self.at() else { return Some(Token::Eof) };
+        if current == expected {
+            Some(current)
+        } else {
+            None
+        }
+    }
     fn skip(&mut self) {
         self.eat();
     }
