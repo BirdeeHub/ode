@@ -131,15 +131,6 @@ where I: Iterator<Item = char>,
         self.current = self.tokenizer.next();
         out
     }
-    // TODO: this
-    fn expect(&mut self, expected: Token) -> Option<Token> {
-        let Some(current) = self.at() else { return Some(Token::Eof) };
-        if current == expected {
-            Some(current)
-        } else {
-            None
-        }
-    }
     fn skip(&mut self) {
         self.eat();
     }
@@ -214,7 +205,7 @@ where I: Iterator<Item = char>,
                 }
                 val
             },
-            _ => Err(ParseError::InvalidExpression(self.at().unwrap_or(Token::Eof).clone())),
+            v => Err(ParseError::InvalidExpression(v.unwrap_or(Token::Eof).clone())),
         }
     }
     pub fn parse_ident(&mut self) -> ParseResult {
