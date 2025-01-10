@@ -19,6 +19,7 @@ fn main() -> std::io::Result<()> {
     }
     println!("Tokenizer took: {:?}", start.elapsed());
 
+    let start = Instant::now();
     let mut parser = Parser::new(CharIterator::new(File::open(filepath)?));
     let ast = parser.parse_program().unwrap();
     let rtvals = runtime::evaluate(&ast);
