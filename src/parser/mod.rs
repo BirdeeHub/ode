@@ -17,18 +17,17 @@ left (\: name:type:default, arg2:: -> {}) right
 \ name:type:default, arg:: -> rettype {}
 then => else !> and match # only
 
-struct:name:<T> [']{
+<T>:struct:name: [']{
   name:type:default;
 }
-trait:name:[<T>] [']{
+<T>:trait:name: [']{
   name:type;
 }
-enum:name:[<T>] [']{
-  name:type;
+<T>:enum:name: [']{
+  TypePattern;
 }
 
-Impl
-<T>:[type,names]:structname [']{
+<T>:impl:name:structname: [']{
   name = value;
 }
 
@@ -62,12 +61,14 @@ but dereference becomes the function defined and returns an option?
 You cant read or write to the value if you dont own it except by using this if defined?
 Is defined at use site of mutable types?
 Possibly mutable structs define a signature for it?
-Will be used instead of unsafe?
+node config + this will be used instead of unsafe?
 
 I want to have raw pointer writing for embedded
 and IO and whatnot passed in via the node definition
 and then you can define mutable IO and monadic pure IO and pass them in.
 But im not sure how this is going to work completely
+
+Ideally I want this mechanism to replace unsafe
 
 <@ is value to stream/actor
 @ is open/run stream/actor on node
@@ -81,7 +82,7 @@ But im not sure how this is going to work completely
 :name = 5;
 `int:name2 = 6;
 
-"#!" "#@" <- node config enclosers
+"#@" "@#" <- node config enclosers
 doubles as shebang for interpreted mode
 */
 impl<'a,I> Parser<'a,I>
@@ -104,7 +105,7 @@ where I: Iterator<Item = char>,
                 "<@", "@", "@@", "@>", "@>>",
                 ":", ".", ",", ";",
             ],
-            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#<", ">"), ("#@", "@#")],
+            enclosers: &[("(", ")"), ("[", "]"), ("{", "}"), ("<", ">"), ("#@", "@#")],
             charop: "`",
             templop: "\"",
             interstart: "$[",
