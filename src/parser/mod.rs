@@ -128,7 +128,7 @@ where I: Iterator<Item = char>,
         self.current.clone()
     }
     fn eat(&mut self) -> Option<Token> {
-        let out = self.current.clone();
+        let out = self.current.take();
         self.current = self.tokenizer.next();
         out
     }

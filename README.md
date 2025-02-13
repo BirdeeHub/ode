@@ -1,20 +1,22 @@
 # ODE (Orthographic Dynamic Execution)
 
-learning how to write a programming language
+Orthographic = the way something is written
 
-I dont know a ton, I'm just going to try it.
+Dynamic Execution = eager vs lazy execution chosen
 
-Also just starting learning rust, probably doing a lot of copying until I make my noob code use more slices.
+The plan is to compile to musl libc.
 
-currently its just a tokenizer but this is all of the rust code I have ever written in my life so thats a good start!
+This is a learning project that I will be slowly revisiting whenever I have inspiration to do so.
 
-Do not expect progress in this repository, learning is the goal, not a good language.
+Do not expect this to be the next big thing.
 
-This is effectively just me drawing in the margins of my notebook for now.
+But the plan is to make something safe, low level, with actors, that combines lazy and eager execution, so its quite the task.
 
-But the idea is cool, I was forced to. An ode to an idea I guess.
+However I also have an interesting idea about types that I am still trying to find the shape of.
 
-Again, the idea is cool, but the experiment as to if it is good is still in progress.
+So I hold to none of the ideas stated above strongly and reserve the right to change my mind at any time.
+
+Also, its currently just a fancy calculator... it will get there...
 
 ### Planning notes:
 
